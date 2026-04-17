@@ -8,6 +8,21 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: 22679f6bbf8408f48bf1685974c3b365
+  - enabled: 1
+    path: Assets/Scenes/FaseFome.unity
+    guid: 36abbed72a6d8f64086756ed3dfd2408
+  - enabled: 1
+    path: Assets/Scenes/FasePeste.unity
+    guid: 48d09f90c20956d459012c93ab019baa
+  - enabled: 1
+    path: Assets/Scenes/FaseGuerra.unity
+    guid: f9d40078382a2b54eb15ac9d4ca7f3fd
+  - enabled: 1
+    path: Assets/Scenes/FaseMorte.unity
+    guid: d197219ca3caf9e4db7f7f6465638686
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
