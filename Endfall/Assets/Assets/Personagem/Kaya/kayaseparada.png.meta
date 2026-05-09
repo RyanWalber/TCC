@@ -1,0 +1,377 @@
+fileFormatVersion: 2
+guid: 7bc01ea8df74ea240913f4050dcbf54f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2075503201161093824
+    second: kayaseparada_0
+  - first:
+      213: 3142454981373106448
+    second: kayaseparada_1
+  - first:
+      213: -567844195929657283
+    second: kayaseparada_2
+  - first:
+      213: -4925610658169332806
+    second: kayaseparada_3
+  - first:
+      213: 7888061724102184881
+    second: kayaseparada_4
+  - first:
+      213: -7494402962189850504
+    second: kayaseparada_5
+  - first:
+      213: -2684901080999816096
+    second: kayaseparada_6
+  - first:
+      213: -7592132478186737200
+    second: kayaseparada_7
+  - first:
+      213: 1282852802505872182
+    second: kayaseparada_8
+  - first:
+      213: 8426197544954309723
+    second: kayaseparada_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: kayaseparada_0
+      rect:
+        serializedVersion: 2
+        x: 2176
+        y: 8235
+        width: 1369
+        height: 1240
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04d5b94c5d45233e0800000000000000
+      internalID: -2075503201161093824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_1
+      rect:
+        serializedVersion: 2
+        x: 4656
+        y: 7631
+        width: 1933
+        height: 1810
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0199667f72e3c9b20800000000000000
+      internalID: 3142454981373106448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_2
+      rect:
+        serializedVersion: 2
+        x: 7940
+        y: 7712
+        width: 1079
+        height: 1465
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3078dd56bc9e18f0800000000000000
+      internalID: -567844195929657283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_3
+      rect:
+        serializedVersion: 2
+        x: 1055
+        y: 5487
+        width: 928
+        height: 1504
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abb50f11437b4abb0800000000000000
+      internalID: -4925610658169332806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_4
+      rect:
+        serializedVersion: 2
+        x: 3310
+        y: 6228
+        width: 1038
+        height: 1385
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bf47776856087d60800000000000000
+      internalID: 7888061724102184881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_5
+      rect:
+        serializedVersion: 2
+        x: 5174
+        y: 3314
+        width: 1647
+        height: 3507
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 878e90386388ef790800000000000000
+      internalID: -7494402962189850504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_6
+      rect:
+        serializedVersion: 2
+        x: 8513
+        y: 4604
+        width: 854
+        height: 1807
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06491f921b05dbad0800000000000000
+      internalID: -2684901080999816096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_7
+      rect:
+        serializedVersion: 2
+        x: 1004
+        y: 2213
+        width: 599
+        height: 1841
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d139f56cb353a690800000000000000
+      internalID: -7592132478186737200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_8
+      rect:
+        serializedVersion: 2
+        x: 2817
+        y: 71
+        width: 1454
+        height: 3455
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6331a78b3db9dc110800000000000000
+      internalID: 1282852802505872182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kayaseparada_9
+      rect:
+        serializedVersion: 2
+        x: 8108
+        y: 48
+        width: 1441
+        height: 3655
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5c2542f50edfe470800000000000000
+      internalID: 8426197544954309723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      kayaseparada_0: -2075503201161093824
+      kayaseparada_1: 3142454981373106448
+      kayaseparada_2: -567844195929657283
+      kayaseparada_3: -4925610658169332806
+      kayaseparada_4: 7888061724102184881
+      kayaseparada_5: -7494402962189850504
+      kayaseparada_6: -2684901080999816096
+      kayaseparada_7: -7592132478186737200
+      kayaseparada_8: 1282852802505872182
+      kayaseparada_9: 8426197544954309723
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
