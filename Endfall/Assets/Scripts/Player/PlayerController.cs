@@ -19,11 +19,14 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private float dashTimer;
     private float savedGravity;
+    private bool facingRight = true;
+    private bool overrideFacing = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         savedGravity = rb.gravityScale;
+        facingRight = transform.localScale.x >= 0f;
     }
 
     void Update()
@@ -41,13 +44,18 @@ public class PlayerController : MonoBehaviour
 
         horizontal = Input.GetAxisRaw("Horizontal");
 
-        if (horizontal > 0)
+        if (!overrideFacing)
         {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
-        else if (horizontal < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
+            if (horizontal > 0)
+            {
+                facingRight = true;
+                UpdateLocalScale();
+            }
+            else if (horizontal < 0)
+            {
+                facingRight = false;
+                UpdateLocalScale();
+            }
         }
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
@@ -71,6 +79,23 @@ public class PlayerController : MonoBehaviour
             rb.gravityScale = 0;
             rb.linearVelocity = new Vector2(transform.localScale.x * dashSpeed, 0);
         }
+    }
+
+    private void UpdateLocalScale()
+    {
+        transform.localScale = new Vector3(facingRight ? 1f : -1f, 1f, 1f);
+    }
+
+    public void SetFacing(bool faceRight, bool setOverride)
+    {
+        facingRight = faceRight;
+        overrideFacing = setOverride;
+        UpdateLocalScale();
+    }
+
+    public void ClearFacingOverride()
+    {
+        overrideFacing = false;
     }
 
     void FixedUpdate()
