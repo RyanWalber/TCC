@@ -66,18 +66,21 @@ public class PlayerController : MonoBehaviour
             anim.SetBool("isWalking", estaAndando);
         }
 
+        // Verifica se está tocando o chão
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (isGrounded)
+        // Só recarrega os pulos se estiver no chão E a velocidade Y for menor ou igual a 0 (caindo ou parada)
+        if (isGrounded && rb.linearVelocity.y <= 0.1f)
         {
             jumpsLeft = maxJumps;
         }
 
+        // Sistema de Pulo
         if (Input.GetKeyDown(KeyCode.Space) && jumpsLeft > 0)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0); 
             rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
-            jumpsLeft--;
+            jumpsLeft--; 
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
