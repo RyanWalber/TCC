@@ -3,6 +3,11 @@ using UnityEngine;
 public class MiraMouse : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteArma;
+    
+    [Header("Nova Referência do Braço")]
+    [Tooltip("Arraste o SpriteRenderer do Braço da Kaya aqui.")]
+    [SerializeField] private SpriteRenderer spriteBraco;
+
     private PlayerController playerController;
 
     void Start()

@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     public float dashDuration = 0.15f;
 
     private Rigidbody2D rb;
+    private Animator anim;
     private float horizontal;
     private bool isGrounded;
     private int jumpsLeft;
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponentInChildren<Animator>();
         savedGravity = rb.gravityScale;
         facingRight = transform.localScale.x >= 0f;
     }
@@ -56,6 +58,12 @@ public class PlayerController : MonoBehaviour
                 facingRight = false;
                 UpdateLocalScale();
             }
+        }
+
+        bool estaAndando = Mathf.Abs(horizontal) > 0.001f;
+        if (anim != null)
+        {
+            anim.SetBool("isWalking", estaAndando);
         }
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
