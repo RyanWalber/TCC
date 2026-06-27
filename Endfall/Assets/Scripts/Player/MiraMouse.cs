@@ -1,12 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MiraMouse : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer spriteArma;
-    
-    [Header("Referência do Braço")]
-    [Tooltip("Arraste o SpriteRenderer do Braço da Kaya aqui.")]
-    [SerializeField] private SpriteRenderer spriteBraco;
+    [Header("Lista de Todos os Membros da Mira")]
+    [Tooltip("Arraste aqui todos os ossos/membros que devem girar com o mouse (Braço, Antebraço, Arma, etc.)")]
+    [SerializeField] private List<Transform> membrosDaMira = new List<Transform>();
 
     private PlayerController playerController;
 
@@ -30,15 +29,12 @@ public class MiraMouse : MonoBehaviour
         bool pointingLeft = direcaoGlobal.x < 0;
 
         // 3. Avisa o PlayerController para virar o corpo da Kaya
-        // (Isso inverte a escala X do pai imediatamente)
         if (playerController != null)
         {
             playerController.SetFacing(!pointingLeft, true);
         }
 
         // 4. O SEGREDO DE OURO: Direção Local!
-        // Convertendo o ponto do mouse para o "espaço local" do pai, a Unity 
-        // entende perfeitamente que o corpo está invertido e ajusta o cálculo sozinha.
         Vector3 direcaoLocal = direcaoGlobal;
         
         if (transform.parent != null)
@@ -51,14 +47,14 @@ public class MiraMouse : MonoBehaviour
         // 5. Calcular o ângulo local
         float anguloLocal = Mathf.Atan2(direcaoLocal.y, direcaoLocal.x) * Mathf.Rad2Deg;
 
-        // 6. Aplicar APENAS a rotação local (localRotation)
-        transform.localRotation = Quaternion.Euler(0f, 0f, anguloLocal);
-
-        // 7. Removemos qualquer FlipY! 
-        // Como o corpo inteiro (Pai) virou (Scale X = -1), a arma já vai ser 
-        // espelhada perfeitamente na vertical pela própria Unity sem ficar de ponta-cabeça.
-        if (spriteArma != null) spriteArma.flipY = false;
-        if (spriteBraco != null) spriteBraco.flipY = false;
+        // 6. Aplicar a rotação local em todos os membros adicionados na lista
+        foreach (Transform membro in membrosDaMira)
+        {
+            if (membro != null)
+            {
+                membro.localRotation = Quaternion.Euler(0f, 0f, anguloLocal);
+            }
+        }
     }
 
     void OnDisable()
