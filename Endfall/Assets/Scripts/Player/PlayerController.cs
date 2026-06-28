@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -7,6 +8,11 @@ public class PlayerController : MonoBehaviour
 
     [Header("Pulo e Pulo Duplo")]
     [SerializeField] private float forcaDoPulo = 12f;
+
+    [Header("Dash")]
+    [SerializeField] private float forcaDoDash = 20f;
+    [SerializeField] private float duracaoDash = 0.2f;
+    [SerializeField] private float tempoEsperaDash = 1f;
 
     [Header("Animacao")]
     [SerializeField] private Animator animator;
@@ -17,9 +23,14 @@ public class PlayerController : MonoBehaviour
     private int pulosRestantes;
     private int maxPulos = 2;
 
+    private bool podeDarDash = true;
+    private bool estaDandoDash;
+    private float gravidadeOriginal;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        gravidadeOriginal = rb.gravityScale;
 
         if (animator == null)
         {
@@ -29,6 +40,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (estaDandoDash) return;
+
         inputHorizontal = Input.GetAxisRaw("Horizontal");
 
         if (Mathf.Abs(rb.linearVelocity.y) < 0.01f)
@@ -49,6 +62,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.LeftShift) && podeDarDash && Mathf.Abs(inputHorizontal) > 0.1f)
+        {
+            StartCoroutine(ExecutarDash());
+        }
+
         if (animator != null)
         {
             if (Mathf.Abs(inputHorizontal) > 0.1f)
@@ -64,6 +82,8 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (estaDandoDash) return;
+
         rb.linearVelocity = new Vector2(inputHorizontal * velocidade, rb.linearVelocity.y);
     }
 
@@ -76,5 +96,22 @@ public class PlayerController : MonoBehaviour
 
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, forcaDoPulo);
         pulosRestantes--;
+    }
+
+    private IEnumerator ExecutarDash()
+    {
+        podeDarDash = false;
+        estaDandoDash = true;
+        
+        rb.gravityScale = 0f;
+        rb.linearVelocity = new Vector2(inputHorizontal * forcaDoDash, 0f);
+
+        yield return new WaitForSeconds(duracaoDash);
+
+        rb.gravityScale = gravidadeOriginal;
+        estaDandoDash = false;
+
+        yield return new WaitForSeconds(tempoEsperaDash);
+        podeDarDash = true;
     }
 }
