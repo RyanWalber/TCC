@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 389047089}
   - component: {fileID: 389047088}
   - component: {fileID: 389047087}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: prototipo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -230,7 +230,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -251,22 +251,12 @@ Transform:
   m_GameObject: {fileID: 389047086}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.7, y: -207.6579, z: 0}
+  m_LocalPosition: {x: 9, y: -176.1, z: 0}
   m_LocalScale: {x: 236.90343, y: 266.86118, z: 91.34859}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &469178188 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 301500521232529748, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &528051694 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 565278132442300046, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &529485615
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,7 +282,7 @@ Transform:
   m_GameObject: {fileID: 529485615}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 77.38448, y: -24.12872, z: 0}
+  m_LocalPosition: {x: 0.34, y: -38.52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -375,13 +365,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d69443c05275e49846ad3c6319d845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiraMouse
-  membrosDaMira:
-  - {fileID: 1461738459}
-  - {fileID: 1112711357}
-  - {fileID: 1957783943}
-  - {fileID: 1210903308}
-  - {fileID: 528051694}
-  - {fileID: 469178188}
+  aniKaya: {fileID: 1131443847}
+  ajusteCentroX: 70
 --- !u!1 &962137991
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,7 +429,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 80
+  orthographic size: 120
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -469,7 +454,7 @@ Transform:
   m_GameObject: {fileID: 962137991}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33, y: -40, z: -10}
+  m_LocalPosition: {x: 36, y: 36, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -519,19 +504,9 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!4 &1112711357 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2510973114087902679, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1131443847 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1210903308 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7555714588699482447, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
   m_PrefabInstance: {fileID: 657307563}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1441572669
@@ -548,7 +523,7 @@ GameObject:
   - component: {fileID: 1441572673}
   m_Layer: 0
   m_Name: Kaya
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -579,7 +554,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!70 &1441572671
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -645,26 +620,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e18dc918a003441bc2148cc04ca3e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveSpeed: 8
-  jumpForce: 12
-  maxJumps: 2
-  groundCheck: {fileID: 529485616}
-  groundCheckRadius: 0.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  dashSpeed: 22
-  dashDuration: 0.15
---- !u!4 &1461738459 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 782990501516756692, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1957783943 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6805822181685913656, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-  m_PrefabInstance: {fileID: 657307563}
-  m_PrefabAsset: {fileID: 0}
+  velocidade: 100
+  forcaDoPulo: 80
+  animator: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

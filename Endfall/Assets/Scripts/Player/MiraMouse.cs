@@ -1,69 +1,66 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MiraMouse : MonoBehaviour
 {
-    [Header("Lista de Todos os Membros da Mira")]
-    [Tooltip("Arraste aqui todos os ossos/membros que devem girar com o mouse (Braço, Antebraço, Arma, etc.)")]
-    [SerializeField] private List<Transform> membrosDaMira = new List<Transform>();
+    [Header("Configuracao")]
+    [SerializeField] private Transform aniKaya;
+    [SerializeField] private float ajusteCentroX = 0f;
 
-    private PlayerController playerController;
+    private Camera cameraPrincipal;
+    private Vector3 escalaOriginalKaya;
+    private Vector3 posicaoOriginalKaya;
+    private Transform centroDoPersonagem;
 
     void Start()
     {
-        playerController = GetComponentInParent<PlayerController>();
+        cameraPrincipal = Camera.main;
+        centroDoPersonagem = transform.root;
+
+        if (aniKaya == null)
+        {
+            aniKaya = transform.parent;
+        }
+
+        if (aniKaya != null)
+        {
+            escalaOriginalKaya = aniKaya.localScale;
+            posicaoOriginalKaya = aniKaya.localPosition;
+        }
     }
 
-    void Update()
+    void LateUpdate()
     {
-        // 1. Pegar a posição do mouse no mundo
-        Vector3 posicaoMouse = Input.mousePosition;
-        Vector3 posicaoMundo = Camera.main.ScreenToWorldPoint(new Vector3(posicaoMouse.x, posicaoMouse.y, transform.position.z - Camera.main.transform.position.z));
+        Vector3 posicaoMouseTela = Input.mousePosition;
+        Vector3 posicaoMouseMundo = cameraPrincipal.ScreenToWorldPoint(new Vector3(
+            posicaoMouseTela.x, 
+            posicaoMouseTela.y, 
+            transform.position.z - cameraPrincipal.transform.position.z
+        ));
 
-        // 2. Direção global pura apenas para saber para qual lado ela deve olhar
-        Vector3 direcaoGlobal = posicaoMundo - transform.position;
-        direcaoGlobal.z = 0f;
-
-        if (direcaoGlobal.sqrMagnitude < 0.0001f) return;
-
-        bool pointingLeft = direcaoGlobal.x < 0;
-
-        // 3. Avisa o PlayerController para virar o corpo da Kaya
-        if (playerController != null)
+        if (posicaoMouseMundo.x < centroDoPersonagem.position.x)
         {
-            playerController.SetFacing(!pointingLeft, true);
-        }
-
-        // 4. O SEGREDO DE OURO: Direção Local!
-        Vector3 direcaoLocal = direcaoGlobal;
-        
-        if (transform.parent != null)
-        {
-            Vector3 alvoLocal = transform.parent.InverseTransformPoint(posicaoMundo);
-            direcaoLocal = alvoLocal - transform.localPosition;
-            direcaoLocal.z = 0f;
-        }
-
-        // 5. Calcular o ângulo local
-        float anguloLocal = Mathf.Atan2(direcaoLocal.y, direcaoLocal.x) * Mathf.Rad2Deg;
-
-        // 6. Aplicar a rotação local em todos os membros adicionados na lista
-        foreach (Transform membro in membrosDaMira)
-        {
-            if (membro != null)
+            if (aniKaya != null)
             {
-                membro.localRotation = Quaternion.Euler(0f, 0f, anguloLocal);
+                aniKaya.localScale = new Vector3(-Mathf.Abs(escalaOriginalKaya.x), escalaOriginalKaya.y, escalaOriginalKaya.z);
+                aniKaya.localPosition = new Vector3(posicaoOriginalKaya.x + ajusteCentroX, posicaoOriginalKaya.y, posicaoOriginalKaya.z);
             }
         }
-    }
+        else
+        {
+            if (aniKaya != null)
+            {
+                aniKaya.localScale = new Vector3(Mathf.Abs(escalaOriginalKaya.x), escalaOriginalKaya.y, escalaOriginalKaya.z);
+                aniKaya.localPosition = posicaoOriginalKaya;
+            }
+        }
 
-    void OnDisable()
-    {
-        if (playerController != null) playerController.ClearFacingOverride();
-    }
-
-    void OnDestroy()
-    {
-        if (playerController != null) playerController.ClearFacingOverride();
+        if (aniKaya != null)
+        {
+            Vector3 alvoLocal = aniKaya.InverseTransformPoint(posicaoMouseMundo);
+            Vector3 direcaoLocal = alvoLocal - transform.localPosition;
+            float anguloLocal = Mathf.Atan2(direcaoLocal.y, direcaoLocal.x) * Mathf.Rad2Deg;
+            
+            transform.localRotation = Quaternion.Euler(0f, 0f, anguloLocal);
+        }
     }
 }

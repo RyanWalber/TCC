@@ -1,111 +1,80 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Configurações de Movimento")]
-    public float moveSpeed = 8f;
-    public float jumpForce = 12f;
-    public int maxJumps = 2;
+    [Header("Movimentacao")]
+    [SerializeField] private float velocidade = 6f;
 
-    [Header("Física e Chão")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundLayer;
-    
-    [Header("Mecânica de Dash")]
-    public float dashSpeed = 22f;
-    public float dashDuration = 0.15f;
+    [Header("Pulo e Pulo Duplo")]
+    [SerializeField] private float forcaDoPulo = 12f;
+
+    [Header("Animacao")]
+    [SerializeField] private Animator animator;
 
     private Rigidbody2D rb;
-    private Animator anim;
-    private float horizontal;
-    private bool isGrounded;
-    private int jumpsLeft;
-    private bool isDashing;
-    private float dashTimer;
-    private float savedGravity;
-    private bool facingRight = true;
-    private bool overrideFacing = false;
+    private float inputHorizontal;
+    private bool estaNoChao;
+    private int pulosRestantes;
+    private int maxPulos = 2;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Pega o Animator que está no objeto ou nos filhos (como o Ani Kaya)
-        anim = GetComponentInChildren<Animator>();
-        savedGravity = rb.gravityScale;
-        facingRight = transform.localScale.x >= 0f;
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
     }
 
     void Update()
     {
-        // Se estiver dando Dash, ignora os comandos temporariamente
-        if (isDashing)
+        inputHorizontal = Input.GetAxisRaw("Horizontal");
+
+        if (Mathf.Abs(rb.linearVelocity.y) < 0.01f)
         {
-            dashTimer -= Time.deltaTime;
-            if (dashTimer <= 0)
-            {
-                isDashing = false;
-                rb.gravityScale = savedGravity;
-            }
-            return;
+            estaNoChao = true;
+            pulosRestantes = maxPulos;
+        }
+        else
+        {
+            estaNoChao = false;
         }
 
-        // 1. Pega o comando das setas ou A/D do teclado
-        horizontal = Input.GetAxisRaw("Horizontal");
-
-        // 2. CONTROLE DA ANIMAÇÃO (O vai e vem que conversamos!)
-        if (anim != null)
+        if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
         {
-            // Se horizontal for diferente de 0, significa que está apertando o teclado
-            bool estaAndando = (horizontal != 0);
-            anim.SetBool("isWalking", estaAndando); 
+            if (estaNoChao || pulosRestantes > 0)
+            {
+                Pular();
+            }
         }
 
-        // 3. Controla a direção do corpo baseada no teclado (se o mouse não estiver controlando)
-        if (!overrideFacing)
+        if (animator != null)
         {
-            if (horizontal > 0)
+            if (Mathf.Abs(inputHorizontal) > 0.1f)
             {
-                facingRight = true;
-                UpdateLocalScale();
+                animator.speed = 1f;
             }
-            else if (horizontal < 0)
+            else
             {
-                facingRight = false;
-                UpdateLocalScale();
+                animator.speed = 0f;
             }
         }
     }
 
-    // O FixedUpdate é onde a mágica da física acontece! Faz ela andar de verdade.
     void FixedUpdate()
     {
-        if (isDashing) return;
-
-        // Aplica a velocidade horizontal mantendo a gravidade caindo normal
-        rb.linearVelocity = new Vector2(horizontal * moveSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(inputHorizontal * velocidade, rb.linearVelocity.y);
     }
 
-    // Atualiza o lado que o boneco está olhando na tela
-    private void UpdateLocalScale()
+    void Pular()
     {
-        Vector3 scale = transform.localScale;
-        scale.x = facingRight ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
-        transform.localScale = scale;
-    }
+        if (!estaNoChao)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        }
 
-    // --- FUNÇÕES QUE A MIRA DO MOUSE PRECISA (Isso evita os erros no console!) ---
-    
-    public void SetFacing(bool faceRight, bool isOverriding)
-    {
-        overrideFacing = isOverriding;
-        facingRight = faceRight;
-        UpdateLocalScale();
-    }
-
-    public void ClearFacingOverride()
-    {
-        overrideFacing = false;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, forcaDoPulo);
+        pulosRestantes--;
     }
 }
