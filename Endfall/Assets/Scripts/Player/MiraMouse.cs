@@ -11,6 +11,11 @@ public class MiraMouse : MonoBehaviour
     private Vector3 posicaoOriginalKaya;
     private Transform centroDoPersonagem;
 
+    // Variáveis de controle para capturar a animação perfeitamente
+    private Quaternion ultimaRotacaoFinal;
+    private Quaternion ultimaRotacaoAnimacao = Quaternion.identity;
+    private bool iniciado = false;
+
     void Start()
     {
         cameraPrincipal = Camera.main;
@@ -26,10 +31,30 @@ public class MiraMouse : MonoBehaviour
             escalaOriginalKaya = aniKaya.localScale;
             posicaoOriginalKaya = aniKaya.localPosition;
         }
+
+        ultimaRotacaoFinal = transform.localRotation;
     }
 
     void LateUpdate()
     {
+        Quaternion rotacaoAtual = transform.localRotation;
+        Quaternion rotacaoPristinaDaAnimacao;
+
+        // Se for o primeiro frame ou se o Animator aplicou um novo frame de animação real
+        if (!iniciado || Quaternion.Angle(rotacaoAtual, ultimaRotacaoFinal) > 0.01f)
+        {
+            // O Animator rodou! Capturamos o balanço puro do braço vindo da animação
+            rotacaoPristinaDaAnimacao = rotacaoAtual;
+            ultimaRotacaoAnimacao = rotacaoAtual;
+            iniciado = true;
+        }
+        else
+        {
+            // A Unity otimizou o frame? Sem problemas, usamos o último balanço conhecido
+            rotacaoPristinaDaAnimacao = ultimaRotacaoAnimacao;
+        }
+
+        // 1. Sua lógica original de Flip (perfeita)
         Vector3 posicaoMouseTela = Input.mousePosition;
         Vector3 posicaoMouseMundo = cameraPrincipal.ScreenToWorldPoint(new Vector3(
             posicaoMouseTela.x, 
@@ -54,13 +79,18 @@ public class MiraMouse : MonoBehaviour
             }
         }
 
+        // 2. Lógica de Mira injetando o movimento da animação por dentro
         if (aniKaya != null)
         {
             Vector3 alvoLocal = aniKaya.InverseTransformPoint(posicaoMouseMundo);
             Vector3 direcaoLocal = alvoLocal - transform.localPosition;
             float anguloLocal = Mathf.Atan2(direcaoLocal.y, direcaoLocal.x) * Mathf.Rad2Deg;
             
-            transform.localRotation = Quaternion.Euler(0f, 0f, anguloLocal);
+            // Aqui a mágica acontece: Aplica a mira do mouse E mantém o balanço da corrida ativo
+            transform.localRotation = Quaternion.Euler(0f, 0f, anguloLocal) * rotacaoPristinaDaAnimacao;
+
+            // Salva o estado atual para fazer a checagem inteligente no próximo frame
+            ultimaRotacaoFinal = transform.localRotation;
         }
     }
 }

@@ -69,14 +69,7 @@ public class PlayerController : MonoBehaviour
 
         if (animator != null)
         {
-            if (Mathf.Abs(inputHorizontal) > 0.1f)
-            {
-                animator.speed = 1f;
-            }
-            else
-            {
-                animator.speed = 0f;
-            }
+            animator.speed = 1f;
         }
     }
 
