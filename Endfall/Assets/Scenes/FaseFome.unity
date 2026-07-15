@@ -899,7 +899,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   velocidade: 100
   forcaDoPulo: 80
-  forcaDoDash: 300
+  forcaDoDash: 400
   duracaoDash: 0.5
   tempoEsperaDash: 1
   animator: {fileID: 0}
