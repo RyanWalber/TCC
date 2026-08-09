@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animacao")]
     [SerializeField] private Animator animator;
+    [SerializeField] private string nomeParametroVelocidade = "Velocidade";
+    [SerializeField] private string nomeParametroChao = "estaNoChao";
 
     private Rigidbody2D rb;
     private float inputHorizontal;
@@ -26,11 +28,13 @@ public class PlayerController : MonoBehaviour
     private bool podeDarDash = true;
     private bool estaDandoDash;
     private float gravidadeOriginal;
+    private bool estaSubindoPulo;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         gravidadeOriginal = rb.gravityScale;
+        pulosRestantes = maxPulos;
 
         if (animator == null)
         {
@@ -43,16 +47,6 @@ public class PlayerController : MonoBehaviour
         if (estaDandoDash) return;
 
         inputHorizontal = Input.GetAxisRaw("Horizontal");
-
-        if (Mathf.Abs(rb.linearVelocity.y) < 0.01f)
-        {
-            estaNoChao = true;
-            pulosRestantes = maxPulos;
-        }
-        else
-        {
-            estaNoChao = false;
-        }
 
         if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
         {
@@ -67,28 +61,62 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(ExecutarDash());
         }
 
-        if (animator != null)
-        {
-            animator.speed = 1f;
-        }
+        AtualizarAnimacoes();
     }
 
     void FixedUpdate()
     {
         if (estaDandoDash) return;
 
-        rb.linearVelocity = new Vector2(inputHorizontal * velocidade, rb.linearVelocity.y);
+        float velocidadeY = rb.linearVelocity.y;
+
+        if (!estaSubindoPulo && velocidadeY > 0f)
+        {
+            velocidadeY = 0f;
+        }
+
+        rb.linearVelocity = new Vector2(inputHorizontal * velocidade, velocidadeY);
+    }
+
+    void AtualizarAnimacoes()
+    {
+        if (animator != null)
+        {
+            animator.SetFloat(nomeParametroVelocidade, Mathf.Abs(inputHorizontal));
+            animator.SetBool(nomeParametroChao, estaNoChao);
+        }
     }
 
     void Pular()
     {
-        if (!estaNoChao)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-        }
+        estaSubindoPulo = true;
+        estaNoChao = false;
 
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, forcaDoPulo);
         pulosRestantes--;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        foreach (ContactPoint2D contato in collision.contacts)
+        {
+            if (contato.normal.y > 0.5f)
+            {
+                estaNoChao = true;
+                pulosRestantes = maxPulos;
+
+                if (rb.linearVelocity.y <= 0.1f)
+                {
+                    estaSubindoPulo = false;
+                }
+                return;
+            }
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        estaNoChao = false;
     }
 
     private IEnumerator ExecutarDash()
