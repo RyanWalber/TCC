@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private bool podeDarDash = true;
     private bool estaDandoDash;
+    private float direcaoDash;
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
 
@@ -66,13 +67,22 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (estaDandoDash) return;
+        if (estaDandoDash)
+        {
+            rb.linearVelocity = new Vector2(direcaoDash * forcaDoDash, 0f);
+            return;
+        }
 
         float velocidadeY = rb.linearVelocity.y;
 
         if (!estaSubindoPulo && velocidadeY > 0f)
         {
             velocidadeY = 0f;
+        }
+
+        if (velocidadeY > forcaDoPulo)
+        {
+            velocidadeY = forcaDoPulo;
         }
 
         rb.linearVelocity = new Vector2(inputHorizontal * velocidade, velocidadeY);
@@ -100,6 +110,15 @@ public class PlayerController : MonoBehaviour
     {
         foreach (ContactPoint2D contato in collision.contacts)
         {
+            if (contato.normal.y < -0.2f)
+            {
+                estaSubindoPulo = false;
+                if (rb.linearVelocity.y > 0f)
+                {
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+                }
+            }
+
             if (contato.normal.y > 0.5f)
             {
                 estaNoChao = true;
@@ -123,9 +142,9 @@ public class PlayerController : MonoBehaviour
     {
         podeDarDash = false;
         estaDandoDash = true;
-        
+        direcaoDash = inputHorizontal;
+
         rb.gravityScale = 0f;
-        rb.linearVelocity = new Vector2(inputHorizontal * forcaDoDash, 0f);
 
         yield return new WaitForSeconds(duracaoDash);
 
