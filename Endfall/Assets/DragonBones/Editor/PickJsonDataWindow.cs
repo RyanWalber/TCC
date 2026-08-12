@@ -1,3 +1,4 @@
+#pragma warning disable 0618, 0619
 /**
  * The MIT License (MIT)
  *
@@ -20,22 +21,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
 namespace DragonBones
 {
-    /// <summary>
-    /// JSON数据拾取，为UnityArmatureComponent创建UnityDragonBonesData
-    /// </summary>
     public class PickJsonDataWindow : EditorWindow
     {
         private const string ObjectSelectorUpdated = "ObjectSelectorUpdated";
         private const string ObjectSelectorClosed = "ObjectSelectorClosed";
-        //private const string PickFileFileter = "_ske t:TextAsset";
         private const string PickFileFileter = "t:TextAsset";
-
 
         private UnityArmatureComponent _armatureComp;
         private TextAsset _dragonBoneJSONData;
@@ -43,7 +39,6 @@ namespace DragonBones
         private bool _isOpenPickWindow = false;
         private int _controlID;
 
-        //
         public static void OpenWindow(UnityArmatureComponent armatureComp)
         {
             if (armatureComp == null)
@@ -51,7 +46,6 @@ namespace DragonBones
                 return;
             }
 
-            //
             var win = GetWindow<PickJsonDataWindow>();
             win._armatureComp = armatureComp;
         }
@@ -83,16 +77,10 @@ namespace DragonBones
             string commandName = Event.current.commandName;
             if (commandName == ObjectSelectorUpdated)
             {
-                //更新JSON数据
                 _dragonBoneJSONData = EditorGUIUtility.GetObjectPickerObject() as TextAsset;
             }
             else if (commandName == ObjectSelectorClosed)
             {
-                //根据选择的JSON数据设置DragonBonesData
-
-                //这里不仅创建了DragonBonesData,并且更新了场景中的显示对象
-                //UnityEditor.ChangeDragonBonesData(_armatureComp, _dragonBoneJSONData);
-
                 if (_dragonBoneJSONData != null)
                 {
                     SetUnityDragonBonesData();
@@ -120,7 +108,7 @@ namespace DragonBones
         private void SetUnityDragonBonesData()
         {
             List<string> textureAtlasJSONs = new List<string>();
-            UnityEditor.GetTextureAtlasConfigs(textureAtlasJSONs, AssetDatabase.GetAssetPath(_dragonBoneJSONData.GetInstanceID()));
+            UnityEditor.GetTextureAtlasConfigs(textureAtlasJSONs, AssetDatabase.GetAssetPath(_dragonBoneJSONData));
             UnityDragonBonesData.TextureAtlas[] textureAtlas = UnityEditor.GetTextureAtlasByJSONs(textureAtlasJSONs);
 
             UnityDragonBonesData data = UnityEditor.CreateUnityDragonBonesData(_dragonBoneJSONData, textureAtlas);
