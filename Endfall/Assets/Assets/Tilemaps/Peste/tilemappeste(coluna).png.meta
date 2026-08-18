@@ -190,10 +190,10 @@ TextureImporter:
       name: tilemappeste(coluna)_0
       rect:
         serializedVersion: 2
-        x: 316
-        y: 1893
-        width: 516
-        height: 409
+        x: 287
+        y: 1291
+        width: 975
+        height: 769
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: tilemappeste(coluna)_1
       rect:
         serializedVersion: 2
-        x: 386
-        y: 1510
-        width: 391
-        height: 293
+        x: 1414
+        y: 1377
+        width: 738
+        height: 676
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: tilemappeste(coluna)_2
       rect:
         serializedVersion: 2
-        x: 385
-        y: 1031
-        width: 392
-        height: 357
+        x: 419
+        y: 563
+        width: 736
+        height: 551
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: tilemappeste(coluna)_3
       rect:
         serializedVersion: 2
-        x: 386
-        y: 583
-        width: 391
-        height: 358
+        x: 1414
+        y: 528
+        width: 740
+        height: 675
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,7 +278,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: c613f0ba1c67fc04cabc56c8e673cbc2
+    spriteID: 20cbd6b938c339c4f931ac82a3013e07
     internalID: 0
     vertices: []
     indices: 

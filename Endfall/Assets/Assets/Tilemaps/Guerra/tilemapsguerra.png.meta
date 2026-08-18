@@ -1,25 +1,25 @@
 fileFormatVersion: 2
-guid: 8fc977f8a1614e845b467838bef1753f
+guid: 4f4f052f6672d2a43b4eed8c86ded882
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6849998896456140873
-    second: tilemapsguerra 1_0
+      213: 4573656175510810120
+    second: tilemapsguerra_0
   - first:
-      213: 3191249831797806013
-    second: tilemapsguerra 1_1
+      213: -4005125953328833966
+    second: tilemapsguerra_1
   - first:
-      213: 4682015018712728686
-    second: tilemapsguerra 1_2
+      213: 6712068931311352516
+    second: tilemapsguerra_2
   - first:
-      213: -4964112287858158208
-    second: tilemapsguerra 1_3
+      213: -3406065207750172599
+    second: tilemapsguerra_3
   - first:
-      213: 8093717922517466723
-    second: tilemapsguerra 1_4
+      213: -7768867789076017202
+    second: tilemapsguerra_4
   - first:
-      213: -4863216189941087582
-    second: tilemapsguerra 1_5
+      213: 6894595872587399051
+    second: tilemapsguerra_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -62,7 +62,7 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
-  spriteExtrude: 1
+  spriteExtrude: 0
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
@@ -193,13 +193,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tilemapsguerra 1_0
+      name: tilemapsguerra_0
       rect:
         serializedVersion: 2
-        x: 318
-        y: 1676
-        width: 515
-        height: 404
+        x: 63
+        y: 1431
+        width: 994
+        height: 784
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -208,20 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b7f9e8eb4aefe0a0800000000000000
-      internalID: -6849998896456140873
+      spriteID: 80ee7123f04e87f30800000000000000
+      internalID: 4573656175510810120
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemapsguerra 1_1
+      name: tilemapsguerra_1
       rect:
         serializedVersion: 2
-        x: 1219
-        y: 1413
-        width: 392
-        height: 371
+        x: 1229
+        y: 1544
+        width: 735
+        height: 678
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -230,20 +230,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db355d560d8994c20800000000000000
-      internalID: 3191249831797806013
+      spriteID: 25a132f5a2fea68c0800000000000000
+      internalID: -4005125953328833966
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemapsguerra 1_2
+      name: tilemapsguerra_2
       rect:
         serializedVersion: 2
-        x: 1943
-        y: 1397
-        width: 1256
-        height: 438
+        x: 2192
+        y: 1941
+        width: 1254
+        height: 434
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -252,20 +252,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e648a676adbd9f040800000000000000
-      internalID: 4682015018712728686
+      spriteID: 4cabfb6812f062d50800000000000000
+      internalID: 6712068931311352516
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemapsguerra 1_3
+      name: tilemapsguerra_3
       rect:
         serializedVersion: 2
-        x: 388
-        y: 1321
-        width: 385
-        height: 295
+        x: 196
+        y: 758
+        width: 736
+        height: 557
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -274,20 +274,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0851019dc2eeb1bb0800000000000000
-      internalID: -4964112287858158208
+      spriteID: 940eb3a5db93bb0d0800000000000000
+      internalID: -3406065207750172599
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemapsguerra 1_4
+      name: tilemapsguerra_4
       rect:
         serializedVersion: 2
-        x: 388
-        y: 852
-        width: 385
-        height: 356
+        x: 1229
+        y: 724
+        width: 735
+        height: 676
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -296,20 +296,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 36ebdd37199a25070800000000000000
-      internalID: 8093717922517466723
+      spriteID: ecf462538ef6f2490800000000000000
+      internalID: -7768867789076017202
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemapsguerra 1_5
+      name: tilemapsguerra_5
       rect:
         serializedVersion: 2
-        x: 388
-        y: 422
-        width: 385
-        height: 356
+        x: 2748
+        y: 585
+        width: 393
+        height: 370
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -318,8 +318,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2a202a444a2628cb0800000000000000
-      internalID: -4863216189941087582
+      spriteID: b8f327fba668eaf50800000000000000
+      internalID: 6894595872587399051
       vertices: []
       indices: 
       edges: []
@@ -328,7 +328,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 183009c63ba3ca4408ffe31297b7fb40
+    spriteID: d2c66d8a755615043b8f7bf3309c1fb2
     internalID: 0
     vertices: []
     indices: 
@@ -340,12 +340,12 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      tilemapsguerra 1_0: -6849998896456140873
-      tilemapsguerra 1_1: 3191249831797806013
-      tilemapsguerra 1_2: 4682015018712728686
-      tilemapsguerra 1_3: -4964112287858158208
-      tilemapsguerra 1_4: 8093717922517466723
-      tilemapsguerra 1_5: -4863216189941087582
+      tilemapsguerra_0: 4573656175510810120
+      tilemapsguerra_1: -4005125953328833966
+      tilemapsguerra_2: 6712068931311352516
+      tilemapsguerra_3: -3406065207750172599
+      tilemapsguerra_4: -7768867789076017202
+      tilemapsguerra_5: 6894595872587399051
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlataformaMovel : MonoBehaviour
 {
     public Vector3[] pontos;
@@ -9,10 +10,15 @@ public class PlataformaMovel : MonoBehaviour
     private int indicePontoAtual = 0;
     private float temporizadorEspera = 0f;
     private Vector3[] pontosGlobais;
-    private Transform jogadorTransform;
+    private Rigidbody2D rb;
 
     private void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
+
+        // Garante que a plataforma é Kinematic para não sofrer gravidade
+        rb.bodyType = RigidbodyType2D.Kinematic;
+
         pontosGlobais = new Vector3[pontos.Length + 1];
         pontosGlobais[0] = transform.position;
 
@@ -22,33 +28,27 @@ public class PlataformaMovel : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (pontosGlobais == null || pontosGlobais.Length <= 1) return;
 
-        Vector3 posicaoAntesDoMovimento = transform.position;
-
         if (temporizadorEspera > 0)
         {
-            temporizadorEspera -= Time.deltaTime;
+            temporizadorEspera -= Time.fixedDeltaTime;
         }
         else
         {
             Vector3 destino = pontosGlobais[indicePontoAtual];
-            transform.position = Vector3.MoveTowards(transform.position, destino, velocidade * Time.deltaTime);
+            Vector3 novaPosicao = Vector3.MoveTowards(transform.position, destino, velocidade * Time.fixedDeltaTime);
+
+            // Move através do motor de física, resolvendo colisões suavemente
+            rb.MovePosition(novaPosicao);
 
             if (Vector3.Distance(transform.position, destino) < 0.01f)
             {
                 indicePontoAtual = (indicePontoAtual + 1) % pontosGlobais.Length;
                 temporizadorEspera = tempoDeEspera;
             }
-        }
-
-        Vector3 deslocamento = transform.position - posicaoAntesDoMovimento;
-
-        if (jogadorTransform != null && deslocamento != Vector3.zero)
-        {
-            jogadorTransform.position += deslocamento;
         }
     }
 
@@ -58,7 +58,7 @@ public class PlataformaMovel : MonoBehaviour
         {
             if (collision.contacts[0].normal.y < -0.5f)
             {
-                jogadorTransform = collision.transform;
+                collision.transform.SetParent(transform);
             }
         }
     }
@@ -67,9 +67,9 @@ public class PlataformaMovel : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (collision.transform == jogadorTransform)
+            if (collision.transform.parent == transform)
             {
-                jogadorTransform = null;
+                collision.transform.SetParent(null);
             }
         }
     }

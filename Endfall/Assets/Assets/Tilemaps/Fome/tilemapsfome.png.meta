@@ -62,7 +62,7 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
-  spriteExtrude: 1
+  spriteExtrude: 0
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
@@ -196,10 +196,10 @@ TextureImporter:
       name: tilemapsfome_0
       rect:
         serializedVersion: 2
-        x: 373
-        y: 1669
-        width: 515
-        height: 406
+        x: 114
+        y: 1304
+        width: 997
+        height: 785
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -218,10 +218,10 @@ TextureImporter:
       name: tilemapsfome_1
       rect:
         serializedVersion: 2
-        x: 1274
-        y: 1407
-        width: 392
-        height: 370
+        x: 1256
+        y: 1381
+        width: 747
+        height: 688
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -240,10 +240,10 @@ TextureImporter:
       name: tilemapsfome_2
       rect:
         serializedVersion: 2
-        x: 1996
-        y: 1390
+        x: 2135
+        y: 1648
         width: 1256
-        height: 438
+        height: 439
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -262,10 +262,10 @@ TextureImporter:
       name: tilemapsfome_3
       rect:
         serializedVersion: 2
-        x: 443
-        y: 1316
-        width: 385
-        height: 293
+        x: 249
+        y: 619
+        width: 745
+        height: 566
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -284,10 +284,10 @@ TextureImporter:
       name: tilemapsfome_4
       rect:
         serializedVersion: 2
-        x: 443
-        y: 847
-        width: 385
-        height: 354
+        x: 1256
+        y: 547
+        width: 747
+        height: 689
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -306,10 +306,10 @@ TextureImporter:
       name: tilemapsfome_5
       rect:
         serializedVersion: 2
-        x: 443
-        y: 415
-        width: 385
-        height: 357
+        x: 2575
+        y: 777
+        width: 393
+        height: 370
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -328,7 +328,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 1dad7934b10eaa546bb7a04d25d078ac
+    spriteID: 86c8ae1a077cae14c9c97c9adbfc66cf
     internalID: 0
     vertices: []
     indices: 
