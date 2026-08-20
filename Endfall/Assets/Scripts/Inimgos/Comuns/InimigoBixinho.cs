@@ -1,13 +1,14 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class InimigoPerseguidor : MonoBehaviour
+public class InimigoBixinho : MonoBehaviour
 {
-    [Header("Movimentação")]
-    public float velocidade = 3f;
+    [Header("Movimentação e Rotação")]
+    public float velocidade = 3.5f;
+    public float velocidadeRotacao = 10f;
+    public float offsetAngulo = 180f; 
     public float raioDeteccao = 6f;
     public Vector2 offsetDeteccao;
-    public bool voador = false;
     public Transform player;
 
     [Header("Vida")]
@@ -45,25 +46,21 @@ public class InimigoPerseguidor : MonoBehaviour
         {
             Vector2 direcao = ((Vector2)player.position - (Vector2)transform.position).normalized;
 
-            if (voador)
-            {
-                rb.linearVelocity = direcao * velocidade;
-            }
-            else
-            {
-                rb.linearVelocity = new Vector2(direcao.x * velocidade, rb.linearVelocity.y);
-            }
-
-            if (Mathf.Abs(player.position.x - transform.position.x) > 0.2f)
-            {
-                float escalaX = player.position.x > transform.position.x ? Mathf.Abs(transform.localScale.x) : -Mathf.Abs(transform.localScale.x);
-                transform.localScale = new Vector3(escalaX, transform.localScale.y, transform.localScale.z);
-            }
+            rb.linearVelocity = direcao * velocidade;
+            RotacionarParaPlayer(direcao);
         }
         else
         {
-            rb.linearVelocity = voador ? Vector2.zero : new Vector2(0, rb.linearVelocity.y);
+            rb.linearVelocity = Vector2.zero;
         }
+    }
+
+    private void RotacionarParaPlayer(Vector2 direcao)
+    {
+        float angulo = (Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg) + offsetAngulo;
+        Quaternion rotacaoAlvo = Quaternion.Euler(0, 0, angulo);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeRotacao * Time.deltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
