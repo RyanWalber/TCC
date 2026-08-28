@@ -1,138 +1,174 @@
+using System.Collections;
 using UnityEngine;
+using DragonBones;
+using Transform = UnityEngine.Transform;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixel : MonoBehaviour
 {
-    [Header("Inversão do Sprite")]
-    public bool spriteInvertido = true;
+    [Header("CONFIGURAÇÃO VISUAL")]
+    public Transform pivoVisual;
+    public UnityArmatureComponent armatureComponent;
+    public string animAndar = "walk";
+    public string animParado = "idle";
+    public bool spriteInvertido = false;
 
-    [Header("Patrulha")]
-    public float velocidade = 2.5f;
-    public Vector2 offsetChecagem = new Vector2(0.6f, -0.4f);
-    public float distanciaChecagem = 0.5f;
-    public LayerMask camadaChao;
-    public float cooldownVirada = 0.5f;
+    [Header("STATUS")]
+    public int vida = 3;
+    public int danoNoPlayer = 1;
 
-    [Header("Animação")]
-    public string parametroAndando = "isWalking";
-
-    [Header("Vida e Impacto")]
-    public int vidaMaxima = 3;
-    private int vidaAtual;
-    public int danoNoJogador = 1;
-    public float forcaImpacto = 10f;
-    public float cooldownImpacto = 0.8f;
-    private float tempoProximoImpacto;
+    [Header("MOVIMENTO (Patrulha)")]
+    public float velocidade = 3f;
+    public float distanciaPatrulha = 5f;
 
     private Rigidbody2D rb;
-    private Animator anim;
-    private bool movendoParaDireita = true;
-    private float tempoProximaVirada;
-    private Vector3 escalaOriginal;
-
-    private void Awake()
-    {
-        Physics2D.queriesStartInColliders = false;
-    }
+    private Vector3 posicaoInicial;
+    private bool indoParaDireita = true;
+    private bool estaMorto = false;
 
     private void Start()
     {
-        vidaAtual = vidaMaxima;
+        posicaoInicial = transform.position;
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponentInChildren<Animator>();
-
         rb.freezeRotation = true;
-        if (rb.gravityScale <= 0) rb.gravityScale = 3f;
 
-        escalaOriginal = transform.localScale;
+        if (pivoVisual == null && transform.childCount > 0)
+            pivoVisual = transform.GetChild(0);
+
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
+
         AtualizarEscala();
     }
 
     private void FixedUpdate()
     {
+        if (estaMorto) return;
         Patrulhar();
     }
 
     private void Update()
     {
+        if (estaMorto) return;
         AtualizarAnimacao();
     }
 
     private void Patrulhar()
     {
-        float direcao = movendoParaDireita ? 1f : -1f;
+        float limiteDireita = posicaoInicial.x + distanciaPatrulha;
+        float limiteEsquerda = posicaoInicial.x - distanciaPatrulha;
 
-        rb.linearVelocity = new Vector2(direcao * velocidade, rb.linearVelocity.y);
+        float direcaoX = indoParaDireita ? 1f : -1f;
+        rb.linearVelocity = new Vector2(direcaoX * velocidade, rb.linearVelocity.y);
 
-        if (Time.time < tempoProximaVirada) return;
-
-        Vector2 ponto = (Vector2)transform.position + new Vector2(offsetChecagem.x * direcao, offsetChecagem.y);
-
-        bool temChao = Physics2D.Raycast(ponto, Vector2.down, distanciaChecagem, camadaChao);
-        bool temParede = Physics2D.Raycast(ponto, Vector2.right * direcao, distanciaChecagem, camadaChao);
-
-        if (!temChao || temParede)
+        if (indoParaDireita && transform.position.x >= limiteDireita)
         {
-            Virar();
+            Virar(false);
+        }
+        else if (!indoParaDireita && transform.position.x <= limiteEsquerda)
+        {
+            Virar(true);
         }
     }
 
-    private void Virar()
+    private void Virar(bool irParaDireita)
     {
-        tempoProximaVirada = Time.time + cooldownVirada;
-        movendoParaDireita = !movendoParaDireita;
+        indoParaDireita = irParaDireita;
         AtualizarEscala();
     }
 
     private void AtualizarEscala()
     {
-        float sinal = movendoParaDireita ? Mathf.Abs(escalaOriginal.x) : -Mathf.Abs(escalaOriginal.x);
+        if (pivoVisual == null) return;
+
+        float sinal = indoParaDireita ? 1f : -1f;
         if (spriteInvertido) sinal *= -1f;
-        transform.localScale = new Vector3(sinal, escalaOriginal.y, escalaOriginal.z);
+
+        pivoVisual.localScale = new Vector3(sinal, 1f, 1f);
     }
 
     private void AtualizarAnimacao()
     {
-        if (anim != null && !string.IsNullOrEmpty(parametroAndando))
+        if (armatureComponent == null) return;
+
+        bool estaAndando = Mathf.Abs(rb.linearVelocity.x) > 0.1f;
+        string animDesejada = estaAndando ? animAndar : animParado;
+
+        if (!string.IsNullOrEmpty(animDesejada) && armatureComponent.animation.lastAnimationName != animDesejada)
         {
-            bool estaAndando = Mathf.Abs(rb.linearVelocity.x) > 0.1f;
-            anim.SetBool(parametroAndando, estaAndando);
+            armatureComponent.animation.Play(animDesejada, 0);
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
-    private void OnCollisionStay2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
-
-    private void TentarAplicarImpacto(GameObject jogadorObj)
+    public void ReceberDano(int dano = 1)
     {
-        if (!jogadorObj.CompareTag("Player") || Time.time < tempoProximoImpacto) return;
+        if (estaMorto) return;
 
-        Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
-        if (rbPlayer != null)
+        vida -= dano;
+        StartCoroutine(PiscarVermelhoDragonBones());
+
+        if (vida <= 0) Morrer();
+    }
+
+    public void TomarDano(int dano = 1)
+    {
+        ReceberDano(dano);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
         {
-            tempoProximoImpacto = Time.time + cooldownImpacto;
-            Vector2 direcaoImpacto = (jogadorObj.transform.position - transform.position).normalized;
-            direcaoImpacto.y = Mathf.Clamp(direcaoImpacto.y + 0.3f, 0.4f, 0.8f);
+            // Cria a cor vermelha no formato nativo do DragonBones
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
 
-            rbPlayer.linearVelocity = Vector2.zero;
-            rbPlayer.AddForce(direcaoImpacto * forcaImpacto, ForceMode2D.Impulse);
+            // Cria a cor normal (original)
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+            armatureComponent.color = corNormal;
         }
     }
 
-    public void TomarDano(int quantidadeDano)
+    private void Morrer()
     {
-        vidaAtual -= quantidadeDano;
-        if (vidaAtual <= 0) Destroy(gameObject);
+        if (estaMorto) return;
+        estaMorto = true;
+
+        rb.linearVelocity = Vector2.zero;
+        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
+        rb.simulated = false;
+
+        Destroy(gameObject);
     }
 
-    private void OnDrawGizmos()
+    private void OnCollisionEnter2D(Collision2D colisao)
     {
-        float direcao = movendoParaDireita ? 1f : -1f;
-        Vector2 ponto = (Vector2)transform.position + new Vector2(offsetChecagem.x * direcao, offsetChecagem.y);
+        if (estaMorto) return;
+        if (colisao.gameObject.CompareTag("Player"))
+        {
+            colisao.gameObject.SendMessage("Machucar", danoNoPlayer, SendMessageOptions.DontRequireReceiver);
+        }
+    }
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(ponto, 0.08f);
-        Gizmos.DrawRay(ponto, Vector2.down * distanciaChecagem);
-        Gizmos.DrawRay(ponto, Vector2.right * direcao * distanciaChecagem);
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (estaMorto) return;
+
+        if (other.CompareTag("Ataque"))
+        {
+            ReceberDano(1);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 centro = Application.isPlaying ? posicaoInicial : transform.position;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(new Vector3(centro.x - distanciaPatrulha, centro.y, centro.z), new Vector3(centro.x + distanciaPatrulha, centro.y, centro.z));
     }
 }

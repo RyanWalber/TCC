@@ -1,7 +1,13 @@
+using System.Collections;
 using UnityEngine;
+using DragonBones;
+using Transform = UnityEngine.Transform;
 
 public class InimigoParado : MonoBehaviour
 {
+    [Header("CONFIGURAÇÃO VISUAL")]
+    public UnityArmatureComponent armatureComponent;
+
     [Header("Configurações de Emergência")]
     public float raioDeteccao = 4f;
     public Vector2 offsetDeteccao;
@@ -24,6 +30,9 @@ public class InimigoParado : MonoBehaviour
     private void Start()
     {
         vidaAtual = vidaMaxima;
+
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
         if (player == null)
         {
@@ -78,6 +87,11 @@ public class InimigoParado : MonoBehaviour
         {
             AplicarDanoEEmpurrar(collision.gameObject);
         }
+
+        if (collision.CompareTag("Ataque"))
+        {
+            TomarDano(1);
+        }
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -104,11 +118,33 @@ public class InimigoParado : MonoBehaviour
     public void TomarDano(int quantidadeDano)
     {
         vidaAtual -= quantidadeDano;
-        Debug.Log(gameObject.name + " tomou dano! Vida restante: " + vidaAtual);
+        StartCoroutine(PiscarVermelhoDragonBones());
 
         if (vidaAtual <= 0)
         {
             Morrer();
+        }
+    }
+
+    public void ReceberDano(int quantidadeDano = 1)
+    {
+        TomarDano(quantidadeDano);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
+        {
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
+
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+            armatureComponent.color = corNormal;
         }
     }
 

@@ -1,12 +1,18 @@
+using System.Collections;
 using UnityEngine;
+using DragonBones;
+using Transform = UnityEngine.Transform;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixinho : MonoBehaviour
 {
+    [Header("CONFIGURAÇÃO VISUAL")]
+    public UnityArmatureComponent armatureComponent;
+
     [Header("Movimentação e Rotação")]
     public float velocidade = 3.5f;
     public float velocidadeRotacao = 10f;
-    public float offsetAngulo = 180f; 
+    public float offsetAngulo = 180f;
     public float raioDeteccao = 6f;
     public Vector2 offsetDeteccao;
     public Transform player;
@@ -27,6 +33,9 @@ public class InimigoBixinho : MonoBehaviour
     {
         vidaAtual = vidaMaxima;
         rb = GetComponent<Rigidbody2D>();
+
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
         if (player == null)
         {
@@ -63,25 +72,20 @@ public class InimigoBixinho : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeRotacao * Time.deltaTime);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        TentarAplicarImpacto(collision.gameObject);
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        TentarAplicarImpacto(collision.gameObject);
-    }
+    private void OnCollisionEnter2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
+    private void OnCollisionStay2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         TentarAplicarImpacto(collision.gameObject);
+
+        if (collision.CompareTag("Ataque"))
+        {
+            TomarDano(1);
+        }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        TentarAplicarImpacto(collision.gameObject);
-    }
+    private void OnTriggerStay2D(Collider2D collision) => TentarAplicarImpacto(collision.gameObject);
 
     private void TentarAplicarImpacto(GameObject jogadorObj)
     {
@@ -103,9 +107,33 @@ public class InimigoBixinho : MonoBehaviour
     public void TomarDano(int quantidadeDano)
     {
         vidaAtual -= quantidadeDano;
+        StartCoroutine(PiscarVermelhoDragonBones());
+
         if (vidaAtual <= 0)
         {
             Destroy(gameObject);
+        }
+    }
+
+    public void ReceberDano(int quantidadeDano = 1)
+    {
+        TomarDano(quantidadeDano);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
+        {
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
+
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+            armatureComponent.color = corNormal;
         }
     }
 
