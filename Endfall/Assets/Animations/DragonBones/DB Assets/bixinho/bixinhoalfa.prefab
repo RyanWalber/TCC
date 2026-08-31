@@ -243,6 +243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d93be86f108f0f3448c7baa8198cad51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoPerseguidor
+  armatureComponent: {fileID: 0}
   velocidade: 100
   velocidadeRotacao: 10
   offsetAngulo: 180
