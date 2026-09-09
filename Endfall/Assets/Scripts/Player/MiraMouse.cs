@@ -36,7 +36,7 @@ public class MiraMouse : MonoBehaviour
         Vector3 posicaoMouseMundo = cameraPrincipal.ScreenToWorldPoint(new Vector3(
             posicaoMouseTela.x,
             posicaoMouseTela.y,
-            transform.position.z - cameraPrincipal.transform.position.z
+            -cameraPrincipal.transform.position.z
         ));
 
         bool olhandoEsquerda = posicaoMouseMundo.x < centroDoPersonagem.position.x;
@@ -52,10 +52,11 @@ public class MiraMouse : MonoBehaviour
             aniKaya.localPosition = posicaoOriginalKaya;
         }
 
-        Vector3 pontoLocalMouse = aniKaya.InverseTransformPoint(posicaoMouseMundo);
-        Vector3 direcaoLocal = pontoLocalMouse - transform.localPosition;
-        float angulo = Mathf.Atan2(direcaoLocal.y, direcaoLocal.x) * Mathf.Rad2Deg;
+        Vector2 direcaoMundo = posicaoMouseMundo - transform.position;
+        float anguloMundo = Mathf.Atan2(direcaoMundo.y, direcaoMundo.x) * Mathf.Rad2Deg;
 
-        transform.localRotation = Quaternion.Euler(0f, 0f, angulo);
+        float anguloMira = olhandoEsquerda ? (180f - anguloMundo) : anguloMundo;
+
+        transform.localRotation = Quaternion.Euler(0f, 0f, anguloMira);
     }
 }
