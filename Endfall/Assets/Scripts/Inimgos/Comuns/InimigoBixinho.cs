@@ -1,13 +1,20 @@
+using System.Collections;
 using UnityEngine;
+using DragonBones;
+using Transform = UnityEngine.Transform;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class InimigoPerseguidor : MonoBehaviour
+public class InimigoBixinho : MonoBehaviour
 {
-    [Header("Movimentação")]
-    public float velocidade = 3f;
+    [Header("CONFIGURAÇÃO VISUAL")]
+    public UnityArmatureComponent armatureComponent;
+
+    [Header("Movimentação e Rotação")]
+    public float velocidade = 3.5f;
+    public float velocidadeRotacao = 10f;
+    public float offsetAngulo = 180f;
     public float raioDeteccao = 6f;
     public Vector2 offsetDeteccao;
-    public bool voador = false;
     public Transform player;
 
     [Header("Vida")]
@@ -27,6 +34,9 @@ public class InimigoPerseguidor : MonoBehaviour
         vidaAtual = vidaMaxima;
         rb = GetComponent<Rigidbody2D>();
 
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
+
         if (player == null)
         {
             GameObject p = GameObject.FindWithTag("Player");
@@ -45,46 +55,37 @@ public class InimigoPerseguidor : MonoBehaviour
         {
             Vector2 direcao = ((Vector2)player.position - (Vector2)transform.position).normalized;
 
-            if (voador)
-            {
-                rb.linearVelocity = direcao * velocidade;
-            }
-            else
-            {
-                rb.linearVelocity = new Vector2(direcao.x * velocidade, rb.linearVelocity.y);
-            }
-
-            if (Mathf.Abs(player.position.x - transform.position.x) > 0.2f)
-            {
-                float escalaX = player.position.x > transform.position.x ? Mathf.Abs(transform.localScale.x) : -Mathf.Abs(transform.localScale.x);
-                transform.localScale = new Vector3(escalaX, transform.localScale.y, transform.localScale.z);
-            }
+            rb.linearVelocity = direcao * velocidade;
+            RotacionarParaPlayer(direcao);
         }
         else
         {
-            rb.linearVelocity = voador ? Vector2.zero : new Vector2(0, rb.linearVelocity.y);
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void RotacionarParaPlayer(Vector2 direcao)
     {
-        TentarAplicarImpacto(collision.gameObject);
+        float angulo = (Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg) + offsetAngulo;
+        Quaternion rotacaoAlvo = Quaternion.Euler(0, 0, angulo);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeRotacao * Time.deltaTime);
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        TentarAplicarImpacto(collision.gameObject);
-    }
+    private void OnCollisionEnter2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
+    private void OnCollisionStay2D(Collision2D collision) => TentarAplicarImpacto(collision.gameObject);
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         TentarAplicarImpacto(collision.gameObject);
+
+        if (collision.CompareTag("Ataque"))
+        {
+            TomarDano(1);
+        }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        TentarAplicarImpacto(collision.gameObject);
-    }
+    private void OnTriggerStay2D(Collider2D collision) => TentarAplicarImpacto(collision.gameObject);
 
     private void TentarAplicarImpacto(GameObject jogadorObj)
     {
@@ -106,9 +107,33 @@ public class InimigoPerseguidor : MonoBehaviour
     public void TomarDano(int quantidadeDano)
     {
         vidaAtual -= quantidadeDano;
+        StartCoroutine(PiscarVermelhoDragonBones());
+
         if (vidaAtual <= 0)
         {
             Destroy(gameObject);
+        }
+    }
+
+    public void ReceberDano(int quantidadeDano = 1)
+    {
+        TomarDano(quantidadeDano);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
+        {
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
+
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+            armatureComponent.color = corNormal;
         }
     }
 
