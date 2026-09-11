@@ -225,7 +225,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 50
+  orthographic size: 200
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -250,8 +250,8 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.0018489189, w: 0.99999833}
-  m_LocalPosition: {x: -204.67299, y: -11.207831, z: -10}
-  m_LocalScale: {x: 0.32151902, y: 0.58458, z: 0.58458}
+  m_LocalPosition: {x: 108, y: 24, z: -10}
+  m_LocalScale: {x: 1.321519, y: 1.58458, z: 1.58458}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -865,63 +865,6 @@ Transform:
   - {fileID: 1347811228502315656}
   m_Father: {fileID: 6111139395053691458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1852733591562116679
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 27.5829
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 21.78762
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538400780778121616, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8459016560203862240, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
-      propertyPath: m_Name
-      value: Ani Kaya
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 17b644f053acbd445be63fc53820fc3e, type: 3}
 --- !u!4 &2045000211288207649
 Transform:
   m_ObjectHideFlags: 0
@@ -1982,7 +1925,6 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1284443215}
-  - {fileID: 1852733591562116679}
   - {fileID: 1164397637}
   - {fileID: 1129878144174019737}
   - {fileID: 1810129049}
