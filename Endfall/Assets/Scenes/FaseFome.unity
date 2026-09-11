@@ -2965,7 +2965,7 @@ Transform:
   m_GameObject: {fileID: 1255637747}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -695, y: 144, z: -10}
+  m_LocalPosition: {x: -690, y: 107, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7449,7 +7449,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1858065417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7767,13 +7767,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: 'Kaya '
       objectReference: {fileID: 0}
+    - target: {fileID: 7252555578328901473, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 434.5515
+      objectReference: {fileID: 0}
+    - target: {fileID: 7252555578328901473, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 50.239998
+      objectReference: {fileID: 0}
     - target: {fileID: 8645116829258177615, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -695
+      value: -690
       objectReference: {fileID: 0}
     - target: {fileID: 8645116829258177615, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 94
+      value: 57
       objectReference: {fileID: 0}
     - target: {fileID: 8645116829258177615, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.z
