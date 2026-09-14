@@ -1,39 +1,20 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
 public class Checkpoint : MonoBehaviour
 {
-    private bool ativado = false;
-
-    private void Awake()
-    {
-        GetComponent<Collider2D>().isTrigger = true;
-    }
+    private bool jaAtivado = false;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (ativado || !collision.CompareTag("Player")) return;
-
-        ativado = true;
-
-        if (SaveManager.Instance != null && LevelManager.Instance != null)
+        if (collision.CompareTag("Player") && !jaAtivado)
         {
-            SaveData dados = SaveManager.Instance.dadosAtuais;
+            jaAtivado = true;
 
-            dados.temCheckpoint = true;
-            dados.posicaoCheckpoint = transform.position;
-
-            dados.moedasNoCheckpoint = LevelManager.Instance.moedasFaseAtual;
-
-            foreach (string id in LevelManager.Instance.moedasColetadasTemporarias)
+            if (LevelManager.Instance != null)
             {
-                if (!dados.moedasColetadasIDs.Contains(id))
-                {
-                    dados.moedasColetadasIDs.Add(id);
-                }
+                LevelManager.Instance.ProcessarCheckpoint(transform.position);
+                Debug.Log("Progresso salvo no Checkpoint!");
             }
-
-            SaveManager.Instance.SalvarSlot(0);
         }
     }
 }
