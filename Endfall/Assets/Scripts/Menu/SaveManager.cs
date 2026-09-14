@@ -1,16 +1,19 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
+    public static SaveManager Instancia => Instance;
 
-    private const string CHAVE_CRIPTOGRAFIA = "ChaveSecretaTrabalhoGame123";
-    public SaveData dadosAtuais = new SaveData();
+    public SaveData DadosAtuais = new SaveData();
+
+    public SaveData dadosAtuais
+    {
+        get => DadosAtuais;
+        set => DadosAtuais = value;
+    }
 
     private void Awake()
     {
@@ -25,67 +28,32 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    public void NovoJogo()
+    public void CriarNovoJogo()
     {
-        dadosAtuais = new SaveData();
+        DadosAtuais = new SaveData();
     }
 
-    public void SalvarSlot(int slot)
+    public void SalvarNoSlot(int slot)
     {
-        string json = JsonUtility.ToJson(dadosAtuais, true);
-        byte[] bytesOriginais = Encoding.UTF8.GetBytes(json);
-        byte[] bytesEncriptados = Criptografar(bytesOriginais);
-
-        File.WriteAllBytes(ObterCaminho(slot), bytesEncriptados);
-
-        if (slot != 0)
-        {
-            File.WriteAllBytes(ObterCaminho(0), bytesEncriptados);
-        }
+        DadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        SaveSystem.Salvar(slot, DadosAtuais);
     }
 
-    public bool CarregarSlot(int slot)
+    public void SalvarSlot(int slot) => SalvarNoSlot(slot);
+
+    public void CarregarDados(SaveData dados)
     {
-        string caminho = ObterCaminho(slot);
-        if (!File.Exists(caminho)) return false;
-
-        byte[] bytesEncriptados = File.ReadAllBytes(caminho);
-        byte[] bytesDecriptados = Criptografar(bytesEncriptados);
-        string json = Encoding.UTF8.GetString(bytesDecriptados);
-
-        dadosAtuais = JsonUtility.FromJson<SaveData>(json);
-
-        if (slot != 0)
-        {
-            SalvarSlot(0);
-        }
-
-        return true;
+        DadosAtuais = dados;
     }
 
-    public void CarregarEIniciarJogo(int slot)
+    public void RegistrarCheckpoint(Vector3 posicao)
     {
-        if (CarregarSlot(slot))
-        {
-            SceneManager.LoadScene(dadosAtuais.nomeCena);
-        }
-    }
+        DadosAtuais.temCheckpoint = true;
+        DadosAtuais.posicaoCheckpoint[0] = posicao.x;
+        DadosAtuais.posicaoCheckpoint[1] = posicao.y;
+        DadosAtuais.posicaoCheckpoint[2] = posicao.z;
+        DadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
 
-    public string ObterCaminho(int slot)
-    {
-        return Path.Combine(Application.persistentDataPath, $"save_{slot}.dat");
-    }
-
-    private byte[] Criptografar(byte[] dados)
-    {
-        byte[] chaveBytes = Encoding.UTF8.GetBytes(CHAVE_CRIPTOGRAFIA);
-        byte[] resultado = new byte[dados.Length];
-
-        for (int i = 0; i < dados.Length; i++)
-        {
-            resultado[i] = (byte)(dados[i] ^ chaveBytes[i % chaveBytes.Length]);
-        }
-
-        return resultado;
+        SaveSystem.Salvar(0, DadosAtuais);
     }
 }

@@ -1,76 +1,69 @@
-using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    [Header("UI do Menu")]
-    public GameObject botaoContinuar;
-    public GameObject painelSlots;
+    [SerializeField] private GameObject botaoContinuar;
+    [SerializeField] private GameObject painelSlots;
+    [SerializeField] private string nomePrimeiraFase = "FaseFome";
 
-    [Header("Configurações da Cena Inicial")]
-    public string nomePrimeiraFase = "Tutorial";
+    private bool modoCarregar = false;
 
     private void Start()
     {
-        VerificarAutosave();
+        if (botaoContinuar != null)
+        {
+            botaoContinuar.SetActive(SaveSystem.SlotExiste(0));
+        }
 
         if (painelSlots != null)
+        {
             painelSlots.SetActive(false);
-    }
-
-    private void VerificarAutosave()
-    {
-        if (SaveManager.Instance != null && botaoContinuar != null)
-        {
-            string caminhoAutosave = SaveManager.Instance.ObterCaminho(0);
-            botaoContinuar.SetActive(File.Exists(caminhoAutosave));
-        }
-    }
-
-    public void BotaoContinuar()
-    {
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.CarregarEIniciarJogo(0);
         }
     }
 
     public void BotaoNovoJogo()
     {
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.NovoJogo();
-            SaveManager.Instance.dadosAtuais.nomeCena = nomePrimeiraFase;
-        }
+        SaveManager.Instancia.CriarNovoJogo();
         SceneManager.LoadScene(nomePrimeiraFase);
     }
 
-    public void BotaoAbrirCarregarSlots()
+    public void BotaoContinuar()
     {
-        if (painelSlots != null)
-            painelSlots.SetActive(true);
+        SaveData dados = SaveSystem.Carregar(0);
+        if (dados != null)
+        {
+            SaveManager.Instancia.CarregarDados(dados);
+            SceneManager.LoadScene(dados.nomeCena);
+        }
+    }
+
+    public void BotaoAbrirCarregar()
+    {
+        modoCarregar = true;
+        painelSlots.SetActive(true);
+    }
+
+    public void BotaoSelecionarSlot(int slot)
+    {
+        if (modoCarregar)
+        {
+            SaveData dados = SaveSystem.Carregar(slot);
+            if (dados != null)
+            {
+                SaveManager.Instancia.CarregarDados(dados);
+                SceneManager.LoadScene(dados.nomeCena);
+            }
+        }
     }
 
     public void BotaoFecharSlots()
     {
-        if (painelSlots != null)
-            painelSlots.SetActive(false);
-    }
-
-    public void BotaoSelecionarSlot(int numeroSlot)
-    {
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.CarregarEIniciarJogo(numeroSlot);
-        }
+        painelSlots.SetActive(false);
     }
 
     public void BotaoSair()
     {
         Application.Quit();
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
     }
 }
