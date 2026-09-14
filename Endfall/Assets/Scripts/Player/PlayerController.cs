@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animacao")]
     [SerializeField] private Animator animator;
-    [SerializeField] private string nomeParametroVelocidade = "Velocidade";
+    [SerializeField] private string nomeParametroAndando = "isWalking";
     [SerializeField] private string nomeParametroChao = "estaNoChao";
 
     private Rigidbody2D rb;
@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour
     {
         if (animator != null)
         {
-            animator.SetFloat(nomeParametroVelocidade, Mathf.Abs(inputHorizontal));
+            animator.SetBool(nomeParametroAndando, Mathf.Abs(inputHorizontal) > 0.1f);
             animator.SetBool(nomeParametroChao, estaNoChao);
         }
     }
