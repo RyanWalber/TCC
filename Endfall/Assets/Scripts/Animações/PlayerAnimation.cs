@@ -16,4 +16,12 @@ public class PlayerAnimation : MonoBehaviour
             animator.SetBool("isWalking", estaAndando);
         }
     }
+
+    public void DefinirDash(bool estaDandoDash)
+    {
+        if (animator != null)
+        {
+            animator.SetBool("isDashing", estaDandoDash);
+        }
+    }
 }

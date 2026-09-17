@@ -142,12 +142,22 @@ public class PlayerController : MonoBehaviour
         estaDandoDash = true;
         direcaoDash = inputHorizontal;
 
+        if (playerAnimation != null)
+        {
+            playerAnimation.DefinirDash(true);
+        }
+
         rb.gravityScale = 0f;
 
         yield return new WaitForSeconds(duracaoDash);
 
         rb.gravityScale = gravidadeOriginal;
         estaDandoDash = false;
+
+        if (playerAnimation != null)
+        {
+            playerAnimation.DefinirDash(false);
+        }
 
         yield return new WaitForSeconds(tempoEsperaDash);
         podeDarDash = true;
