@@ -15,9 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float tempoEsperaDash = 1f;
 
     [Header("Animacao")]
-    [SerializeField] private Animator animator;
-    [SerializeField] private string nomeParametroAndando = "isWalking";
-    [SerializeField] private string nomeParametroChao = "estaNoChao";
+    [SerializeField] private PlayerAnimation playerAnimation;
 
     private Rigidbody2D rb;
     private float inputHorizontal;
@@ -37,29 +35,30 @@ public class PlayerController : MonoBehaviour
         gravidadeOriginal = rb.gravityScale;
         pulosRestantes = maxPulos;
 
-        if (animator == null)
+        if (playerAnimation == null)
         {
-            animator = GetComponentInChildren<Animator>();
+            playerAnimation = GetComponentInChildren<PlayerAnimation>();
         }
     }
 
     void Update()
     {
-        if (estaDandoDash) return;
-
-        inputHorizontal = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
+        if (!estaDandoDash)
         {
-            if (estaNoChao || pulosRestantes > 0)
+            inputHorizontal = Input.GetAxisRaw("Horizontal");
+
+            if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
             {
-                Pular();
+                if (estaNoChao || pulosRestantes > 0)
+                {
+                    Pular();
+                }
             }
-        }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && podeDarDash && Mathf.Abs(inputHorizontal) > 0.1f)
-        {
-            StartCoroutine(ExecutarDash());
+            if (Input.GetKeyDown(KeyCode.LeftShift) && podeDarDash && Mathf.Abs(inputHorizontal) > 0.1f)
+            {
+                StartCoroutine(ExecutarDash());
+            }
         }
 
         AtualizarAnimacoes();
@@ -90,11 +89,10 @@ public class PlayerController : MonoBehaviour
 
     void AtualizarAnimacoes()
     {
-        if (animator != null)
-        {
-            animator.SetBool(nomeParametroAndando, Mathf.Abs(inputHorizontal) > 0.1f);
-            animator.SetBool(nomeParametroChao, estaNoChao);
-        }
+        if (playerAnimation == null) return;
+
+        bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
+        playerAnimation.DefinirAndando(estaMovimentando);
     }
 
     void Pular()
