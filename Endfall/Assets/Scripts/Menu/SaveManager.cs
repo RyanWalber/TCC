@@ -7,53 +7,144 @@ public class SaveManager : MonoBehaviour
     public static SaveManager Instance { get; private set; }
     public static SaveManager Instancia => Instance;
 
-    public SaveData DadosAtuais = new SaveData();
+    [SerializeField] private bool usarCriptografia = true;
 
-    public SaveData dadosAtuais
+    private SaveData dadosAtuais;
+    private FileDataHandler fileDataHandler;
+    private int moedasColetadasAtual = 0;
+    private int totalMoedasNaFase = 0;
+
+    public SaveData DadosAtuais => dadosAtuais;
+
+    void Awake()
     {
-        get => DadosAtuais;
-        set => DadosAtuais = value;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        fileDataHandler = new FileDataHandler(Application.persistentDataPath, usarCriptografia);
+        dadosAtuais = new SaveData();
     }
 
-    private void Awake()
+    // --- Métodos de Leitura e Estado ---
+    public SaveData GetDadosAtuais() => dadosAtuais;
+    public bool TemAutosave() => fileDataHandler.SlotExists(0);
+    public bool ExisteSaveNoSlot(int slot) => fileDataHandler.SlotExists(slot);
+
+    // --- Métodos de Controlo de Jogo e Cenas ---
+    public void NovoJogo()
     {
-        if (Instance == null)
+        dadosAtuais = new SaveData();
+        dadosAtuais.nomeCena = "FaseFome";
+        dadosAtuais.faseAtual = 1;
+        moedasColetadasAtual = 0;
+        fileDataHandler.Save(dadosAtuais, 0);
+        SceneManager.LoadScene(dadosAtuais.nomeCena);
+    }
+
+    public void CriarNovoJogo() => NovoJogo();
+
+    // --- Carregamento de Slots e Dados ---
+    public void CarregarDados(SaveData dados)
+    {
+        if (dados != null)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            dadosAtuais = dados;
+            fileDataHandler.Save(dadosAtuais, 0);
+            moedasColetadasAtual = dadosAtuais.moedasNoCheckpoint;
+
+            if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
+            {
+                SceneManager.LoadScene(dadosAtuais.nomeCena);
+            }
+        }
+    }
+
+    public void CarregarSlot(int slot)
+    {
+        SaveData dadosCarregados = fileDataHandler.Load(slot);
+        if (dadosCarregados != null)
+        {
+            CarregarDados(dadosCarregados);
+        }
+    }
+
+    public void CarregarSlot(SaveData dados) => CarregarDados(dados);
+    public void CarregarDados(int slot) => CarregarSlot(slot);
+    public void CarregarDados() => CarregarSlot(0);
+
+    // --- Guardar Jogo ---
+    public void SalvarNoSlot(int slot)
+    {
+        dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        fileDataHandler.Save(dadosAtuais, slot);
+        fileDataHandler.Save(dadosAtuais, 0);
+    }
+
+    // --- Checkpoint ---
+    public void RegistrarCheckpoint(Vector3 posicao)
+    {
+        dadosAtuais.passouCheckpoint = true;
+        dadosAtuais.posicaoCheckpoint = posicao;
+        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        fileDataHandler.Save(dadosAtuais, 0);
+    }
+
+    public void AtivarCheckpoint(Vector3 posicao) => RegistrarCheckpoint(posicao);
+
+    // --- Gestão de Moedas ---
+    public void ColetarMoeda(string idMoeda)
+    {
+        if (!dadosAtuais.moedasColetadasIDs.Contains(idMoeda))
+        {
+            dadosAtuais.moedasColetadasIDs.Add(idMoeda);
+            moedasColetadasAtual++;
+        }
+    }
+
+    public bool MoedaJaFoiColetada(string idMoeda) => dadosAtuais.moedasColetadasIDs.Contains(idMoeda);
+    public int GetMoedasAtuais() => moedasColetadasAtual;
+
+    public void RegistrarTotalMoedasFase(int quantidade)
+    {
+        totalMoedasNaFase = quantidade;
+    }
+
+    public int GetTotalMoedasFase() => totalMoedasNaFase;
+
+    public void AvancarFase()
+    {
+        dadosAtuais.faseAtual++;
+        dadosAtuais.passouCheckpoint = false;
+        dadosAtuais.moedasNoCheckpoint = 0;
+        dadosAtuais.moedasColetadasIDs.Clear();
+        moedasColetadasAtual = 0;
+
+        // Mapeamento das tuas fases específicas
+        if (dadosAtuais.faseAtual == 2)
+        {
+            dadosAtuais.nomeCena = "FasePeste";
         }
         else
         {
-            Destroy(gameObject);
+            dadosAtuais.nomeCena = "Menu";
         }
-    }
 
-    public void CriarNovoJogo()
-    {
-        DadosAtuais = new SaveData();
-    }
+        fileDataHandler.Save(dadosAtuais, 0);
 
-    public void SalvarNoSlot(int slot)
-    {
-        DadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
-        SaveSystem.Salvar(slot, DadosAtuais);
-    }
-
-    public void SalvarSlot(int slot) => SalvarNoSlot(slot);
-
-    public void CarregarDados(SaveData dados)
-    {
-        DadosAtuais = dados;
-    }
-
-    public void RegistrarCheckpoint(Vector3 posicao)
-    {
-        DadosAtuais.temCheckpoint = true;
-        DadosAtuais.posicaoCheckpoint[0] = posicao.x;
-        DadosAtuais.posicaoCheckpoint[1] = posicao.y;
-        DadosAtuais.posicaoCheckpoint[2] = posicao.z;
-        DadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
-
-        SaveSystem.Salvar(0, DadosAtuais);
+        if (Application.CanStreamedLevelBeLoaded(dadosAtuais.nomeCena))
+        {
+            SceneManager.LoadScene(dadosAtuais.nomeCena);
+        }
+        else
+        {
+            SceneManager.LoadScene("Menu");
+        }
     }
 }

@@ -2,18 +2,22 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    [Tooltip("")]
+    [SerializeField] private Transform pontoDeRenascer;
+
     private bool jaAtivado = false;
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.CompareTag("Player") && !jaAtivado)
+        if (!jaAtivado && other.CompareTag("Player"))
         {
             jaAtivado = true;
 
-            if (LevelManager.Instance != null)
+            Vector3 posicaoSalvar = pontoDeRenascer != null ? pontoDeRenascer.position : other.transform.position;
+
+            if (SaveManager.Instance != null)
             {
-                LevelManager.Instance.ProcessarCheckpoint(transform.position);
-                Debug.Log("Progresso salvo no Checkpoint!");
+                SaveManager.Instance.RegistrarCheckpoint(posicaoSalvar);
             }
         }
     }
