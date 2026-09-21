@@ -9,7 +9,7 @@ public class LevelSetup : MonoBehaviour
     {
         if (jogador == null)
         {
-            Debug.LogError("LevelSetup: O objeto do Jogador não foi atribuído no Inspector!");
+            Debug.LogError("");
             return;
         }
 

@@ -31,12 +31,10 @@ public class SaveManager : MonoBehaviour
         dadosAtuais = new SaveData();
     }
 
-    // --- Métodos de Leitura e Estado ---
     public SaveData GetDadosAtuais() => dadosAtuais;
     public bool TemAutosave() => fileDataHandler.SlotExists(0);
     public bool ExisteSaveNoSlot(int slot) => fileDataHandler.SlotExists(slot);
 
-    // --- Métodos de Controlo de Jogo e Cenas ---
     public void NovoJogo()
     {
         dadosAtuais = new SaveData();
@@ -49,7 +47,6 @@ public class SaveManager : MonoBehaviour
 
     public void CriarNovoJogo() => NovoJogo();
 
-    // --- Carregamento de Slots e Dados ---
     public void CarregarDados(SaveData dados)
     {
         if (dados != null)
@@ -78,7 +75,6 @@ public class SaveManager : MonoBehaviour
     public void CarregarDados(int slot) => CarregarSlot(slot);
     public void CarregarDados() => CarregarSlot(0);
 
-    // --- Guardar Jogo ---
     public void SalvarNoSlot(int slot)
     {
         dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
@@ -86,7 +82,6 @@ public class SaveManager : MonoBehaviour
         fileDataHandler.Save(dadosAtuais, 0);
     }
 
-    // --- Checkpoint ---
     public void RegistrarCheckpoint(Vector3 posicao)
     {
         dadosAtuais.passouCheckpoint = true;
@@ -98,7 +93,6 @@ public class SaveManager : MonoBehaviour
 
     public void AtivarCheckpoint(Vector3 posicao) => RegistrarCheckpoint(posicao);
 
-    // --- Gestão de Moedas ---
     public void ColetarMoeda(string idMoeda)
     {
         if (!dadosAtuais.moedasColetadasIDs.Contains(idMoeda))
@@ -126,7 +120,6 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.moedasColetadasIDs.Clear();
         moedasColetadasAtual = 0;
 
-        // Mapeamento das tuas fases específicas
         if (dadosAtuais.faseAtual == 2)
         {
             dadosAtuais.nomeCena = "FasePeste";

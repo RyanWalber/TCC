@@ -8,11 +8,9 @@ public class PauseMenuManager : MonoBehaviour
     [SerializeField] private GameObject painelSlots;
 
     private bool estaPausado = false;
-    private bool modoSalvar = false; // true = Salvando | false = Carregando
-
+    private bool modoSalvar = false;
     void Update()
     {
-        // Pressionar P ou ESC alterna o Pause
         if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape))
         {
             if (estaPausado)
@@ -29,7 +27,7 @@ public class PauseMenuManager : MonoBehaviour
     public void PausarJogo()
     {
         estaPausado = true;
-        Time.timeScale = 0f; // Congela o jogo (física e animações)
+        Time.timeScale = 0f;
         if (painelPause != null) painelPause.SetActive(true);
         if (painelSlots != null) painelSlots.SetActive(false);
     }
@@ -37,7 +35,7 @@ public class PauseMenuManager : MonoBehaviour
     public void ContinuarJogo()
     {
         estaPausado = false;
-        Time.timeScale = 1f; // Volta o jogo ao normal
+        Time.timeScale = 1f; 
         if (painelPause != null) painelPause.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
     }
@@ -63,11 +61,11 @@ public class PauseMenuManager : MonoBehaviour
         if (modoSalvar)
         {
             SaveManager.Instance.SalvarNoSlot(slot);
-            ContinuarJogo(); // Fecha o pause após salvar
+            ContinuarJogo(); 
         }
         else
         {
-            Time.timeScale = 1f; // Restaura o tempo antes de carregar a cena
+            Time.timeScale = 1f; 
             SaveManager.Instance.CarregarSlot(slot);
         }
     }
@@ -80,7 +78,7 @@ public class PauseMenuManager : MonoBehaviour
 
     public void OnClickVoltarAoMenu()
     {
-        Time.timeScale = 1f; // Garante que o tempo descongela ao voltar ao menu
+        Time.timeScale = 1f; 
         SceneManager.LoadScene("Menu");
     }
 }
