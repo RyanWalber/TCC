@@ -11,12 +11,11 @@ public class PlataformaMovel : MonoBehaviour
     private float temporizadorEspera = 0f;
     private Vector3[] pontosGlobais;
     private Rigidbody2D rb;
+    private Rigidbody2D playerRb;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-
-        // Garante que a plataforma é Kinematic para não sofrer gravidade
         rb.bodyType = RigidbodyType2D.Kinematic;
 
         pontosGlobais = new Vector3[pontos.Length + 1];
@@ -40,9 +39,22 @@ public class PlataformaMovel : MonoBehaviour
         {
             Vector3 destino = pontosGlobais[indicePontoAtual];
             Vector3 novaPosicao = Vector3.MoveTowards(transform.position, destino, velocidade * Time.fixedDeltaTime);
+            Vector3 delta = novaPosicao - transform.position;
 
-            // Move através do motor de física, resolvendo colisões suavemente
             rb.MovePosition(novaPosicao);
+
+            if (playerRb != null)
+            {
+                if (playerRb.linearVelocity.y > 0.1f)
+                {
+                    playerRb = null;
+                }
+                else
+                {
+                    Vector2 deslocamentoPlayer = playerRb.linearVelocity * Time.fixedDeltaTime;
+                    playerRb.MovePosition(playerRb.position + (Vector2)delta + deslocamentoPlayer);
+                }
+            }
 
             if (Vector3.Distance(transform.position, destino) < 0.01f)
             {
@@ -54,11 +66,25 @@ public class PlataformaMovel : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        VerificarJogador(collision);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        VerificarJogador(collision);
+    }
+
+    private void VerificarJogador(Collision2D collision)
+    {
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (collision.contacts[0].normal.y < -0.5f)
+            foreach (ContactPoint2D contato in collision.contacts)
             {
-                collision.transform.SetParent(transform);
+                if (contato.normal.y < -0.2f || collision.transform.position.y > transform.position.y + 0.1f)
+                {
+                    playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
+                    return;
+                }
             }
         }
     }
@@ -67,10 +93,7 @@ public class PlataformaMovel : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (collision.transform.parent == transform)
-            {
-                collision.transform.SetParent(null);
-            }
+            playerRb = null;
         }
     }
 
