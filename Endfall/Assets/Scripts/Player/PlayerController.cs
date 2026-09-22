@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private float inputHorizontal;
-    private bool estaNoChao;
+    private bool estaNoChao = true;
     private int pulosRestantes;
     private int maxPulos = 2;
 
@@ -93,6 +93,7 @@ public class PlayerController : MonoBehaviour
 
         bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
         playerAnimation.DefinirAndando(estaMovimentando);
+        playerAnimation.DefinirNoChao(estaNoChao);
     }
 
     void Pular()
@@ -104,19 +105,20 @@ public class PlayerController : MonoBehaviour
         pulosRestantes--;
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        ProcessarContatoChao(collision);
+    }
+
     private void OnCollisionStay2D(Collision2D collision)
+    {
+        ProcessarContatoChao(collision);
+    }
+
+    private void ProcessarContatoChao(Collision2D collision)
     {
         foreach (ContactPoint2D contato in collision.contacts)
         {
-            if (contato.normal.y < -0.2f)
-            {
-                estaSubindoPulo = false;
-                if (rb.linearVelocity.y > 0f)
-                {
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-                }
-            }
-
             if (contato.normal.y > 0.5f)
             {
                 estaNoChao = true;
@@ -133,7 +135,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        estaNoChao = false;
+        if (estaSubindoPulo || Mathf.Abs(rb.linearVelocity.y) > 0.1f)
+        {
+            estaNoChao = false;
+        }
     }
 
     private IEnumerator ExecutarDash()

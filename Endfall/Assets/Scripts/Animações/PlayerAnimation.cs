@@ -24,4 +24,12 @@ public class PlayerAnimation : MonoBehaviour
             animator.SetBool("isDashing", estaDandoDash);
         }
     }
+
+    public void DefinirNoChao(bool estaNoChao)
+    {
+        if (animator != null)
+        {
+            animator.SetBool("isGrounded", estaNoChao);
+        }
+    }
 }
