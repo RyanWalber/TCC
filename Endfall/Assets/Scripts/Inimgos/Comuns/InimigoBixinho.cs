@@ -95,7 +95,7 @@ public class InimigoBixinho : MonoBehaviour
         {
             TentarAplicarImpacto(obj);
         }
-        else if (obj.CompareTag("Ataque") || obj.CompareTag("Projetil"))
+        else if (obj.CompareTag("Ataque"))
         {
             TomarDano(1);
         }
