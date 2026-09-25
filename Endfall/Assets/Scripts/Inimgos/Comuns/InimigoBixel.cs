@@ -119,13 +119,11 @@ public class InimigoBixel : MonoBehaviour
     {
         if (armatureComponent != null)
         {
-            // Cria a cor vermelha no formato nativo do DragonBones
             DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
             corVermelha.redMultiplier = 1f;
             corVermelha.greenMultiplier = 0f;
             corVermelha.blueMultiplier = 0f;
 
-            // Cria a cor normal (original)
             DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
 
             armatureComponent.color = corVermelha;
