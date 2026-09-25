@@ -11,21 +11,27 @@ public class InimigoBixao : MonoBehaviour
     public string animVoar = "fly";
 
     [Header("Configurações de Ação")]
-    public float velocidade = 60f;
-    public float raioDetecao = 300f;
-    public float distanciaFuga = 150f;
+    public float velocidade = 4f;
+    public float raioDetecao = 10f;
+    public float distanciaFuga = 6f;
     public float tempoEspera = 1f;
     public int vida = 3;
+    public int danoNoJogador = 1;
+    public float forcaEmpurrao = 8f;
 
     private Rigidbody2D rb;
     private bool aguardando = false;
     private Vector3 escalaOriginal;
+    private Coroutine coroutineFuga;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0;
         rb.freezeRotation = true;
+
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
     }
 
     private void Start()
@@ -37,9 +43,6 @@ public class InimigoBixao : MonoBehaviour
             GameObject p = GameObject.FindWithTag("Player");
             if (p != null) player = p.transform;
         }
-
-        if (armatureComponent == null)
-            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
         if (armatureComponent != null && !string.IsNullOrEmpty(animVoar))
             armatureComponent.animation.Play(animVoar, 0);
@@ -78,17 +81,13 @@ public class InimigoBixao : MonoBehaviour
 
         if (direcao.x >= 0)
         {
-            // Player à DIREITA: Espelha X para virar a boca (desenhada pra esquerda) pro player
             float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
-
             transform.localScale = new Vector3(-absX, absY, escalaOriginal.z);
             transform.rotation = Quaternion.Euler(0, 0, angulo);
         }
         else
         {
-            // Player à ESQUERDA: Mantém X positivo (boca nativa p/ esquerda) e ajusta a inclinação
             float angulo = Mathf.Atan2(direcao.y, -direcao.x) * Mathf.Rad2Deg;
-
             transform.localScale = new Vector3(absX, absY, escalaOriginal.z);
             transform.rotation = Quaternion.Euler(0, 0, -angulo);
         }
@@ -103,21 +102,41 @@ public class InimigoBixao : MonoBehaviour
 
         if (obj.CompareTag("Player"))
         {
+            obj.SendMessage("Machucar", danoNoJogador, SendMessageOptions.DontRequireReceiver);
+
+            Rigidbody2D rbPlayer = obj.GetComponent<Rigidbody2D>();
+            if (rbPlayer != null)
+            {
+                Vector2 direcaoImpacto = (obj.transform.position - transform.position).normalized;
+                direcaoImpacto.y = Mathf.Clamp(direcaoImpacto.y + 0.3f, 0.4f, 0.8f);
+
+                rbPlayer.linearVelocity = new Vector2(rbPlayer.linearVelocity.x, 0);
+                rbPlayer.AddForce(direcaoImpacto * forcaEmpurrao, ForceMode2D.Impulse);
+            }
+
             Fugir();
         }
-        else if (obj.CompareTag("Ataque"))
+        else if (obj.CompareTag("Ataque") || obj.CompareTag("Projetil") || obj.CompareTag("Tiro") || obj.CompareTag("Bala"))
         {
             TomarDano(1);
         }
     }
 
-    public void TomarDano(int dano)
+    public void TomarDano(int dano = 1)
     {
+        ReceberDano(dano);
+    }
+
+    public void ReceberDano(int dano = 1)
+    {
+        if (vida <= 0) return;
+
         vida -= dano;
+        StartCoroutine(PiscarVermelhoDragonBones());
 
         if (vida <= 0)
         {
-            Destroy(gameObject);
+            Morrer();
         }
         else
         {
@@ -125,10 +144,38 @@ public class InimigoBixao : MonoBehaviour
         }
     }
 
+    private void Morrer()
+    {
+        rb.linearVelocity = Vector2.zero;
+        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
+        Destroy(gameObject, 0.15f);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
+        {
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
+
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+
+            if (armatureComponent != null)
+                armatureComponent.color = corNormal;
+        }
+    }
+
     private void Fugir()
     {
-        StopAllCoroutines();
-        StartCoroutine(RotinaFuga());
+        if (coroutineFuga != null)
+            StopCoroutine(coroutineFuga);
+
+        coroutineFuga = StartCoroutine(RotinaFuga());
     }
 
     private IEnumerator RotinaFuga()

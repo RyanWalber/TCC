@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 2167849774800599703}
   m_Layer: 6
   m_Name: tiro_5
-  m_TagString: Untagged
+  m_TagString: Ataque
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

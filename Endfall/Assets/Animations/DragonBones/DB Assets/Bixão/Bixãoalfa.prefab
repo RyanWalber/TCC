@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 6573639339170868798}
   m_Layer: 0
   m_Name: "Bix\xE3oalfa"
-  m_TagString: Untagged
+  m_TagString: Inimigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -203,6 +203,8 @@ MonoBehaviour:
   distanciaFuga: 200
   tempoEspera: 1
   vida: 3
+  danoNoJogador: 1
+  forcaEmpurrao: 8
 --- !u!1 &1905619740655798839
 GameObject:
   m_ObjectHideFlags: 0

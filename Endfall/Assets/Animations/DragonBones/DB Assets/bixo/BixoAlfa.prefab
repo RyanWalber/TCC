@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 8859103063039120554}
   m_Layer: 0
   m_Name: BixoAlfa
-  m_TagString: Untagged
+  m_TagString: Inimigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -367,6 +367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b292a0bf7f6eb834ea4d5d3564b0ebea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoParado
+  armatureComponent: {fileID: 0}
   raioDeteccao: 120
   offsetDeteccao: {x: 40, y: 25}
   alturaEmergir: 67.8

@@ -16,6 +16,7 @@ public class InimigoBixel : MonoBehaviour
     [Header("STATUS")]
     public int vida = 3;
     public int danoNoPlayer = 1;
+    public float forcaEmpurrao = 8f;
 
     [Header("MOVIMENTO (Patrulha)")]
     public float velocidade = 3f;
@@ -102,17 +103,17 @@ public class InimigoBixel : MonoBehaviour
 
     public void ReceberDano(int dano = 1)
     {
+        TomarDano(dano);
+    }
+
+    public void TomarDano(int dano = 1)
+    {
         if (estaMorto) return;
 
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
         if (vida <= 0) Morrer();
-    }
-
-    public void TomarDano(int dano = 1)
-    {
-        ReceberDano(dano);
     }
 
     private IEnumerator PiscarVermelhoDragonBones()
@@ -146,20 +147,34 @@ public class InimigoBixel : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D colisao)
     {
-        if (estaMorto) return;
-        if (colisao.gameObject.CompareTag("Player"))
-        {
-            colisao.gameObject.SendMessage("Machucar", danoNoPlayer, SendMessageOptions.DontRequireReceiver);
-        }
+        ProcessarInteracao(colisao.gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        ProcessarInteracao(other.gameObject);
+    }
+
+    private void ProcessarInteracao(GameObject obj)
+    {
         if (estaMorto) return;
 
-        if (other.CompareTag("Ataque"))
+        if (obj.CompareTag("Player"))
         {
-            ReceberDano(1);
+            obj.SendMessage("Machucar", danoNoPlayer, SendMessageOptions.DontRequireReceiver);
+
+            Rigidbody2D rbPlayer = obj.GetComponent<Rigidbody2D>();
+            if (rbPlayer != null)
+            {
+                Vector2 direcaoEmpurrao = (obj.transform.position - transform.position).normalized;
+                direcaoEmpurrao.y = Mathf.Clamp(direcaoEmpurrao.y + 0.3f, 0.4f, 0.8f);
+                rbPlayer.linearVelocity = new Vector2(rbPlayer.linearVelocity.x, 0);
+                rbPlayer.AddForce(direcaoEmpurrao * forcaEmpurrao, ForceMode2D.Impulse);
+            }
+        }
+        else if (obj.CompareTag("Ataque") || obj.CompareTag("Projetil") || obj.CompareTag("Tiro") || obj.CompareTag("Bala"))
+        {
+            TomarDano(1);
         }
     }
 

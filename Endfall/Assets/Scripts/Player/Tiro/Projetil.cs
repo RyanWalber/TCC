@@ -40,11 +40,7 @@ public class Projetil : MonoBehaviour
 
         jaColidiu = true;
 
-        InimigoBixel inimigo = collision.GetComponentInParent<InimigoBixel>();
-        if (inimigo != null)
-        {
-            inimigo.TomarDano(dano);
-        }
+        collision.SendMessageUpwards("TomarDano", dano, SendMessageOptions.DontRequireReceiver);
 
         Destroy(gameObject);
     }

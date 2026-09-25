@@ -708,7 +708,7 @@ Rigidbody2D:
   m_Mass: 5
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -739,6 +739,7 @@ MonoBehaviour:
   spriteInvertido: 0
   vida: 3
   danoNoPlayer: 1
+  forcaEmpurrao: 8
   velocidade: 40
   distanciaPatrulha: 200
 --- !u!1 &7390450515002595419
