@@ -9,11 +9,29 @@ public class PauseMenuManager : MonoBehaviour
 
     private bool estaPausado = false;
     private bool modoSalvar = false;
-    void Update()
+
+    private void Awake()
+    {
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+        estaPausado = false;
+    }
+
+    private void OnDestroy()
+    {
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+    }
+
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape))
         {
-            if (estaPausado)
+            if (painelSlots != null && painelSlots.activeSelf)
+            {
+                OnClickVoltarAoPause();
+            }
+            else if (estaPausado)
             {
                 ContinuarJogo();
             }
@@ -28,6 +46,8 @@ public class PauseMenuManager : MonoBehaviour
     {
         estaPausado = true;
         Time.timeScale = 0f;
+        AudioListener.pause = true;
+
         if (painelPause != null) painelPause.SetActive(true);
         if (painelSlots != null) painelSlots.SetActive(false);
     }
@@ -35,7 +55,9 @@ public class PauseMenuManager : MonoBehaviour
     public void ContinuarJogo()
     {
         estaPausado = false;
-        Time.timeScale = 1f; 
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+
         if (painelPause != null) painelPause.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
     }
@@ -61,11 +83,13 @@ public class PauseMenuManager : MonoBehaviour
         if (modoSalvar)
         {
             SaveManager.Instance.SalvarNoSlot(slot);
-            ContinuarJogo(); 
+            ContinuarJogo();
         }
         else
         {
-            Time.timeScale = 1f; 
+            estaPausado = false;
+            Time.timeScale = 1f;
+            AudioListener.pause = false;
             SaveManager.Instance.CarregarSlot(slot);
         }
     }
@@ -78,7 +102,9 @@ public class PauseMenuManager : MonoBehaviour
 
     public void OnClickVoltarAoMenu()
     {
-        Time.timeScale = 1f; 
+        estaPausado = false;
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
         SceneManager.LoadScene("Menu");
     }
 }

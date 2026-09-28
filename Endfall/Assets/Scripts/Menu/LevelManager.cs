@@ -5,8 +5,11 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
+    [Header("Referências")]
     [SerializeField] private Transform playerTransform;
-    [SerializeField] private List<GameObject> moedasNaCena = new List<GameObject>();
+
+    [Header("Moedas na Fase")]
+    [SerializeField] private List<Coin> moedasNaCena = new List<Coin>();
 
     public int moedasFaseAtual = 0;
     public List<string> moedasColetadasTemporarias = new List<string>();
@@ -25,24 +28,32 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        if (moedasNaCena.Count == 0)
+        {
+            moedasNaCena.AddRange(FindObjectsByType<Coin>(FindObjectsSortMode.None));
+        }
+
         if (SaveManager.Instance == null) return;
 
         SaveData dados = SaveManager.Instance.DadosAtuais;
 
-        if (dados != null && dados.temCheckpoint)
+        if (dados != null)
         {
-            if (playerTransform != null)
+            if (dados.passouCheckpoint)
             {
-                playerTransform.position = new Vector3(dados.posicaoCheckpoint[0], dados.posicaoCheckpoint[1], dados.posicaoCheckpoint[2]);
+                if (playerTransform != null)
+                {
+                    playerTransform.position = dados.posicaoCheckpoint;
+                }
+
+                moedasFaseAtual = dados.moedasNoCheckpoint;
             }
 
-            moedasFaseAtual = dados.moedasNoCheckpoint;
-
-            foreach (GameObject moeda in moedasNaCena)
+            foreach (Coin moeda in moedasNaCena)
             {
-                if (moeda != null && dados.moedasColetadasIDs.Contains(moeda.name))
+                if (moeda != null && SaveManager.Instance.MoedaJaFoiColetada(moeda.IdUnico))
                 {
-                    moeda.SetActive(false);
+                    moeda.gameObject.SetActive(false);
                 }
             }
         }
@@ -57,27 +68,13 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void ColetarMoeda(GameObject moedaObj)
-    {
-        if (moedaObj != null)
-        {
-            ColetarMoeda(moedaObj.name);
-        }
-    }
-
     public void ProcessarCheckpoint(Vector3 posicaoCentro)
     {
         if (SaveManager.Instance != null)
         {
-            SaveData dados = SaveManager.Instance.DadosAtuais;
-            dados.moedasNoCheckpoint = moedasFaseAtual;
-
             foreach (string id in moedasColetadasTemporarias)
             {
-                if (!dados.moedasColetadasIDs.Contains(id))
-                {
-                    dados.moedasColetadasIDs.Add(id);
-                }
+                SaveManager.Instance.ColetarMoeda(id);
             }
 
             SaveManager.Instance.RegistrarCheckpoint(posicaoCentro);

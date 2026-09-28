@@ -10,11 +10,23 @@ public class MainMenuManager : MonoBehaviour
     [Header("Botões")]
     [SerializeField] private Button botaoContinuar;
 
+    private void Awake()
+    {
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
     private void Start()
     {
         if (painelPrincipal != null) painelPrincipal.SetActive(true);
         if (painelSlots != null) painelSlots.SetActive(false);
 
+        AtualizarBotaoContinuar();
+    }
+
+    public void AtualizarBotaoContinuar()
+    {
         if (botaoContinuar != null)
         {
             bool temAutosave = SaveManager.Instance != null && SaveManager.Instance.TemAutosave();
@@ -24,6 +36,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnClickNovoJogo()
     {
+        Time.timeScale = 1f;
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.NovoJogo();
@@ -32,6 +45,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnClickContinuar()
     {
+        Time.timeScale = 1f;
         if (SaveManager.Instance != null && SaveManager.Instance.TemAutosave())
         {
             SaveManager.Instance.CarregarDados();
@@ -52,6 +66,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnClickCarregarSlot(int slot)
     {
+        Time.timeScale = 1f;
         if (SaveManager.Instance != null && SaveManager.Instance.ExisteSaveNoSlot(slot))
         {
             SaveManager.Instance.CarregarSlot(slot);
@@ -60,9 +75,10 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnClickSair()
     {
-        Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
 #endif
     }
 }

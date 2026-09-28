@@ -2,10 +2,25 @@ using UnityEngine;
 
 public class Coin : MonoBehaviour
 {
-    [SerializeField] private string idUnico = System.Guid.NewGuid().ToString();
+    [SerializeField] private string idUnico;
 
-    void Start()
+    public string IdUnico => idUnico;
+
+    private void OnValidate()
     {
+        if (string.IsNullOrEmpty(idUnico))
+        {
+            idUnico = System.Guid.NewGuid().ToString();
+        }
+    }
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(idUnico))
+        {
+            idUnico = System.Guid.NewGuid().ToString();
+        }
+
         if (SaveManager.Instance != null && SaveManager.Instance.MoedaJaFoiColetada(idUnico))
         {
             gameObject.SetActive(false);
@@ -16,7 +31,11 @@ public class Coin : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            SaveManager.Instance.ColetarMoeda(idUnico);
+            if (LevelManager.Instance != null)
+            {
+                LevelManager.Instance.ColetarMoeda(idUnico);
+            }
+
             gameObject.SetActive(false);
         }
     }

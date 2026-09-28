@@ -35,17 +35,24 @@ public class SaveManager : MonoBehaviour
     public bool TemAutosave() => fileDataHandler.SlotExists(0);
     public bool ExisteSaveNoSlot(int slot) => fileDataHandler.SlotExists(slot);
 
-    public void NovoJogo()
+    public void NovoJogo(int slot = 0)
     {
         dadosAtuais = new SaveData();
         dadosAtuais.nomeCena = "FaseFome";
         dadosAtuais.faseAtual = 1;
         moedasColetadasAtual = 0;
+
+        if (slot != 0)
+        {
+            fileDataHandler.Save(dadosAtuais, slot);
+        }
         fileDataHandler.Save(dadosAtuais, 0);
+
         SceneManager.LoadScene(dadosAtuais.nomeCena);
     }
 
-    public void CriarNovoJogo() => NovoJogo();
+    public void CriarNovoJogo() => NovoJogo(0);
+    public void CriarNovoJogo(int slot) => NovoJogo(slot);
 
     public void CarregarDados(SaveData dados)
     {
@@ -139,5 +146,14 @@ public class SaveManager : MonoBehaviour
         {
             SceneManager.LoadScene("Menu");
         }
+    }
+
+    public void SairDoJogo()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
