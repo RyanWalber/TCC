@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 62de1265a704686458b2988e6e491152
+guid: b12fe562cb01f82409f34cdba5f42769
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4031354340596503442
-    second: barra seca_0
+      213: 4197881690819988882
+    second: layer8_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -178,13 +178,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: barra seca_0
+      name: layer8_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 743
-        height: 124
+        width: 625
+        height: 518
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,8 +193,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293dbfae96f32f730800000000000000
-      internalID: 4031354340596503442
+      spriteID: 29d017e082fd14a30800000000000000
+      internalID: 4197881690819988882
       vertices: []
       indices: 
       edges: []
@@ -213,7 +213,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      barra seca_0: 4031354340596503442
+      layer8_0: 4197881690819988882
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

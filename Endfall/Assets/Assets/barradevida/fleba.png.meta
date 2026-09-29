@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a61f09faa9caa2d45b05a59c8fb5a6d1
+guid: e6495f73f461f084cbf73341f2b3ae54
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 67539811055436359
-    second: path3_0
+      213: -5115329832178209974
+    second: fleba_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 5
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -178,13 +178,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: path3_0
+      name: fleba_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 179
-        height: 184
+        width: 3942
+        height: 528
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,8 +193,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 742082ea913ffe000800000000000000
-      internalID: 67539811055436359
+      spriteID: a4b2f0cae92b209b0800000000000000
+      internalID: -5115329832178209974
       vertices: []
       indices: 
       edges: []
@@ -213,7 +213,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      path3_0: 67539811055436359
+      fleba_0: -5115329832178209974
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
