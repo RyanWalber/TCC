@@ -374,5 +374,5 @@ MonoBehaviour:
   velocidadeSubida: 2
   player: {fileID: 0}
   vidaMaxima: 3
-  danoNoJogador: 1
+  danoNoJogador: 10
   forcaEmpurrao: 1000

@@ -29,6 +29,8 @@ public class PlayerController : MonoBehaviour
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
 
+    public bool EstaDandoDash => estaDandoDash;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();

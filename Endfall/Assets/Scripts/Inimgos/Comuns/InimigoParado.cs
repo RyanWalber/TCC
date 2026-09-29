@@ -20,7 +20,7 @@ public class InimigoParado : MonoBehaviour
     private int vidaAtual;
 
     [Header("Ataque ao Jogador")]
-    public int danoNoJogador = 1;
+    public int danoNoJogador = 10; 
     public float forcaEmpurrao = 12f;
 
     private Vector3 posicaoOculta;
@@ -104,11 +104,16 @@ public class InimigoParado : MonoBehaviour
 
     private void AplicarDanoEEmpurrar(GameObject jogadorObj)
     {
+        PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TomarDano(danoNoJogador);
+        }
+
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
         if (rbPlayer != null)
         {
             float direcaoX = jogadorObj.transform.position.x >= transform.position.x ? 1f : -1f;
-
             Vector2 empurrao = new Vector2(direcaoX * 0.8f, 0.6f).normalized;
 
             rbPlayer.linearVelocity = empurrao * forcaEmpurrao;
