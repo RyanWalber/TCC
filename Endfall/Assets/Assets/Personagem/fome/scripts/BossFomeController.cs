@@ -8,35 +8,57 @@ public class BossFomeController : MonoBehaviour
     [SerializeField] private Transform pontoDisparo;
     [SerializeField] private GameObject prefabFlecha;
 
+    [Header("Visual do Boss")]
+    [Tooltip("Arraste o objeto 'arcoeflecha_0' aqui")]
+    [SerializeField] private GameObject flechaVisualNaMao;
+
     [Header("Configurações de Ataque")]
     [SerializeField] private float alcanceAtaque = 15f;
     [SerializeField] private float tempoEntreAtaques = 3f;
 
+    [Header("Orientação Inicial")]
+    [Tooltip("Marque se o sprite original do boss na cena já começa virado para a direita")]
+    [SerializeField] private bool olhandoDireita = false;
+
     private float cronometroAtaque;
-    private bool olhandoDireita = false;
+
+    // Hash para o parâmetro do Animator (evita processamento de strings repetido)
+    private static readonly int HashAtacar = Animator.StringToHash("Atacar");
 
     private void Start()
     {
-        if (player == null && GameObject.FindGameObjectWithTag("Player") != null)
-        {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
-        }
+        BuscarPlayer();
     }
 
     private void Update()
     {
-        if (player == null) return;
-
-        float distancia = Vector2.Distance(transform.position, player.position);
+        if (player == null)
+        {
+            BuscarPlayer();
+            if (player == null) return;
+        }
 
         OlharParaJogador();
 
         cronometroAtaque += Time.deltaTime;
 
-        if (distancia <= alcanceAtaque && cronometroAtaque >= tempoEntreAtaques)
+        // Otimização: calcula distância ao quadrado para evitar o custo de raiz quadrada
+        float distanciaQuadrada = (player.position - transform.position).sqrMagnitude;
+        float alcanceQuadrado = alcanceAtaque * alcanceAtaque;
+
+        if (distanciaQuadrada <= alcanceQuadrado && cronometroAtaque >= tempoEntreAtaques)
         {
             Atacar();
             cronometroAtaque = 0f;
+        }
+    }
+
+    private void BuscarPlayer()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
         }
     }
 
@@ -62,24 +84,45 @@ public class BossFomeController : MonoBehaviour
 
     private void Atacar()
     {
+        if (flechaVisualNaMao != null)
+        {
+            flechaVisualNaMao.SetActive(true);
+        }
+
         if (animator != null)
         {
-            animator.SetTrigger("Atacar");
+            animator.SetTrigger(HashAtacar);
         }
     }
 
     public void DispararFlecha()
     {
+        if (flechaVisualNaMao != null)
+        {
+            flechaVisualNaMao.SetActive(false);
+        }
+
         if (prefabFlecha != null && pontoDisparo != null && player != null)
         {
-            GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, Quaternion.identity);
-            FlechaBoss flecha = flechaObj.GetComponent<FlechaBoss>();
+            Vector2 direcao = (player.position - pontoDisparo.position).normalized;
 
-            if (flecha != null)
+            float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
+            Quaternion rotacao = Quaternion.Euler(0, 0, angulo);
+
+            GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, rotacao);
+
+            // Otimização API moderna da Unity
+            if (flechaObj.TryGetComponent<FlechaBoss>(out FlechaBoss flecha))
             {
-                Vector2 direcao = (player.position - pontoDisparo.position).normalized;
                 flecha.DefinirDirecao(direcao);
             }
         }
+    }
+
+    // Desenha o alcance de ataque na visualização de Scene
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, alcanceAtaque);
     }
 }
