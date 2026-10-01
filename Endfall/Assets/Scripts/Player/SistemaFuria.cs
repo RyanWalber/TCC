@@ -1,65 +1,112 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SistemaFuria : MonoBehaviour
 {
     [Header("Configurações da Fúria")]
-    public float furiaMaxima = 100f;
-    public float furiaAtual = 0f;
-    public float duracaoFuria = 5f;
+    [SerializeField] private float furiaMaxima = 100f;
+    [SerializeField] private float consumoPorSegundo = 20f;
+    private float furiaAtual = 0f;
 
-    [Header("Bônus em Fúria")]
-    public float multiplicadorDano = 1.5f; 
-    public float multiplicadorCadencia = 0.5f;
+    [Header("Multiplicadores de Atributos em Fúria")]
+    [Tooltip("Ex: 1.4 = +40% de velocidade de movimento")]
+    public float multVelocidade = 1.4f;
+    [Tooltip("Ex: 1.25 = +25% de altura do pulo")]
+    public float multPulo = 1.25f;
+    [Tooltip("Ex: 0.5 = atira com metade do tempo de espera (2x mais rápido)")]
+    public float multCadencia = 0.5f;
+    [Tooltip("Ex: 2.0 = dobro de dano")]
+    public float multDano = 2.0f;
+
+    [Header("UI da Fúria")]
+    [SerializeField] private Image fillFuria;
+
+    [Header("Efeitos Visuais de Fúria (NOVOS)")]
+    [SerializeField] private Outline luzNeonFuria;        // Arraste o componente Outline do objeto 'furia'
+    [SerializeField] private GameObject vinhetaTelaFuria; // Arraste o objeto 'VinhetaFuria' da tela
+
     [Header("Controles")]
-    public KeyCode teclaFuria = KeyCode.Q;
+    [SerializeField] private KeyCode teclaFuria = KeyCode.Q;
 
     private bool estaEmFuria = false;
-    private float tempoRestanteFuria;
 
     public bool EstaEmFuria => estaEmFuria;
 
+    private void Start()
+    {
+        AtualizarUI();
+        AtualizarEfeitosVisuais();
+    }
+
     private void Update()
     {
-        if (Input.GetKeyDown(teclaFuria) && !estaEmFuria && furiaAtual >= furiaMaxima)
+        if (Input.GetKeyDown(teclaFuria))
         {
-            AtivarFuria();
+            if (estaEmFuria)
+            {
+                DesativarFuria();
+            }
+            else if (furiaAtual > 0f)
+            {
+                AtivarFuria();
+            }
         }
 
         if (estaEmFuria)
         {
-            tempoRestanteFuria -= Time.deltaTime;
-            if (tempoRestanteFuria <= 0)
+            furiaAtual -= consumoPorSegundo * Time.deltaTime;
+            furiaAtual = Mathf.Max(furiaAtual, 0f);
+            AtualizarUI();
+
+            if (furiaAtual <= 0f)
             {
                 DesativarFuria();
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            AdicionarFuria(25f);
         }
     }
 
     public void AdicionarFuria(float quantidade)
     {
-        if (estaEmFuria) return; 
+        if (estaEmFuria) return;
 
         furiaAtual += quantidade;
         furiaAtual = Mathf.Clamp(furiaAtual, 0f, furiaMaxima);
-        Debug.Log($"Fúria Atual: {furiaAtual}/{furiaMaxima}");
+        AtualizarUI();
     }
 
     private void AtivarFuria()
     {
         estaEmFuria = true;
-        tempoRestanteFuria = duracaoFuria;
-        furiaAtual = 0f; 
-        Debug.Log(">>> FÚRIA ATIVADA! <<<");
+        AtualizarEfeitosVisuais();
+        Debug.Log(">>> MODO FÚRIA ATIVADO! <<<");
     }
 
     private void DesativarFuria()
     {
         estaEmFuria = false;
-        Debug.Log("Fúria Finalizada.");
+        AtualizarEfeitosVisuais();
+        Debug.Log("Fúria Desativada.");
+    }
+
+    private void AtualizarUI()
+    {
+        if (fillFuria != null)
+        {
+            fillFuria.fillAmount = furiaAtual / furiaMaxima;
+        }
+    }
+
+    // Liga ou desliga os efeitos visuais dependendo de 'estaEmFuria'
+    private void AtualizarEfeitosVisuais()
+    {
+        if (luzNeonFuria != null)
+        {
+            luzNeonFuria.enabled = estaEmFuria;
+        }
+
+        if (vinhetaTelaFuria != null)
+        {
+            vinhetaTelaFuria.SetActive(estaEmFuria);
+        }
     }
 }

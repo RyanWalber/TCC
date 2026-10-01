@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class TiroPlayer : MonoBehaviour
 {
+    [Header("Configurações do Tiro")]
     public GameObject prefabProjetil;
     public GameObject prefabEfeitoFogo;
     public Transform pontoDeDisparo;
@@ -9,13 +10,26 @@ public class TiroPlayer : MonoBehaviour
     public float cadenciaTiro = 0.2f;
 
     private float tempoProximoTiro;
+    private SistemaFuria sistemaFuria;
+
+    private void Start()
+    {
+        sistemaFuria = GetComponentInParent<SistemaFuria>();
+    }
 
     private void Update()
     {
+        float cadenciaEfetiva = cadenciaTiro;
+
+        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
+        {
+            cadenciaEfetiva *= sistemaFuria.multCadencia;
+        }
+
         if ((Input.GetKeyDown(teclaTiro) || Input.GetMouseButtonDown(0)) && Time.time >= tempoProximoTiro)
         {
             Atirar();
-            tempoProximoTiro = Time.time + cadenciaTiro;
+            tempoProximoTiro = Time.time + cadenciaEfetiva;
         }
     }
 

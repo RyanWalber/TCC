@@ -7,6 +7,9 @@ public class Projetil : MonoBehaviour
     public float tempoDeVida = 3f;
     public int dano = 1;
 
+    [Header("Fúria")]
+    public float furiaPorAcerto = 8f; 
+
     private Rigidbody2D rb;
     private bool jaColidiu = false;
 
@@ -40,7 +43,22 @@ public class Projetil : MonoBehaviour
 
         jaColidiu = true;
 
-        collision.SendMessageUpwards("TomarDano", dano, SendMessageOptions.DontRequireReceiver);
+        int danoCalculado = dano;
+        SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
+
+        if (furia != null)
+        {
+            if (furia.EstaEmFuria)
+            {
+                danoCalculado = Mathf.RoundToInt(dano * furia.multDano);
+            }
+            else
+            {
+                furia.AdicionarFuria(furiaPorAcerto);
+            }
+        }
+
+        collision.SendMessageUpwards("TomarDano", danoCalculado, SendMessageOptions.DontRequireReceiver);
 
         Destroy(gameObject);
     }

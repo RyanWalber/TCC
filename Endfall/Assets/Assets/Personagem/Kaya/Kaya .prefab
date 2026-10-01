@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4752287519697750252}
   - component: {fileID: 9067443130348859836}
   - component: {fileID: 644927710069476239}
+  - component: {fileID: 4098034864036435177}
   m_Layer: 0
   m_Name: 'Kaya '
   m_TagString: Player
@@ -47,7 +48,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: c3fcbe25595e15844a10b6e3e14b88e8, type: 2}
+  m_Material: {fileID: 6200000, guid: 6f0d410936554784e890c459f447219b, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -90,7 +91,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 38
-  m_Material: {fileID: 6200000, guid: c3fcbe25595e15844a10b6e3e14b88e8, type: 2}
+  m_Material: {fileID: 6200000, guid: 6f0d410936554784e890c459f447219b, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -149,11 +150,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SistemaFuria
   furiaMaxima: 100
-  furiaAtual: 0
-  duracaoFuria: 5
-  multiplicadorDano: 1.5
-  multiplicadorCadencia: 0.5
+  consumoPorSegundo: 20
+  multVelocidade: 5
+  multPulo: 5
+  multCadencia: 5
+  multDano: 2
+  fillFuria: {fileID: 0}
   teclaFuria: 113
+--- !u!114 &4098034864036435177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8744568874949199937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 075057a5bb48f9643bd3dd9512e54e62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  vidaMaxima: 100
+  fillVida: {fileID: 0}
+  furiaPorDanoTomado: 15
 --- !u!1001 &2936368042210725931
 PrefabInstance:
   m_ObjectHideFlags: 0

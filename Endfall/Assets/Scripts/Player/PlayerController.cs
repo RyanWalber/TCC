@@ -29,11 +29,15 @@ public class PlayerController : MonoBehaviour
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
 
+    // Referência ao sistema de Fúria
+    private SistemaFuria sistemaFuria;
+
     public bool EstaDandoDash => estaDandoDash;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        sistemaFuria = GetComponent<SistemaFuria>();
         gravidadeOriginal = rb.gravityScale;
         pulosRestantes = maxPulos;
 
@@ -74,6 +78,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        float velocidadeEfetiva = velocidade;
+        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
+        {
+            velocidadeEfetiva *= sistemaFuria.multVelocidade;
+        }
+
         float velocidadeY = rb.linearVelocity.y;
 
         if (!estaSubindoPulo && velocidadeY > 0f)
@@ -86,7 +96,7 @@ public class PlayerController : MonoBehaviour
             velocidadeY = forcaDoPulo;
         }
 
-        rb.linearVelocity = new Vector2(inputHorizontal * velocidade, velocidadeY);
+        rb.linearVelocity = new Vector2(inputHorizontal * velocidadeEfetiva, velocidadeY);
     }
 
     void AtualizarAnimacoes()
@@ -103,7 +113,13 @@ public class PlayerController : MonoBehaviour
         estaSubindoPulo = true;
         estaNoChao = false;
 
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, forcaDoPulo);
+        float puloEfetivo = forcaDoPulo;
+        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
+        {
+            puloEfetivo *= sistemaFuria.multPulo;
+        }
+
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, puloEfetivo);
         pulosRestantes--;
     }
 

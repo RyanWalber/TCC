@@ -8,109 +8,73 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float vidaMaxima = 100f;
     private float vidaAtual;
 
-    [Header("Configurações de Fúria")]
-    [SerializeField] private float furiaMaxima = 100f;
-    private float furiaAtual;
+    [Header("Imagens da UI")]
+    [SerializeField] private Image fillVida;         // Barra Vermelha (vida)
+    [SerializeField] private Image fillVidaFantasma; // Barra Amarela/Branca (vidaFantasma)
 
-    [Header("Referências da UI")]
-    [SerializeField] private Image fillVida;
-    [SerializeField] private Image fillFuria;
+    [Header("Velocidade da Barra Fantasma")]
+    [SerializeField] private float velocidadeFantasma = 1.5f;
 
-    [Header("Feedback de Dano")]
-    [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Color corDano = Color.red;
-    [SerializeField] private float tempoPiscar = 0.15f;
-    [SerializeField] private float tempoInvulnerabilidade = 0.5f;
-
-    private Color corOriginal;
-    private bool estaInvulneravel = false;
+    [Header("Fúria e Efeitos")]
+    [SerializeField] private float furiaPorDanoTomado = 15f;
+    private SistemaFuria sistemaFuria;
+    private HUDJuice hudJuice; // Vamos usar na Parte 2
 
     private void Start()
     {
         vidaAtual = vidaMaxima;
-        furiaAtual = 0f; 
+        sistemaFuria = GetComponent<SistemaFuria>();
+        hudJuice = FindFirstObjectByType<HUDJuice>();
 
-        if (spriteRenderer == null)
+        AtualizarUIImediato();
+    }
+
+    private void Update()
+    {
+        // Se a barra fantasma ainda estiver maior que a barra vermelha, reduz ela suavemente
+        if (fillVidaFantasma != null && fillVida != null)
         {
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            if (fillVidaFantasma.fillAmount > fillVida.fillAmount)
+            {
+                fillVidaFantasma.fillAmount -= velocidadeFantasma * Time.deltaTime;
+            }
         }
-
-        if (spriteRenderer != null)
-        {
-            corOriginal = spriteRenderer.color;
-        }
-
-        AtualizarUI();
     }
 
     public void TomarDano(float quantidadeDano)
     {
-        if (estaInvulneravel) return;
-
         vidaAtual -= quantidadeDano;
         vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
-        AtualizarUI();
-
-        if (vidaAtual <= 0f)
-        {
-            Morrer();
-        }
-        else
-        {
-            StartCoroutine(EfeitoPiscarDano());
-        }
-    }
-
-    public void AdicionarFuria(float quantidade)
-    {
-        furiaAtual += quantidade;
-        furiaAtual = Mathf.Clamp(furiaAtual, 0f, furiaMaxima);
-        AtualizarUI();
-    }
-
-    public bool UsarFuria(float quantidade)
-    {
-        if (furiaAtual >= quantidade)
-        {
-            furiaAtual -= quantidade;
-            AtualizarUI();
-            return true;
-        }
-        return false;
-    }
-
-    private void AtualizarUI()
-    {
+        // A barra vermelha cai na hora!
         if (fillVida != null)
         {
             fillVida.fillAmount = vidaAtual / vidaMaxima;
         }
 
-        if (fillFuria != null)
+        // Ganha fúria ao apanhar
+        if (sistemaFuria != null)
         {
-            fillFuria.fillAmount = furiaAtual / furiaMaxima;
+            sistemaFuria.AdicionarFuria(furiaPorDanoTomado);
+        }
+
+        // Avisa o sistema de efeitos para tremer a tela e checar o retrato!
+        if (hudJuice != null)
+        {
+            hudJuice.TremerHUD();
+            hudJuice.AtualizarRetrato(vidaAtual / vidaMaxima);
+        }
+
+        if (vidaAtual <= 0f)
+        {
+            Debug.Log("Kaya Morreu!");
         }
     }
 
-    private IEnumerator EfeitoPiscarDano()
+    private void AtualizarUIImediato()
     {
-        estaInvulneravel = true;
-
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.color = corDano;
-            yield return new WaitForSeconds(tempoPiscar);
-            spriteRenderer.color = corOriginal;
-        }
-
-        yield return new WaitForSeconds(tempoInvulnerabilidade - tempoPiscar);
-
-        estaInvulneravel = false;
-    }
-
-    private void Morrer()
-    {
-        Debug.Log("Kaya morreu!");
+        float pct = vidaAtual / vidaMaxima;
+        if (fillVida != null) fillVida.fillAmount = pct;
+        if (fillVidaFantasma != null) fillVidaFantasma.fillAmount = pct;
     }
 }
