@@ -144,7 +144,6 @@ GameObject:
   - component: {fileID: 1621334966606405424}
   - component: {fileID: 3612214748048976341}
   - component: {fileID: 6514799624962749663}
-  - component: {fileID: 5731833422536336452}
   m_Layer: 5
   m_Name: PanelPause
   m_TagString: Untagged
@@ -213,20 +212,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5731833422536336452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 215408940600973636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ae6ec5268566d4db53b0bd817140cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PauseMenu
-  painelPause: {fileID: 215408940600973636}
-  painelSlots: {fileID: 0}
 --- !u!1 &484820415792633821
 GameObject:
   m_ObjectHideFlags: 0
