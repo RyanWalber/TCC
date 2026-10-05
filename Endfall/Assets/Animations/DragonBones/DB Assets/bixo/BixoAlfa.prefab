@@ -373,6 +373,6 @@ MonoBehaviour:
   alturaEmergir: 67.8
   velocidadeSubida: 2
   player: {fileID: 0}
-  vidaMaxima: 3
-  danoNoJogador: 10
+  vidaMaxima: 20
+  danoNoJogador: 15
   forcaEmpurrao: 1000
