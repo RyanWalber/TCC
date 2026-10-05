@@ -22,7 +22,6 @@ public class BossFomeController : MonoBehaviour
 
     private float cronometroAtaque;
 
-    // Hash para o parâmetro do Animator (evita processamento de strings repetido)
     private static readonly int HashAtacar = Animator.StringToHash("Atacar");
 
     private void Start()
@@ -42,7 +41,6 @@ public class BossFomeController : MonoBehaviour
 
         cronometroAtaque += Time.deltaTime;
 
-        // Otimização: calcula distância ao quadrado para evitar o custo de raiz quadrada
         float distanciaQuadrada = (player.position - transform.position).sqrMagnitude;
         float alcanceQuadrado = alcanceAtaque * alcanceAtaque;
 
@@ -95,6 +93,7 @@ public class BossFomeController : MonoBehaviour
         }
     }
 
+    // Chamado pelo Evento de Animação quando o Boss solta a corda do arco
     public void DispararFlecha()
     {
         if (flechaVisualNaMao != null)
@@ -104,14 +103,12 @@ public class BossFomeController : MonoBehaviour
 
         if (prefabFlecha != null && pontoDisparo != null && player != null)
         {
+            // Instancia a flecha na posição do pontoDisparo
+            GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, Quaternion.identity);
+
+            // Calcula o vetor direto do Ponto de Disparo até a posição do Player
             Vector2 direcao = (player.position - pontoDisparo.position).normalized;
 
-            float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
-            Quaternion rotacao = Quaternion.Euler(0, 0, angulo);
-
-            GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, rotacao);
-
-            // Otimização API moderna da Unity
             if (flechaObj.TryGetComponent<FlechaBoss>(out FlechaBoss flecha))
             {
                 flecha.DefinirDirecao(direcao);
@@ -119,7 +116,6 @@ public class BossFomeController : MonoBehaviour
         }
     }
 
-    // Desenha o alcance de ataque na visualização de Scene
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

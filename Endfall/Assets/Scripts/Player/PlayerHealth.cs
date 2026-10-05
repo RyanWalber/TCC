@@ -9,8 +9,8 @@ public class PlayerHealth : MonoBehaviour
     private float vidaAtual;
 
     [Header("Imagens da UI")]
-    [SerializeField] private Image fillVida;         // Barra Vermelha (vida)
-    [SerializeField] private Image fillVidaFantasma; // Barra Amarela/Branca (vidaFantasma)
+    [SerializeField] private Image fillVida;          // Barra Vermelha (vida)
+    [SerializeField] private Image fillVidaFantasma;  // Barra Amarela/Branca (vidaFantasma)
 
     [Header("Velocidade da Barra Fantasma")]
     [SerializeField] private float velocidadeFantasma = 1.5f;
@@ -18,7 +18,19 @@ public class PlayerHealth : MonoBehaviour
     [Header("Fúria e Efeitos")]
     [SerializeField] private float furiaPorDanoTomado = 15f;
     private SistemaFuria sistemaFuria;
-    private HUDJuice hudJuice; // Vamos usar na Parte 2
+    private HUDJuice hudJuice;
+
+    [Header("Game Over e Feedback de Dano")]
+    [SerializeField] private GameObject painelGameOver;
+    [SerializeField] private Color corDano = Color.red;
+    [SerializeField] private float tempoInvencivel = 0.8f;
+
+    // Lista de todos os Sprites do corpo fatiado da Kaya
+    private SpriteRenderer[] todosSprites;
+    private Color[] coresOriginais;
+
+    private bool estaInvencivel = false;
+    private bool estaMorta = false;
 
     private void Start()
     {
@@ -26,12 +38,27 @@ public class PlayerHealth : MonoBehaviour
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
 
+        // Pega todos os sprites do corpo da Kaya
+        todosSprites = GetComponentsInChildren<SpriteRenderer>();
+        if (todosSprites != null && todosSprites.Length > 0)
+        {
+            coresOriginais = new Color[todosSprites.Length];
+            for (int i = 0; i < todosSprites.Length; i++)
+            {
+                coresOriginais[i] = todosSprites[i].color;
+            }
+        }
+
+        if (painelGameOver != null)
+        {
+            painelGameOver.SetActive(false);
+        }
+
         AtualizarUIImediato();
     }
 
     private void Update()
     {
-        // Se a barra fantasma ainda estiver maior que a barra vermelha, reduz ela suavemente
         if (fillVidaFantasma != null && fillVida != null)
         {
             if (fillVidaFantasma.fillAmount > fillVida.fillAmount)
@@ -43,22 +70,21 @@ public class PlayerHealth : MonoBehaviour
 
     public void TomarDano(float quantidadeDano)
     {
+        if (estaMorta || estaInvencivel) return;
+
         vidaAtual -= quantidadeDano;
         vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
-        // A barra vermelha cai na hora!
         if (fillVida != null)
         {
             fillVida.fillAmount = vidaAtual / vidaMaxima;
         }
 
-        // Ganha fúria ao apanhar
         if (sistemaFuria != null)
         {
             sistemaFuria.AdicionarFuria(furiaPorDanoTomado);
         }
 
-        // Avisa o sistema de efeitos para tremer a tela e checar o retrato!
         if (hudJuice != null)
         {
             hudJuice.TremerHUD();
@@ -67,8 +93,47 @@ public class PlayerHealth : MonoBehaviour
 
         if (vidaAtual <= 0f)
         {
-            Debug.Log("Kaya Morreu!");
+            Morrer();
         }
+        else
+        {
+            StartCoroutine(RotinaInvencibilidade());
+        }
+    }
+
+    private IEnumerator RotinaInvencibilidade()
+    {
+        estaInvencivel = true;
+
+        // Pinta todo o corpo da Kaya de vermelho
+        for (int i = 0; i < todosSprites.Length; i++)
+        {
+            if (todosSprites[i] != null) todosSprites[i].color = corDano;
+        }
+
+        yield return new WaitForSeconds(0.15f);
+
+        // Restaura as cores originais do corpo
+        for (int i = 0; i < todosSprites.Length; i++)
+        {
+            if (todosSprites[i] != null) todosSprites[i].color = coresOriginais[i];
+        }
+
+        yield return new WaitForSeconds(tempoInvencivel - 0.15f);
+
+        estaInvencivel = false;
+    }
+
+    private void Morrer()
+    {
+        estaMorta = true;
+
+        if (painelGameOver != null)
+        {
+            painelGameOver.SetActive(true);
+        }
+
+        Time.timeScale = 0f;
     }
 
     private void AtualizarUIImediato()

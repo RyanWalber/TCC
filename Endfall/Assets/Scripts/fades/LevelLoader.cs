@@ -8,8 +8,10 @@ public class LevelLoader : MonoBehaviour
     public static LevelLoader Instance { get; private set; }
 
     [Header("UI de Transição")]
-    [SerializeField] private Image cortinaTransicao; // Imagem preta da transição
-    [SerializeField] private float tempoTransicao = 0.5f;
+    [SerializeField] private Image cortinaTransicao; // Arraste a CortinaGlobal aqui
+    [SerializeField] private float tempoTransicao = 0.6f; // Tempo do Fade
+
+    private bool emTransicao = false;
 
     private void Awake()
     {
@@ -29,43 +31,64 @@ public class LevelLoader : MonoBehaviour
     {
         if (cortinaTransicao != null)
         {
-            // Começa 100% cobrindo a tela
+            // Ao ligar o jogo, garante que começa 100% coberto e abre a tela
             SetAlpha(1f);
             cortinaTransicao.raycastTarget = true;
-
-            // Fade-In: Revela a cena inicial
             StartCoroutine(AnimarFade(1f, 0f));
         }
     }
 
     public void CarregarCena(string nomeCena)
     {
-        StartCoroutine(RotinaTrocaDeCena(nomeCena));
+        if (!emTransicao)
+        {
+            StartCoroutine(RotinaTrocaDeCena(nomeCena));
+        }
     }
 
     private IEnumerator RotinaTrocaDeCena(string nomeCena)
     {
-        // Bloqueia cliques durante o escurecimento para evitar cliques duplos
-        cortinaTransicao.raycastTarget = true;
+        emTransicao = true;
+        cortinaTransicao.raycastTarget = true; // Bloqueia cliques durante o fade
 
-        // 1. FADE-OUT: A tela fica preta cobrindo a cena atual
+        // 1. SAÍDA (Fade-Out): A cor preta vai surgindo devagar até cobrir o jogo (0 -> 1)
         yield return StartCoroutine(AnimarFade(0f, 1f));
 
         Time.timeScale = 1f;
         AudioListener.pause = false;
 
-        // 2. Carrega a nova cena enquanto a tela está 100% PRETA
+        // 2. TROCA DE CENA EM SEGUNDO PLANO (Com a tela 100% preta)
         AsyncOperation operacao = SceneManager.LoadSceneAsync(nomeCena);
+
+        // IMPEDE a Unity de mostrar a nova cena até autorizarmos!
+        operacao.allowSceneActivation = false;
+
+        // Aguarda o carregamento em background (0.9 significa pronto na Unity)
+        while (operacao.progress < 0.9f)
+        {
+            yield return null;
+        }
+
+        // Garante que a tela continua totalmente preta antes de trocar
+        SetAlpha(1f);
+
+        // Agora sim: autoriza a Unity a renderizar a nova cena
+        operacao.allowSceneActivation = true;
+
+        // Aguarda a conclusão total do carregamento da cena
         while (!operacao.isDone)
         {
             yield return null;
         }
 
-        // 3. FADE-IN: A tela clareia revelando a nova cena
+        // Aguarda 1 frame extra para os objetos da nova cena inicializarem atrás do escuro
+        yield return null;
+
+        // 3. ENTRADA (Fade-In): A cor preta vai sumindo devagar revelando a nova cena (1 -> 0)
         yield return StartCoroutine(AnimarFade(1f, 0f));
 
-        // Desativa o bloqueio de cliques para você poder jogar/clicar nos botões
-        cortinaTransicao.raycastTarget = false;
+        cortinaTransicao.raycastTarget = false; // Desbloqueia os cliques para o jogador
+        emTransicao = false;
     }
 
     private IEnumerator AnimarFade(float alphaInicial, float alphaFinal)
@@ -80,12 +103,6 @@ public class LevelLoader : MonoBehaviour
         }
 
         SetAlpha(alphaFinal);
-
-        // Se a tela ficou transparente, libera os cliques imediatamente
-        if (alphaFinal <= 0f)
-        {
-            cortinaTransicao.raycastTarget = false;
-        }
     }
 
     private void SetAlpha(float alpha)

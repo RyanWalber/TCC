@@ -292,4 +292,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Projetil
   velocidade: 650
   tempoDeVida: 0.8
-  dano: 1
+  dano: 10
+  furiaPorAcerto: 8

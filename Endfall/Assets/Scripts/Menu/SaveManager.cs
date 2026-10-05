@@ -48,7 +48,8 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        SceneManager.LoadScene(dadosAtuais.nomeCena);
+        // Troca direta substituída pela transição suave
+        CarregarCenaComFade(dadosAtuais.nomeCena);
     }
 
     public void CriarNovoJogo() => NovoJogo(0);
@@ -64,7 +65,8 @@ public class SaveManager : MonoBehaviour
 
             if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
             {
-                SceneManager.LoadScene(dadosAtuais.nomeCena);
+                // Troca direta substituída pela transição suave
+                CarregarCenaComFade(dadosAtuais.nomeCena);
             }
         }
     }
@@ -140,11 +142,11 @@ public class SaveManager : MonoBehaviour
 
         if (Application.CanStreamedLevelBeLoaded(dadosAtuais.nomeCena))
         {
-            SceneManager.LoadScene(dadosAtuais.nomeCena);
+            CarregarCenaComFade(dadosAtuais.nomeCena);
         }
         else
         {
-            SceneManager.LoadScene("Menu");
+            CarregarCenaComFade("Menu");
         }
     }
 
@@ -155,5 +157,20 @@ public class SaveManager : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    /// <summary>
+    /// Roteia o carregamento de cena pelo LevelLoader para garantir a transição universal com Fade.
+    /// </summary>
+    private void CarregarCenaComFade(string nomeCena)
+    {
+        if (LevelLoader.Instance != null)
+        {
+            LevelLoader.Instance.CarregarCena(nomeCena);
+        }
+        else
+        {
+            SceneManager.LoadScene(nomeCena);
+        }
     }
 }

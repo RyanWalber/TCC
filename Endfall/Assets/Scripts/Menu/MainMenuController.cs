@@ -9,7 +9,7 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Botões e Configurações")]
     [SerializeField] private GameObject botaoContinuar;
-    [SerializeField] private string nomePrimeiraFase = "FaseFome"; // Direciona para a cena de História/Explicação antes da fase
+    [SerializeField] private string nomePrimeiraFase = "FaseFome";
 
     private bool modoCarregar = false;
 
@@ -64,18 +64,25 @@ public class MainMenuController : MonoBehaviour
         {
             if (SaveManager.Instancia != null)
             {
+                // O próprio SaveManager já lê o slot e chama a cena com Fade no SaveManager.cs
                 SaveManager.Instancia.CarregarSlot(slot);
+            }
+            else
+            {
+                CarregarCenaComFade(nomePrimeiraFase);
             }
         }
         else
         {
             if (SaveManager.Instancia != null)
             {
+                // O próprio SaveManager já inicia o novo jogo e chama a cena com Fade no SaveManager.cs
                 SaveManager.Instancia.NovoJogo(slot);
             }
-
-            // Carrega a cena de explicação com o efeito Fade universal
-            CarregarCenaComFade(nomePrimeiraFase);
+            else
+            {
+                CarregarCenaComFade(nomePrimeiraFase);
+            }
         }
     }
 
@@ -105,9 +112,6 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-    /// <summary>
-    /// Método universal de transição: utiliza o LevelLoader se disponível, ou faz fallback no SceneManager.
-    /// </summary>
     public void CarregarCenaComFade(string nomeCena)
     {
         if (LevelLoader.Instance != null)
