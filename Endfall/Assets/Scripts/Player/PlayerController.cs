@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Pulo e Pulo Duplo")]
     [SerializeField] private float forcaDoPulo = 12f;
+    [SerializeField] private float tempoCoyote = 0.15f; // Tolerância para imperfeições do chão (em segundos)
 
     [Header("Dash")]
     [SerializeField] private float forcaDoDash = 20f;
@@ -21,15 +22,15 @@ public class PlayerController : MonoBehaviour
     private float inputHorizontal;
     private bool estaNoChao = true;
     private int pulosRestantes;
-    private int maxPulos = 2;
+    private int maxPulos = 2; // Total: 1 do chão + 1 no ar
 
+    private float contadorCoyote;
     private bool podeDarDash = true;
     private bool estaDandoDash;
     private float direcaoDash;
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
 
-    // Referência ao sistema de Fúria
     private SistemaFuria sistemaFuria;
 
     public bool EstaDandoDash => estaDandoDash;
@@ -49,13 +50,24 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // Atualiza a janela de tolerância de chão (Coyote Time)
+        if (estaNoChao)
+        {
+            contadorCoyote = tempoCoyote;
+        }
+        else
+        {
+            contadorCoyote -= Time.deltaTime;
+        }
+
         if (!estaDandoDash)
         {
             inputHorizontal = Input.GetAxisRaw("Horizontal");
 
             if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
             {
-                if (estaNoChao || pulosRestantes > 0)
+                // Permite pular se estiver no chão, no tempo Coyote ou se tiver pulo duplo no ar
+                if (contadorCoyote > 0f || pulosRestantes > 0)
                 {
                     Pular();
                 }
@@ -104,12 +116,33 @@ public class PlayerController : MonoBehaviour
         if (playerAnimation == null) return;
 
         bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
+
+        bool noChaoParaAnimacao = contadorCoyote > 0f;
+
         playerAnimation.DefinirAndando(estaMovimentando);
-        playerAnimation.DefinirNoChao(estaNoChao);
+        playerAnimation.DefinirNoChao(noChaoParaAnimacao);
     }
 
     void Pular()
     {
+        bool puloDoChao = contadorCoyote > 0f && pulosRestantes == maxPulos;
+
+        if (puloDoChao)
+        {
+            pulosRestantes--;
+        }
+        else if (pulosRestantes > 0)
+        {
+            pulosRestantes--;
+
+            if (playerAnimation != null)
+            {
+                bool estaAndando = Mathf.Abs(inputHorizontal) > 0.01f;
+                playerAnimation.ReiniciarPulo(estaAndando);
+            }
+        }
+
+        contadorCoyote = 0f;
         estaSubindoPulo = true;
         estaNoChao = false;
 
@@ -119,8 +152,19 @@ public class PlayerController : MonoBehaviour
             puloEfetivo *= sistemaFuria.multPulo;
         }
 
+        float gravidadeG = Mathf.Abs(Physics2D.gravity.y) * rb.gravityScale;
+        float tempoTotalNoAr = (2f * puloEfetivo) / gravidadeG;
+
+        float duracaoOriginalSprite = 2.0f;
+
+        float multiplicadorVelocidade = duracaoOriginalSprite / tempoTotalNoAr;
+
+        if (playerAnimation != null)
+        {
+            playerAnimation.AjustarVelocidadePulo(multiplicadorVelocidade);
+        }
+
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, puloEfetivo);
-        pulosRestantes--;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -135,6 +179,8 @@ public class PlayerController : MonoBehaviour
 
     private void ProcessarContatoChao(Collision2D collision)
     {
+        if (estaSubindoPulo && rb.linearVelocity.y > 0.1f) return;
+
         foreach (ContactPoint2D contato in collision.contacts)
         {
             if (contato.normal.y > 0.5f)

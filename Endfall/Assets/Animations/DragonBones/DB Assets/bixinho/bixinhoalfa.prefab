@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8330434100342755438
 Transform:
   m_ObjectHideFlags: 0
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 472208128502994686}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.00000011922593, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.001}
+  m_LocalPosition: {x: 5.3250785, y: 3.6179252, z: -0.001}
   m_LocalScale: {x: 1.0000001, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -58,7 +58,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 771de55bff05fea44bc581b33dc2d192, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -250,8 +250,8 @@ MonoBehaviour:
   raioDeteccao: 300
   offsetDeteccao: {x: 20, y: 20}
   player: {fileID: 0}
-  vidaMaxima: 3
-  danoNoJogador: 1
+  vidaMaxima: 20
+  danoNoJogador: 10
   forcaImpacto: 100
   cooldownImpacto: 100
 --- !u!1 &8407171625317360210
@@ -271,7 +271,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7771213939154683179
 Transform:
   m_ObjectHideFlags: 0
@@ -281,7 +281,7 @@ Transform:
   m_GameObject: {fileID: 8407171625317360210}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -1.5454747e-11, w: 1}
-  m_LocalPosition: {x: 5.1551075, y: 3.5923045, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -312,7 +312,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 771de55bff05fea44bc581b33dc2d192, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

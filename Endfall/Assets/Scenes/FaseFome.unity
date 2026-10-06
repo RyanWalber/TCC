@@ -9033,6 +9033,81 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!1 &1352749531
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1352749532}
+  - component: {fileID: 1352749534}
+  - component: {fileID: 1352749533}
+  m_Layer: 5
+  m_Name: PainelFuria
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1352749532
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352749531}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8530811496345764708}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1352749533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352749531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0, b: 0, a: 0.15686275}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1352749534
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352749531}
+  m_CullTransparentMesh: 1
 --- !u!1 &1370459098
 GameObject:
   m_ObjectHideFlags: 0
@@ -22501,86 +22576,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 455624631225466573, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: multPulo
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: fillFuria
       value: 
       objectReference: {fileID: 3272413321414718259}
     - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: furiaMaxima
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: multCadencia
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: multVelocidade
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: vinhetaTelaFuria
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2410193891199105322, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4019229383658011266, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4093044942071604843, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 3
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1352749531}
     - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: fillVida
       value: 
       objectReference: {fileID: 3741171165473331290}
     - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: vidaMaxima
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1386497101}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: fillVidaFantasma
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: furiaPorDanoTomado
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4419738045611139210, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: velocidade
-      value: 150
-      objectReference: {fileID: 0}
-    - target: {fileID: 4765101400712675638, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6419241937827441843, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7027660092045964289, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -544
@@ -22621,17 +22632,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7312884325877496589, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8744568874949199937, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_Name
       value: 'Kaya '
-      objectReference: {fileID: 0}
-    - target: {fileID: 9067443130348859836, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: cadenciaTiro
-      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -23418,7 +23421,7 @@ Transform:
   m_GameObject: {fileID: 7233698933782385104}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -289.52264, y: 9.059999, z: -10}
+  m_LocalPosition: {x: -160.52698, y: 9.05, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23537,6 +23540,7 @@ RectTransform:
   - {fileID: 2343756586813240503}
   - {fileID: 2112434305234470397}
   - {fileID: 1818581618481621376}
+  - {fileID: 1352749532}
   - {fileID: 1386497102}
   - {fileID: 257535479}
   - {fileID: 4248664576223243759}
