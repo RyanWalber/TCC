@@ -17,16 +17,14 @@ public class InimigoBixinho : MonoBehaviour
     public Vector2 offsetDeteccao;
     public Transform player;
 
-    [Header("Vida")]
+    [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
     private int vidaAtual;
     private bool estaMorto = false;
 
-    [Header("Impacto no Jogador")]
-    public int danoNoJogador = 1;
-    public float forcaImpacto = 8f;
-    public float cooldownImpacto = 0.8f;
-    private float tempoProximoImpacto;
+    [Header("Ataque ao Jogador")]
+    public int danoNoJogador = 10;
+    public float forcaEmpurrao = 8f;
 
     private Rigidbody2D rb;
 
@@ -41,19 +39,15 @@ public class InimigoBixinho : MonoBehaviour
     {
         vidaAtual = vidaMaxima;
 
-        GarantirReferenciaVisual();
+        // Pega o componente DragonBones automaticamente caso não esteja arrastado no Inspector
+        if (armatureComponent == null)
+            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
         if (player == null)
         {
             GameObject p = GameObject.FindWithTag("Player");
             if (p != null) player = p.transform;
         }
-    }
-
-    private void GarantirReferenciaVisual()
-    {
-        if (armatureComponent == null)
-            armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
     }
 
     private void FixedUpdate()
@@ -82,59 +76,104 @@ public class InimigoBixinho : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeRotacao * Time.fixedDeltaTime);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) => ProcessarInteracao(collision.gameObject);
-    private void OnCollisionStay2D(Collision2D collision) => ProcessarInteracao(collision.gameObject);
-    private void OnTriggerEnter2D(Collider2D collision) => ProcessarInteracao(collision.gameObject);
-    private void OnTriggerStay2D(Collider2D collision) => ProcessarInteracao(collision.gameObject);
-
-    private void ProcessarInteracao(GameObject obj)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (estaMorto) return;
-
-        if (obj.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            TentarAplicarImpacto(obj);
+            AplicarDanoEEmpurrar(collision.gameObject);
         }
-        else if (obj.CompareTag("Ataque"))
+
+        if (collision.gameObject.CompareTag("Ataque"))
         {
             TomarDano(1);
         }
     }
 
-    private void TentarAplicarImpacto(GameObject jogadorObj)
+    private void OnCollisionStay2D(Collision2D collision)
     {
-        if (Time.time < tempoProximoImpacto) return;
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            AplicarDanoEEmpurrar(collision.gameObject);
+        }
+    }
 
-        tempoProximoImpacto = Time.time + cooldownImpacto;
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            AplicarDanoEEmpurrar(collision.gameObject);
+        }
 
-        jogadorObj.SendMessage("Machucar", danoNoJogador, SendMessageOptions.DontRequireReceiver);
+        if (collision.CompareTag("Ataque"))
+        {
+            TomarDano(1);
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            AplicarDanoEEmpurrar(collision.gameObject);
+        }
+    }
+
+    private void AplicarDanoEEmpurrar(GameObject jogadorObj)
+    {
+        if (estaMorto) return;
+
+        PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>();
+        if (playerHealth == null) playerHealth = jogadorObj.GetComponentInParent<PlayerHealth>();
+
+        if (playerHealth != null)
+        {
+            playerHealth.TomarDano(danoNoJogador);
+        }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
+        if (rbPlayer == null) rbPlayer = jogadorObj.GetComponentInParent<Rigidbody2D>();
+
         if (rbPlayer != null)
         {
-            Vector2 direcaoImpacto = (jogadorObj.transform.position - transform.position).normalized;
-            direcaoImpacto.y = Mathf.Clamp(direcaoImpacto.y + 0.3f, 0.4f, 0.8f);
+            float direcaoX = jogadorObj.transform.position.x >= transform.position.x ? 1f : -1f;
+            Vector2 empurrao = new Vector2(direcaoX * 0.8f, 0.6f).normalized;
 
-            rbPlayer.linearVelocity = new Vector2(rbPlayer.linearVelocity.x, 0);
-            rbPlayer.AddForce(direcaoImpacto * forcaImpacto, ForceMode2D.Impulse);
+            rbPlayer.linearVelocity = empurrao * forcaEmpurrao;
         }
     }
 
     public void TomarDano(int quantidadeDano)
     {
-        ReceberDano(quantidadeDano);
-    }
-
-    public void ReceberDano(int quantidadeDano = 1)
-    {
         if (estaMorto) return;
 
         vidaAtual -= quantidadeDano;
-        StartCoroutine(PiscarVermelho());
+        StartCoroutine(PiscarVermelhoDragonBones());
 
         if (vidaAtual <= 0)
         {
             Morrer();
+        }
+    }
+
+    public void ReceberDano(int quantidadeDano = 1)
+    {
+        TomarDano(quantidadeDano);
+    }
+
+    private IEnumerator PiscarVermelhoDragonBones()
+    {
+        if (armatureComponent != null)
+        {
+            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
+            corVermelha.redMultiplier = 1f;
+            corVermelha.greenMultiplier = 0f;
+            corVermelha.blueMultiplier = 0f;
+
+            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
+
+            armatureComponent.color = corVermelha;
+            yield return new WaitForSeconds(0.15f);
+            armatureComponent.color = corNormal;
         }
     }
 
@@ -146,45 +185,7 @@ public class InimigoBixinho : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
 
-        Destroy(gameObject, 0.18f);
-    }
-
-    private IEnumerator PiscarVermelho()
-    {
-        GarantirReferenciaVisual();
-
-        SpriteRenderer[] renderersNormais = GetComponentsInChildren<SpriteRenderer>();
-
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corVermelhaDB = new DragonBones.ColorTransform
-            {
-                redMultiplier = 1f,
-                greenMultiplier = 0f,
-                blueMultiplier = 0f,
-                redOffset = 255
-            };
-
-            armatureComponent.color = corVermelhaDB;
-        }
-
-        foreach (var sr in renderersNormais)
-        {
-            if (sr != null) sr.color = Color.red;
-        }
-
-        yield return new WaitForSeconds(0.15f);
-
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corNormalDB = new DragonBones.ColorTransform();
-            armatureComponent.color = corNormalDB;
-        }
-
-        foreach (var sr in renderersNormais)
-        {
-            if (sr != null) sr.color = Color.white;
-        }
+        Destroy(gameObject);
     }
 
     private void OnDrawGizmosSelected()
