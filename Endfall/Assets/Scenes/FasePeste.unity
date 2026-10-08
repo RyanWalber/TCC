@@ -603,7 +603,9 @@ PolygonCollider2D:
   m_Points:
     m_Paths:
     - - {x: 10000.487, y: -686.04553}
-      - {x: 4194.0195, y: -682.9927}
+      - {x: 4597.9966, y: -412.09036}
+      - {x: 3447.0396, y: -404.75305}
+      - {x: 3392.4832, y: -665.31354}
       - {x: 1658.1417, y: -679.4899}
       - {x: 1645.6383, y: -380.1749}
       - {x: 805.6668, y: -384.96835}
@@ -1289,9 +1291,12 @@ GameObject:
   - component: {fileID: 373490615}
   - component: {fileID: 373490614}
   - component: {fileID: 373490613}
+  - component: {fileID: 373490618}
+  - component: {fileID: 373490617}
+  - component: {fileID: 373490616}
   m_Layer: 0
   m_Name: BossPeste
-  m_TagString: Untagged
+  m_TagString: Inimigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1386,8 +1391,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 373490612}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3796.3591, y: -170.12779, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 4133, y: -112, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1397,6 +1402,94 @@ Transform:
   - {fileID: 1988664122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!70 &373490616
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 373490612}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 1.3140869, y: 7.6987724}
+  m_Size: {x: 51.78589, y: 84.52221}
+  m_Direction: 0
+--- !u!114 &373490617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 373490612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78fddd152cd9b004488aa8b3cb4b0410, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossPeste
+  arteOriginalOlhaDireita: 0
+  vida: 250
+  danoNoPlayer: 25
+  forcaEmpurrao: 8
+  velocidade: 100
+  distanciaPatrulha: 400
+  balancoVertical: 10
+  prefabGosma: {fileID: 7923020114145414555, guid: 2d988265aa74eba43972daf84c7bceb0, type: 3}
+  pontoBoca: {fileID: 1680129822}
+  "toler\xE2nciaSobrePlayer": 3
+  tempoAtaqueVidaCheia: 4
+  tempoAtaqueVidaBaixa: 1
+--- !u!50 &373490618
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 373490612}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 100
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!114 &389543455 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6022483893037333419, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
@@ -28645,7 +28738,7 @@ GameObject:
   - component: {fileID: 1393854699}
   m_Layer: 0
   m_Name: Grid
-  m_TagString: Untagged
+  m_TagString: Chao
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28711,6 +28804,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1748912601}
+  - {fileID: 1680129822}
   m_Father: {fileID: 373490615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 11.512}
 --- !u!114 &1394269090
@@ -29885,6 +29979,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
+--- !u!1 &1680129821
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1680129822}
+  m_Layer: 0
+  m_Name: pontoboca
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1680129822
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1680129821}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0.100292824, w: 0.994958}
+  m_LocalPosition: {x: -3.79, y: -1.78, z: 0}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1394269089}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1718508248
 GameObject:
   m_ObjectHideFlags: 0
@@ -30369,7 +30494,7 @@ Transform:
   m_GameObject: {fileID: 1853081479}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3706.6, y: -202.9, z: -10}
+  m_LocalPosition: {x: 3712.5195, y: -7.4600067, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
