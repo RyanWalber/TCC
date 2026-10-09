@@ -769,7 +769,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &293849249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1392,7 +1392,7 @@ Transform:
   m_GameObject: {fileID: 373490612}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4133, y: -112, z: 0}
+  m_LocalPosition: {x: 3888, y: 90, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1458,11 +1458,11 @@ MonoBehaviour:
   velocidade: 100
   distanciaPatrulha: 400
   balancoVertical: 10
-  prefabGosma: {fileID: 7923020114145414555, guid: 2d988265aa74eba43972daf84c7bceb0, type: 3}
+  prefabGosma: {fileID: 7586411203511924033, guid: 7022f3913da487e479d3580b0a283208, type: 3}
   pontoBoca: {fileID: 1680129822}
-  "toler\xE2nciaSobrePlayer": 3
-  tempoAtaqueVidaCheia: 4
-  tempoAtaqueVidaBaixa: 1
+  "toler\xE2nciaSobrePlayer": 6
+  tempoAtaqueVidaCheia: 3
+  tempoAtaqueVidaBaixa: 0.2
 --- !u!50 &373490618
 Rigidbody2D:
   serializedVersion: 5
@@ -3076,7 +3076,7 @@ Transform:
   m_GameObject: {fileID: 725806672}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3706.6, y: -202.9, z: -10}
+  m_LocalPosition: {x: 3880, y: -170, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3725,11 +3725,11 @@ PrefabInstance:
       objectReference: {fileID: 1825194628}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3706.6
+      value: 3880
       objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -202.9
+      value: -170
       objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5535,7 +5535,7 @@ GameObject:
   - component: {fileID: 1183215165}
   m_Layer: 0
   m_Name: Tilemap_Plataformas
-  m_TagString: Untagged
+  m_TagString: Chao
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30494,7 +30494,7 @@ Transform:
   m_GameObject: {fileID: 1853081479}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3712.5195, y: -7.4600067, z: -10}
+  m_LocalPosition: {x: 3883.2603, y: -8.559998, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

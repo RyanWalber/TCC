@@ -319,7 +319,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjetilGosma
   velocidadeQueda: 100
-  dano: 25
+  tagDoChao: Chao
   tempoAnimacaoImpacto: 1
 --- !u!61 &5391992248424486138
 BoxCollider2D:
@@ -382,7 +382,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 3
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -393,7 +393,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 5
 --- !u!1 &8036414955443987398
 GameObject:
   m_ObjectHideFlags: 0
