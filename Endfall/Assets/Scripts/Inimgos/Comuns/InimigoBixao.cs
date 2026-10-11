@@ -94,7 +94,9 @@ public class InimigoBixao : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision) => ProcessarContato(collision.gameObject);
+    private void OnCollisionStay2D(Collision2D collision) => ProcessarContato(collision.gameObject);
     private void OnTriggerEnter2D(Collider2D collision) => ProcessarContato(collision.gameObject);
+    private void OnTriggerStay2D(Collider2D collision) => ProcessarContato(collision.gameObject);
 
     private void ProcessarContato(GameObject obj)
     {
@@ -102,23 +104,30 @@ public class InimigoBixao : MonoBehaviour
 
         if (obj.CompareTag("Player"))
         {
-            obj.SendMessage("Machucar", danoNoJogador, SendMessageOptions.DontRequireReceiver);
-
-            Rigidbody2D rbPlayer = obj.GetComponent<Rigidbody2D>();
-            if (rbPlayer != null)
-            {
-                Vector2 direcaoImpacto = (obj.transform.position - transform.position).normalized;
-                direcaoImpacto.y = Mathf.Clamp(direcaoImpacto.y + 0.3f, 0.4f, 0.8f);
-
-                rbPlayer.linearVelocity = new Vector2(rbPlayer.linearVelocity.x, 0);
-                rbPlayer.AddForce(direcaoImpacto * forcaEmpurrao, ForceMode2D.Impulse);
-            }
-
+            AplicarDanoEEmpurrar(obj);
             Fugir();
         }
         else if (obj.CompareTag("Ataque") || obj.CompareTag("Projetil") || obj.CompareTag("Tiro") || obj.CompareTag("Bala"))
         {
             TomarDano(1);
+        }
+    }
+
+    private void AplicarDanoEEmpurrar(GameObject jogadorObj)
+    {
+        PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>() ?? jogadorObj.GetComponentInParent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TomarDano(danoNoJogador);
+        }
+
+        Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();
+        if (rbPlayer != null)
+        {
+            float direcaoX = jogadorObj.transform.position.x >= transform.position.x ? 1f : -1f;
+            Vector2 empurrao = new Vector2(direcaoX * 0.8f, 0.6f).normalized;
+
+            rbPlayer.linearVelocity = empurrao * forcaEmpurrao;
         }
     }
 
