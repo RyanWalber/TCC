@@ -131,7 +131,6 @@ public class BossPeste : MonoBehaviour
         if (playerTransform == null) return false;
 
         bool estaAlinhadoX = Mathf.Abs(transform.position.x - playerTransform.position.x) <= tolerânciaSobrePlayer;
-
         bool estaAcimaY = transform.position.y > playerTransform.position.y;
 
         return estaAlinhadoX && estaAcimaY;
@@ -140,12 +139,12 @@ public class BossPeste : MonoBehaviour
     private void CalcularProximoCooldown()
     {
         float percentualVida = Mathf.Clamp01((float)vida / vidaMaxima);
-
         float tempoBase = Mathf.Lerp(tempoAtaqueVidaBaixa, tempoAtaqueVidaCheia, percentualVida);
 
         proximoIntervaloAtaque = tempoBase * Random.Range(0.8f, 1.2f);
     }
 
+    // Chamado pelo Animation Event no clipe pesteatak
     public void InstanciarGosma()
     {
         if (prefabGosma != null && pontoBoca != null)
@@ -176,6 +175,38 @@ public class BossPeste : MonoBehaviour
 
         transform.rotation = Quaternion.Euler(0f, anguloY, 0f);
     }
+
+    // --- CONTATO COM O JOGADOR ---
+    private void OnCollisionEnter2D(Collision2D collision) => ProcessarContatoPlayer(collision.gameObject);
+    private void OnCollisionStay2D(Collision2D collision) => ProcessarContatoPlayer(collision.gameObject);
+    private void OnTriggerEnter2D(Collider2D collision) => ProcessarContatoPlayer(collision.gameObject);
+    private void OnTriggerStay2D(Collider2D collision) => ProcessarContatoPlayer(collision.gameObject);
+
+    private void ProcessarContatoPlayer(GameObject obj)
+    {
+        if (estaMorto) return;
+
+        if (obj.CompareTag("Player"))
+        {
+            PlayerHealth playerHealth = obj.GetComponent<PlayerHealth>() ?? obj.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TomarDano(danoNoPlayer);
+            }
+
+            Rigidbody2D rbPlayer = obj.GetComponent<Rigidbody2D>() ?? obj.GetComponentInParent<Rigidbody2D>();
+            if (rbPlayer != null)
+            {
+                float direcaoX = obj.transform.position.x >= transform.position.x ? 1f : -1f;
+                Vector2 empurrao = new Vector2(direcaoX * 0.8f, 0.6f).normalized;
+
+                rbPlayer.linearVelocity = empurrao * forcaEmpurrao;
+            }
+        }
+    }
+
+    // --- DANO E MORTE ---
+    public void ReceberDano(int dano = 1) => TomarDano(dano);
 
     public void TomarDano(int dano = 1)
     {
@@ -226,7 +257,6 @@ public class BossPeste : MonoBehaviour
             new Vector3(centro.x + distanciaPatrulha, centro.y, centro.z)
         );
 
-        // Área visual indicando o alcance em X onde o Boss aceita cuspir no Player
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(transform.position, new Vector3(tolerânciaSobrePlayer * 2f, 2f, 0f));
     }
