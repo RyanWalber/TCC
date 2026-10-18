@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour
 {
     private Animator animator;
+    private bool estavaNoChaoAnteriormente;
 
     private void Awake()
     {
@@ -38,12 +39,6 @@ public class PlayerAnimation : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Força a animação de pulo a reiniciar do frame 0 (Ideal para Pulo Duplo)
-    /// </summary>
-    /// <summary>
-    /// Reinicia a animação de pulo correta (parada ou andando) do frame 0 no pulo duplo.
-    /// </summary>
     public void ReiniciarPulo(bool estaAndando)
     {
         if (animator == null) return;
@@ -64,8 +59,26 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (animator == null) return;
 
+        // Atualiza os parâmetros normais
         animator.SetBool("isWalking", estaAndando);
         animator.SetBool("isGrounded", estaNoChao);
         animator.SetBool("isDashing", estaDandoDash);
+
+        // FORÇA O CORTE DA ANIMAÇÃO DE PULO NO MOMENTO EXATO DA ATERRISSAGEM
+        if (estaNoChao && !estavaNoChaoAnteriormente)
+        {
+            if (estaAndando)
+            {
+                // Força o início imediato do ciclo de corrida
+                animator.Play("kayandando", 0, 0f);
+            }
+            else
+            {
+                // Força o início imediato do estado ocioso
+                animator.Play("kayaociosa", 0, 0f);
+            }
+        }
+
+        estavaNoChaoAnteriormente = estaNoChao;
     }
 }

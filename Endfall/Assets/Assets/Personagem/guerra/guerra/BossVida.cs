@@ -11,21 +11,28 @@ public class BossVida : MonoBehaviour
     [Header("UI da Barra de Vida")]
     [SerializeField] private Slider barraDeVida;
 
+    [Tooltip("Arraste aqui o objeto PAI de toda a UI da barra (ex: BarraVidaBoss)")]
+    [SerializeField] private GameObject conteinerBarraDeVida;
+
     [Header("Feedback de Dano (Piscar Vermelho)")]
     [SerializeField] private Color corDano = Color.red;
     [SerializeField] private float duracaoPiscar = 0.15f;
 
-    // Guarda TODOS os sprites do corpo fatiado do Boss
+    [Header("Morte")]
+    [SerializeField] private float tempoParaDestruir = 0.5f;
+
     private SpriteRenderer[] todosSprites;
     private Color[] coresOriginais;
     private Coroutine corrotinaPiscar;
     private bool estaMorto = false;
 
+    public bool EstaMorto => estaMorto;
+
     private void Start()
     {
         vidaAtual = vidaMaxima;
 
-        // Pega todos os SpriteRenderers do Boss e dos filhos (corpo, braços, cabeça, etc)
+        // Pega todos os SpriteRenderers do Boss e dos filhos
         todosSprites = GetComponentsInChildren<SpriteRenderer>();
 
         if (todosSprites != null && todosSprites.Length > 0)
@@ -40,31 +47,38 @@ public class BossVida : MonoBehaviour
         AtualizarBarraUI();
     }
 
+    public void ReceberDano(float dano) => TomarDano(dano);
+
     public void TomarDano(float dano)
     {
         if (estaMorto) return;
 
         vidaAtual -= dano;
-        vidaAtual = Mathf.Clamp(vidaAtual, 0, vidaMaxima);
+        vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
         AtualizarBarraUI();
 
-        // Pisca o corpo INTEIRO do Boss em vermelho
         if (todosSprites != null && todosSprites.Length > 0)
         {
             if (corrotinaPiscar != null) StopCoroutine(corrotinaPiscar);
             corrotinaPiscar = StartCoroutine(RotinaPiscarVermelho());
         }
 
-        if (vidaAtual <= 0)
+        if (vidaAtual <= 0f)
         {
             Morrer();
         }
     }
 
+    // Retorna um valor entre 0.0 (0%) e 1.0 (100%)
+    public float ObterPercentualVida()
+    {
+        if (vidaMaxima <= 0f) return 0f;
+        return vidaAtual / vidaMaxima;
+    }
+
     private IEnumerator RotinaPiscarVermelho()
     {
-        // Pinta todas as partes do corpo de vermelho
         for (int i = 0; i < todosSprites.Length; i++)
         {
             if (todosSprites[i] != null)
@@ -73,7 +87,6 @@ public class BossVida : MonoBehaviour
 
         yield return new WaitForSeconds(duracaoPiscar);
 
-        // Volta todas as partes para a cor original
         for (int i = 0; i < todosSprites.Length; i++)
         {
             if (todosSprites[i] != null)
@@ -92,21 +105,31 @@ public class BossVida : MonoBehaviour
 
     private void Morrer()
     {
+        if (estaMorto) return;
         estaMorto = true;
 
-        // Desativa a inteligência/ataques do Boss
-        if (TryGetComponent<BossFomeController>(out var controller))
+        // Desativa física e colisões
+        if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
+        if (TryGetComponent<Rigidbody2D>(out var rb)) rb.simulated = false;
+
+        // Desativa os scripts de comportamento/IA do Boss automaticamente
+        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+        foreach (var script in scripts)
         {
-            controller.enabled = false;
+            if (script != this) script.enabled = false;
         }
 
-        // Esconde a barra de vida da UI
-        if (barraDeVida != null)
+        // Destrói o objeto pai da barra de vida completa
+        if (conteinerBarraDeVida != null)
         {
-            barraDeVida.gameObject.SetActive(false);
+            Destroy(conteinerBarraDeVida);
+        }
+        else if (barraDeVida != null)
+        {
+            Transform pai = barraDeVida.transform.parent;
+            Destroy(pai != null ? pai.gameObject : barraDeVida.gameObject);
         }
 
-        // Destrói o Boss sem trocar de cena
-        Destroy(gameObject, 0.5f);
+        Destroy(gameObject, tempoParaDestruir);
     }
 }

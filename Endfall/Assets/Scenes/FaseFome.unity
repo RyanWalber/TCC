@@ -8052,6 +8052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossVida
   vidaMaxima: 150
   barraDeVida: {fileID: 153774914}
+  conteinerBarraDeVida: {fileID: 153774913}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   duracaoPiscar: 0.15
 --- !u!114 &1174186880
@@ -8590,7 +8591,7 @@ Transform:
   m_GameObject: {fileID: 1255637747}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10909, y: 358, z: -10}
+  m_LocalPosition: {x: 9723, y: -25, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22735,11 +22736,11 @@ PrefabInstance:
       objectReference: {fileID: 1386497101}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10909
+      value: 9723
       objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 308
+      value: -75
       objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -23562,7 +23563,7 @@ Transform:
   m_GameObject: {fileID: 7233698933782385104}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10610.753, y: 357.77, z: -10}
+  m_LocalPosition: {x: 9723, y: -25, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

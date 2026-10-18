@@ -906,8 +906,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -55.8, y: 1.8}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -62.8, y: 1.8}
+  m_SizeDelta: {x: 129.3179, y: 100}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &302588372
 MonoBehaviour:
@@ -929,7 +929,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3338141327896329606, guid: 43d99ff0f88f9c14ab8db1b9e98011c9, type: 3}
+  m_Sprite: {fileID: -4360901125672008824, guid: 389dd73d7d584ee4a94c414a13115791, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1322,13 +1322,14 @@ GameObject:
   - component: {fileID: 711801904}
   - component: {fileID: 711801903}
   - component: {fileID: 711801906}
+  - component: {fileID: 711801907}
   m_Layer: 0
   m_Name: GuerraBoss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &711801902
 Transform:
   m_ObjectHideFlags: 0
@@ -1338,7 +1339,7 @@ Transform:
   m_GameObject: {fileID: 711801901}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 445.98267, y: 9.98292, z: 0}
+  m_LocalPosition: {x: 530, y: 235, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1441,9 +1442,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossVida
   vidaMaxima: 100
-  barraDeVida: {fileID: 0}
+  barraDeVida: {fileID: 2050953891}
+  conteinerBarraDeVida: {fileID: 2050953889}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   duracaoPiscar: 0.15
+  tempoParaDestruir: 0.5
+--- !u!114 &711801907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 711801901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b13c659e1d4631a4798fbf0437fbea06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
+  barraVidaUI: {fileID: 2050953889}
+  jogador: {fileID: 568609564}
+  distanciaAtivacao: 400
 --- !u!1 &803109328
 GameObject:
   m_ObjectHideFlags: 0
@@ -1473,7 +1491,7 @@ Transform:
   m_GameObject: {fileID: 803109328}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.1197239, y: 117.713684, z: -10}
+  m_LocalPosition: {x: -3, y: 48.6, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2278,18 +2296,20 @@ PolygonCollider2D:
       - {x: 4494.9434, y: -284.16556}
       - {x: 2212.2056, y: -290.18015}
       - {x: 1481.8905, y: -284.48013}
-      - {x: 1404.094, y: -284.40768}
-      - {x: 1374.8562, y: -284.53442}
-      - {x: 1292.7489, y: -284.49045}
-      - {x: 1179.7874, y: -284.8604}
-      - {x: 1052.4695, y: -284.69815}
-      - {x: 944.6978, y: -287.32196}
-      - {x: 879.9823, y: -287.41965}
-      - {x: 775.62683, y: -287.05508}
-      - {x: 690.8256, y: -286.1503}
-      - {x: 420.85956, y: -284.19342}
-      - {x: -198.47081, y: -278.86224}
+      - {x: 1581.1393, y: -307.14746}
+      - {x: 1512.9191, y: -320.26834}
+      - {x: 1773.5323, y: -360.83105}
+      - {x: 1795.385, y: -387.1893}
+      - {x: 2130.4143, y: -390.29276}
+      - {x: 2596.7905, y: -526.6858}
+      - {x: 2321.8274, y: -520.51}
+      - {x: 2089.9204, y: -551.4061}
+      - {x: 1549.9873, y: -577.4402}
+      - {x: 990.0103, y: -514.9386}
+      - {x: 544.0532, y: -530.5808}
+      - {x: -260.24243, y: -480.43243}
       - {x: -199.6722, y: 86.54475}
+      - {x: -129.78781, y: 332.77994}
       - {x: 459.5791, y: 360.82654}
       - {x: 1100.2988, y: 354.84906}
       - {x: 1278.1653, y: 369.67123}

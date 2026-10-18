@@ -2,14 +2,13 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(BossVida))]
 public class BossPeste : MonoBehaviour
 {
     [Header("CONFIGURAÇÃO VISUAL")]
     public bool arteOriginalOlhaDireita = false;
 
-    [Header("STATUS")]
-    public int vida = 10;
-    private int vidaMaxima;
+    [Header("STATUS DE ATAQUE PLAYER")]
     public int danoNoPlayer = 1;
     public float forcaEmpurrao = 8f;
 
@@ -36,22 +35,21 @@ public class BossPeste : MonoBehaviour
     private Transform playerTransform;
     private Vector3 posicaoInicial;
     private bool indoParaDireita = true;
-    private bool estaMorto = false;
     private bool olhandoParaDireita;
 
     private float timerAtaque;
     private float proximoIntervaloAtaque;
 
-    private SpriteRenderer[] renderers;
-    private Color[] coresOriginais;
+    // Referência para o sistema de vida universal
+    private BossVida bossVida;
 
     private void Start()
     {
         posicaoInicial = transform.position;
-        vidaMaxima = vida;
 
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        bossVida = GetComponent<BossVida>();
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
@@ -64,23 +62,13 @@ public class BossPeste : MonoBehaviour
             playerTransform = playerObj.transform;
         }
 
-        renderers = GetComponentsInChildren<SpriteRenderer>();
-        if (renderers != null && renderers.Length > 0)
-        {
-            coresOriginais = new Color[renderers.Length];
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                coresOriginais[i] = renderers[i].color;
-            }
-        }
-
         AtualizarOrientacao();
         CalcularProximoCooldown();
     }
 
     private void Update()
     {
-        if (estaMorto) return;
+        if (bossVida != null && bossVida.EstaMorto) return;
 
         PatrulharEVoar();
         ChecarEExecutarAtaque();
@@ -138,7 +126,8 @@ public class BossPeste : MonoBehaviour
 
     private void CalcularProximoCooldown()
     {
-        float percentualVida = Mathf.Clamp01((float)vida / vidaMaxima);
+        // Pega o percentual de vida direto do script universal
+        float percentualVida = bossVida != null ? bossVida.ObterPercentualVida() : 1f;
         float tempoBase = Mathf.Lerp(tempoAtaqueVidaBaixa, tempoAtaqueVidaCheia, percentualVida);
 
         proximoIntervaloAtaque = tempoBase * Random.Range(0.8f, 1.2f);
@@ -184,7 +173,7 @@ public class BossPeste : MonoBehaviour
 
     private void ProcessarContatoPlayer(GameObject obj)
     {
-        if (estaMorto) return;
+        if (bossVida != null && bossVida.EstaMorto) return;
 
         if (obj.CompareTag("Player"))
         {
@@ -203,48 +192,6 @@ public class BossPeste : MonoBehaviour
                 rbPlayer.linearVelocity = empurrao * forcaEmpurrao;
             }
         }
-    }
-
-    // --- DANO E MORTE ---
-    public void ReceberDano(int dano = 1) => TomarDano(dano);
-
-    public void TomarDano(int dano = 1)
-    {
-        if (estaMorto) return;
-
-        vida -= dano;
-        StartCoroutine(PiscarVermelho());
-
-        if (vida <= 0) Morrer();
-    }
-
-    private IEnumerator PiscarVermelho()
-    {
-        if (renderers != null && renderers.Length > 0)
-        {
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                if (renderers[i] != null) renderers[i].color = Color.red;
-            }
-
-            yield return new WaitForSeconds(0.15f);
-
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                if (renderers[i] != null) renderers[i].color = coresOriginais[i];
-            }
-        }
-    }
-
-    private void Morrer()
-    {
-        if (estaMorto) return;
-        estaMorto = true;
-
-        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
-        rb.simulated = false;
-
-        Destroy(gameObject);
     }
 
     private void OnDrawGizmosSelected()
