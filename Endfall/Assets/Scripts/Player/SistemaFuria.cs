@@ -6,7 +6,11 @@ public class SistemaFuria : MonoBehaviour
     [Header("Configurações da Fúria")]
     [SerializeField] private float furiaMaxima = 100f;
     [SerializeField] private float consumoPorSegundo = 20f;
-    private float furiaAtual = 0f;
+    [SerializeField] private float furiaAtual = 0f;
+
+    // Propriedade pública para leitura externa (Solução para o erro CS0122)
+    public float FuriaAtual => furiaAtual;
+    public float FuriaMaxima => furiaMaxima;
 
     [Header("Multiplicadores de Atributos em Fúria")]
     [Tooltip("Ex: 1.4 = +40% de velocidade de movimento")]
@@ -21,9 +25,9 @@ public class SistemaFuria : MonoBehaviour
     [Header("UI da Fúria")]
     [SerializeField] private Image fillFuria;
 
-    [Header("Efeitos Visuais de Fúria (NOVOS)")]
-    [SerializeField] private Outline luzNeonFuria;        // Arraste o componente Outline do objeto 'furia'
-    [SerializeField] private GameObject vinhetaTelaFuria; // Arraste o objeto 'VinhetaFuria' da tela
+    [Header("Efeitos Visuais de Fúria")]
+    [SerializeField] private Outline luzNeonFuria;
+    [SerializeField] private GameObject vinhetaTelaFuria;
 
     [Header("Controles")]
     [SerializeField] private KeyCode teclaFuria = KeyCode.Q;
@@ -96,7 +100,6 @@ public class SistemaFuria : MonoBehaviour
         }
     }
 
-    // Liga ou desliga os efeitos visuais dependendo de 'estaEmFuria'
     private void AtualizarEfeitosVisuais()
     {
         if (luzNeonFuria != null)

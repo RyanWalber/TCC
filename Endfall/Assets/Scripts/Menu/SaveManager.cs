@@ -14,6 +14,10 @@ public class SaveManager : MonoBehaviour
     private int moedasColetadasAtual = 0;
     private int totalMoedasNaFase = 0;
 
+    // --- Bônus: Controle de Vida e Fúria ---
+    private float vidaKayaAtual = 100f; // Ajuste o valor inicial/máximo padrão
+    private float furiaKayaAtual = 0f;
+
     public SaveData DadosAtuais => dadosAtuais;
 
     void Awake()
@@ -40,7 +44,13 @@ public class SaveManager : MonoBehaviour
         dadosAtuais = new SaveData();
         dadosAtuais.nomeCena = "FaseFome";
         dadosAtuais.faseAtual = 1;
+
+        // Reseta dados no Novo Jogo
         moedasColetadasAtual = 0;
+        dadosAtuais.moedasNoCheckpoint = 0;
+
+        // Reseta Vida e Fúria para os valores padrão no Novo Jogo
+        ResetarStatusKaya();
 
         if (slot != 0)
         {
@@ -48,7 +58,6 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        // Troca direta substituída pela transição suave
         CarregarCenaComFade(dadosAtuais.nomeCena);
     }
 
@@ -61,11 +70,14 @@ public class SaveManager : MonoBehaviour
         {
             dadosAtuais = dados;
             fileDataHandler.Save(dadosAtuais, 0);
+
+            // Sincroniza dados carregados
             moedasColetadasAtual = dadosAtuais.moedasNoCheckpoint;
+            vidaKayaAtual = dadosAtuais.vidaKaya;
+            furiaKayaAtual = dadosAtuais.furiaKaya;
 
             if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
             {
-                // Troca direta substituída pela transição suave
                 CarregarCenaComFade(dadosAtuais.nomeCena);
             }
         }
@@ -87,6 +99,12 @@ public class SaveManager : MonoBehaviour
     public void SalvarNoSlot(int slot)
     {
         dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+
+        // Garante que o estado de vida, fúria e moedas fiquem salvos
+        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
+
         fileDataHandler.Save(dadosAtuais, slot);
         fileDataHandler.Save(dadosAtuais, 0);
     }
@@ -96,7 +114,10 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.passouCheckpoint = true;
         dadosAtuais.posicaoCheckpoint = posicao;
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
         dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+
         fileDataHandler.Save(dadosAtuais, 0);
     }
 
@@ -121,13 +142,41 @@ public class SaveManager : MonoBehaviour
 
     public int GetTotalMoedasFase() => totalMoedasNaFase;
 
+    // --- MÉTODOS PARA VIDA E FÚRIA ---
+    public void AtualizarStatusKaya(float vida, float furia)
+    {
+        vidaKayaAtual = vida;
+        furiaKayaAtual = furia;
+        dadosAtuais.vidaKaya = vida;
+        dadosAtuais.furiaKaya = furia;
+    }
+
+    public float GetVidaKaya() => vidaKayaAtual;
+    public float GetFuriaKaya() => furiaKayaAtual;
+
+    private void ResetarStatusKaya()
+    {
+        vidaKayaAtual = 100f; // Altere se o HP máximo for diferente
+        furiaKayaAtual = 0f;
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
+    }
+
     public void AvancarFase()
     {
         dadosAtuais.faseAtual++;
         dadosAtuais.passouCheckpoint = false;
-        dadosAtuais.moedasNoCheckpoint = 0;
+
+        // CORREÇÃO DAS MOEDAS:
+        // Mantemos 'moedasColetadasAtual' e registramos o valor acumulado no checkpoint
+        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+
+        // Limpamos apenas a lista de IDs coletados da fase passada, para não dar conflito com IDs da Fase 2
         dadosAtuais.moedasColetadasIDs.Clear();
-        moedasColetadasAtual = 0;
+
+        // Salva o status de vida e fúria para a próxima fase
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
 
         if (dadosAtuais.faseAtual == 2)
         {
@@ -159,9 +208,6 @@ public class SaveManager : MonoBehaviour
 #endif
     }
 
-    /// <summary>
-    /// Roteia o carregamento de cena pelo LevelLoader para garantir a transição universal com Fade.
-    /// </summary>
     private void CarregarCenaComFade(string nomeCena)
     {
         if (LevelLoader.Instance != null)

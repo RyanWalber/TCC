@@ -46,11 +46,31 @@ public class PlayerController : MonoBehaviour
         {
             playerAnimation = GetComponentInChildren<PlayerAnimation>();
         }
+
+        // --- CARREGA STATUS SALVO ---
+        CarregarStatusDoSaveManager();
+    }
+
+    private void CarregarStatusDoSaveManager()
+    {
+        if (SaveManager.Instance != null && sistemaFuria != null)
+        {
+            float furiaSalva = SaveManager.Instance.GetFuriaKaya();
+            sistemaFuria.AdicionarFuria(furiaSalva);
+        }
+    }
+
+    public void SalvarStatusKayaNoSaveManager(float vidaAtual)
+    {
+        if (SaveManager.Instance != null)
+        {
+            float furiaAtual = sistemaFuria != null ? sistemaFuria.FuriaAtual : 0f;
+            SaveManager.Instance.AtualizarStatusKaya(vidaAtual, furiaAtual);
+        }
     }
 
     void Update()
     {
-        // Atualiza a janela de tolerância de chão (Coyote Time)
         if (estaNoChao)
         {
             contadorCoyote = tempoCoyote;
@@ -66,7 +86,6 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
             {
-                // Permite pular se estiver no chão, no tempo Coyote ou se tiver pulo duplo no ar
                 if (contadorCoyote > 0f || pulosRestantes > 0)
                 {
                     Pular();
@@ -116,7 +135,6 @@ public class PlayerController : MonoBehaviour
         if (playerAnimation == null) return;
 
         bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
-
         bool noChaoParaAnimacao = contadorCoyote > 0f;
 
         playerAnimation.DefinirAndando(estaMovimentando);
@@ -156,7 +174,6 @@ public class PlayerController : MonoBehaviour
         float tempoTotalNoAr = (2f * puloEfetivo) / gravidadeG;
 
         float duracaoOriginalSprite = 2.0f;
-
         float multiplicadorVelocidade = duracaoOriginalSprite / tempoTotalNoAr;
 
         if (playerAnimation != null)

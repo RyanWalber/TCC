@@ -13,6 +13,9 @@ public class SaveData
     public int moedasNoCheckpoint = 0;
     public List<string> moedasColetadasIDs = new List<string>();
 
+    public float vidaKaya = 100f;  
+    public float furiaKaya = 0f;   
+
     public SaveData()
     {
         nomeCena = "FaseFome";
@@ -21,5 +24,8 @@ public class SaveData
         posicaoCheckpoint = Vector3.zero;
         moedasNoCheckpoint = 0;
         moedasColetadasIDs = new List<string>();
+
+        vidaKaya = 100f;
+        furiaKaya = 0f;
     }
 }

@@ -47,7 +47,7 @@ public class FlechaBoss : MonoBehaviour
             }
             Destroy(gameObject);
         }
-        else if (collision.CompareTag("Chao") || collision.CompareTag("Parede"))
+        else if (collision.CompareTag("Chao"))
         {
             Destroy(gameObject);
         }

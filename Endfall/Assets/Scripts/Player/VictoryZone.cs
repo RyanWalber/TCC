@@ -1,36 +1,54 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class VictoryZone : MonoBehaviour
 {
+    [Header("UI da Vitória")]
     [SerializeField] private GameObject painelVitoria;
     [SerializeField] private TextMeshProUGUI textoMoedas;
+
     private bool aguardandoEntrada = false;
+    private float timerSeguranca = 0f;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") && !aguardandoEntrada)
         {
-            Time.timeScale = 0f;
-            painelVitoria.SetActive(true);
+            aguardandoEntrada = true;
+            Time.timeScale = 0f; 
 
-            int coletadas = SaveManager.Instance.GetMoedasAtuais();
-            int total = SaveManager.Instance.GetTotalMoedasFase();
+            if (painelVitoria != null)
+            {
+                painelVitoria.SetActive(true);
+            }
+
+            int coletadas = SaveManager.Instance != null ? SaveManager.Instance.GetMoedasAtuais() : 0;
+            int total = SaveManager.Instance != null ? SaveManager.Instance.GetTotalMoedasFase() : 0;
 
             if (textoMoedas != null)
+            {
                 textoMoedas.text = $"Moedas: {coletadas} / {total}";
+            }
 
-            aguardandoEntrada = true;
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.SalvarNoSlot(0);
+                Debug.Log("<color=yellow>[AUTOSAVE] Progresso salvo no Slot 0 na Zona de Vitória!</color>");
+            }
         }
     }
 
-    void Update()
+    private void Update()
     {
-        if (aguardandoEntrada && Input.anyKeyDown)
+        if (aguardandoEntrada)
         {
-            Time.timeScale = 1f;
-            SaveManager.Instance.AvancarFase();
+            timerSeguranca += Time.unscaledDeltaTime;
+
+            if (timerSeguranca >= 0.4f && Input.anyKeyDown)
+            {
+                Time.timeScale = 1f; 
+                SaveManager.Instance.AvancarFase();
+            }
         }
     }
 }
