@@ -22,7 +22,9 @@ public class VictoryZone : MonoBehaviour
                 painelVitoria.SetActive(true);
             }
 
-            int coletadas = SaveManager.Instance != null ? SaveManager.Instance.GetMoedasAtuais() : 0;
+            int coletadas = LevelManager.Instance != null
+                ? LevelManager.Instance.moedasFaseAtual
+                : (SaveManager.Instance != null ? SaveManager.Instance.GetMoedasAtuais() : 0);
             int total = SaveManager.Instance != null ? SaveManager.Instance.GetTotalMoedasFase() : 0;
 
             if (textoMoedas != null)
