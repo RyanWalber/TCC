@@ -14,8 +14,8 @@ public class SaveManager : MonoBehaviour
     private int moedasColetadasAtual = 0;
     private int totalMoedasNaFase = 0;
 
-    // --- BÙnus: Controle de Vida e F˙ria ---
-    private float vidaKayaAtual = 100f; // Ajuste o valor inicial/m·ximo padr„o
+    // --- B√¥nus: Controle de Vida e F√∫ria ---
+    private float vidaKayaAtual = 100f; // Ajuste o valor inicial/m√°ximo padr√£o
     private float furiaKayaAtual = 0f;
 
     public SaveData DadosAtuais => dadosAtuais;
@@ -37,6 +37,25 @@ public class SaveManager : MonoBehaviour
 
     public SaveData GetDadosAtuais() => dadosAtuais;
     public bool TemAutosave() => fileDataHandler.SlotExists(0);
+
+    // L√™ os valores reais dos componentes antes de um salvamento importante.
+    private void SincronizarStatusKayaDoJogador()
+    {
+        PlayerHealth saude = FindFirstObjectByType<PlayerHealth>();
+        SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
+
+        if (saude != null)
+            vidaKayaAtual = saude.VidaAtual;
+
+        if (furia != null)
+            furiaKayaAtual = furia.FuriaAtual;
+
+        if (dadosAtuais != null)
+        {
+            dadosAtuais.vidaKaya = vidaKayaAtual;
+            dadosAtuais.furiaKaya = furiaKayaAtual;
+        }
+    }
     public bool ExisteSaveNoSlot(int slot) => fileDataHandler.SlotExists(slot);
 
     public void NovoJogo(int slot = 0)
@@ -49,7 +68,7 @@ public class SaveManager : MonoBehaviour
         moedasColetadasAtual = 0;
         dadosAtuais.moedasNoCheckpoint = 0;
 
-        // Reseta Vida e F˙ria para os valores padr„o no Novo Jogo
+        // Reseta Vida e F√∫ria para os valores padr√£o no Novo Jogo
         ResetarStatusKaya();
 
         if (slot != 0)
@@ -71,7 +90,7 @@ public class SaveManager : MonoBehaviour
             dadosAtuais = dados;
             fileDataHandler.Save(dadosAtuais, 0);
 
-            // Sincroniza dados carregados
+            // Sincroniza os atributos contidos no slot carregado.
             moedasColetadasAtual = dadosAtuais.moedasNoCheckpoint;
             vidaKayaAtual = dadosAtuais.vidaKaya;
             furiaKayaAtual = dadosAtuais.furiaKaya;
@@ -98,9 +117,10 @@ public class SaveManager : MonoBehaviour
 
     public void SalvarNoSlot(int slot)
     {
+        SincronizarStatusKayaDoJogador();
         dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
 
-        // Garante que o estado de vida, f˙ria e moedas fiquem salvos
+        // Garante que o estado de vida, f√∫ria e moedas fiquem salvos
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
@@ -111,12 +131,22 @@ public class SaveManager : MonoBehaviour
 
     public void RegistrarCheckpoint(Vector3 posicao)
     {
+        SincronizarStatusKayaDoJogador();
+
+        string cenaAtual = SceneManager.GetActiveScene().name;
         dadosAtuais.passouCheckpoint = true;
         dadosAtuais.posicaoCheckpoint = posicao;
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
-        dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        dadosAtuais.nomeCena = cenaAtual;
+
+        // Snapshot separado: morrer retorna exatamente aos atributos deste checkpoint,
+        // mesmo que um slot seja salvo depois com outros valores.
+        dadosAtuais.nomeCenaCheckpoint = cenaAtual;
+        dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
+        dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
+        dadosAtuais.checkpointStatusRegistrado = true;
 
         fileDataHandler.Save(dadosAtuais, 0);
     }
@@ -142,7 +172,7 @@ public class SaveManager : MonoBehaviour
 
     public int GetTotalMoedasFase() => totalMoedasNaFase;
 
-    // --- M…TODOS PARA VIDA E F⁄RIA ---
+    // --- M√âTODOS PARA VIDA E F√öRIA ---
     public void AtualizarStatusKaya(float vida, float furia)
     {
         vidaKayaAtual = vida;
@@ -154,9 +184,55 @@ public class SaveManager : MonoBehaviour
     public float GetVidaKaya() => vidaKayaAtual;
     public float GetFuriaKaya() => furiaKayaAtual;
 
+    // Usado quando a Kaya morre: restaura o snapshot do checkpoint e recarrega
+    // a cena correspondente, sem abrir o painel de Game Over.
+    public void RenascerNoCheckpoint()
+    {
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+
+        if (dadosAtuais == null)
+            dadosAtuais = new SaveData();
+
+        string cenaDestino = SceneManager.GetActiveScene().name;
+
+        if (dadosAtuais.passouCheckpoint)
+        {
+            if (!string.IsNullOrEmpty(dadosAtuais.nomeCenaCheckpoint))
+                cenaDestino = dadosAtuais.nomeCenaCheckpoint;
+            else if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
+                cenaDestino = dadosAtuais.nomeCena;
+
+            if (dadosAtuais.checkpointStatusRegistrado)
+            {
+                vidaKayaAtual = dadosAtuais.vidaKayaCheckpoint;
+                furiaKayaAtual = dadosAtuais.furiaKayaCheckpoint;
+            }
+            else
+            {
+                // Compatibilidade com saves antigos que n√£o t√™m snapshot separado.
+                vidaKayaAtual = dadosAtuais.vidaKaya;
+                furiaKayaAtual = dadosAtuais.furiaKaya;
+            }
+        }
+        else
+        {
+            // Sem checkpoint ativado, volta ao in√≠cio da cena com os valores padr√£o.
+            vidaKayaAtual = 100f;
+            furiaKayaAtual = 0f;
+        }
+
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
+        dadosAtuais.nomeCena = cenaDestino;
+
+        fileDataHandler.Save(dadosAtuais, 0);
+        CarregarCenaComFade(cenaDestino);
+    }
+
     private void ResetarStatusKaya()
     {
-        vidaKayaAtual = 100f; // Altere se o HP m·ximo for diferente
+        vidaKayaAtual = 100f; // Altere se o HP m√°ximo for diferente
         furiaKayaAtual = 0f;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
@@ -166,15 +242,18 @@ public class SaveManager : MonoBehaviour
     {
         dadosAtuais.faseAtual++;
         dadosAtuais.passouCheckpoint = false;
+        dadosAtuais.posicaoCheckpoint = Vector3.zero;
+        dadosAtuais.nomeCenaCheckpoint = "";
+        dadosAtuais.checkpointStatusRegistrado = false;
 
-        // CORRE«√O DAS MOEDAS:
+        // CORRE√á√ÉO DAS MOEDAS:
         // Mantemos 'moedasColetadasAtual' e registramos o valor acumulado no checkpoint
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
 
-        // Limpamos apenas a lista de IDs coletados da fase passada, para n„o dar conflito com IDs da Fase 2
+        // Limpamos apenas a lista de IDs coletados da fase passada, para n√£o dar conflito com IDs da Fase 2
         dadosAtuais.moedasColetadasIDs.Clear();
 
-        // Salva o status de vida e f˙ria para a prÛxima fase
+        // Salva o status de vida e f√∫ria para a pr√≥xima fase
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
 
