@@ -8,8 +8,8 @@ public class LevelLoader : MonoBehaviour
     public static LevelLoader Instance { get; private set; }
 
     [Header("UI de Transição")]
-    [SerializeField] private Image cortinaTransicao; // Arraste a CortinaGlobal aqui
-    [SerializeField] private float tempoTransicao = 0.6f; // Tempo do Fade
+    [SerializeField] private Image cortinaTransicao; 
+    [SerializeField] private float tempoTransicao = 0.6f; 
 
     private bool emTransicao = false;
 
@@ -31,7 +31,6 @@ public class LevelLoader : MonoBehaviour
     {
         if (cortinaTransicao != null)
         {
-            // Ao ligar o jogo, garante que começa 100% coberto e abre a tela
             SetAlpha(1f);
             cortinaTransicao.raycastTarget = true;
             StartCoroutine(AnimarFade(1f, 0f));
@@ -49,45 +48,36 @@ public class LevelLoader : MonoBehaviour
     private IEnumerator RotinaTrocaDeCena(string nomeCena)
     {
         emTransicao = true;
-        cortinaTransicao.raycastTarget = true; // Bloqueia cliques durante o fade
+        cortinaTransicao.raycastTarget = true; 
 
-        // 1. SAÍDA (Fade-Out): A cor preta vai surgindo devagar até cobrir o jogo (0 -> 1)
         yield return StartCoroutine(AnimarFade(0f, 1f));
 
         Time.timeScale = 1f;
         AudioListener.pause = false;
 
-        // 2. TROCA DE CENA EM SEGUNDO PLANO (Com a tela 100% preta)
         AsyncOperation operacao = SceneManager.LoadSceneAsync(nomeCena);
 
-        // IMPEDE a Unity de mostrar a nova cena até autorizarmos!
         operacao.allowSceneActivation = false;
 
-        // Aguarda o carregamento em background (0.9 significa pronto na Unity)
         while (operacao.progress < 0.9f)
         {
             yield return null;
         }
 
-        // Garante que a tela continua totalmente preta antes de trocar
         SetAlpha(1f);
 
-        // Agora sim: autoriza a Unity a renderizar a nova cena
         operacao.allowSceneActivation = true;
 
-        // Aguarda a conclusão total do carregamento da cena
         while (!operacao.isDone)
         {
             yield return null;
         }
 
-        // Aguarda 1 frame extra para os objetos da nova cena inicializarem atrás do escuro
         yield return null;
 
-        // 3. ENTRADA (Fade-In): A cor preta vai sumindo devagar revelando a nova cena (1 -> 0)
         yield return StartCoroutine(AnimarFade(1f, 0f));
 
-        cortinaTransicao.raycastTarget = false; // Desbloqueia os cliques para o jogador
+        cortinaTransicao.raycastTarget = false; 
         emTransicao = false;
     }
 

@@ -64,7 +64,6 @@ public class MainMenuController : MonoBehaviour
         {
             if (SaveManager.Instancia != null)
             {
-                // O próprio SaveManager já lê o slot e chama a cena com Fade no SaveManager.cs
                 SaveManager.Instancia.CarregarSlot(slot);
             }
             else
@@ -76,7 +75,6 @@ public class MainMenuController : MonoBehaviour
         {
             if (SaveManager.Instancia != null)
             {
-                // O próprio SaveManager já inicia o novo jogo e chama a cena com Fade no SaveManager.cs
                 SaveManager.Instancia.NovoJogo(slot);
             }
             else
