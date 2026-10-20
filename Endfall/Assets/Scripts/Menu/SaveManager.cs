@@ -186,6 +186,28 @@ public class SaveManager : MonoBehaviour
 
     // Usado quando a Kaya morre: restaura o snapshot do checkpoint e recarrega
     // a cena correspondente, sem abrir o painel de Game Over.
+    // Se uma nova fase for carregada diretamente, descarta o checkpoint da fase anterior.
+    public void DescartarCheckpointDeOutraCena(string cenaAtual)
+    {
+        if (dadosAtuais == null || !dadosAtuais.passouCheckpoint)
+            return;
+
+        string cenaCheckpoint = !string.IsNullOrEmpty(dadosAtuais.nomeCenaCheckpoint)
+            ? dadosAtuais.nomeCenaCheckpoint
+            : dadosAtuais.nomeCena;
+
+        if (cenaCheckpoint == cenaAtual)
+            return;
+
+        dadosAtuais.passouCheckpoint = false;
+        dadosAtuais.posicaoCheckpoint = Vector3.zero;
+        dadosAtuais.nomeCenaCheckpoint = "";
+        dadosAtuais.checkpointStatusRegistrado = false;
+        dadosAtuais.nomeCena = cenaAtual;
+
+        fileDataHandler.Save(dadosAtuais, 0);
+    }
+
     public void RenascerNoCheckpoint()
     {
         Time.timeScale = 1f;
