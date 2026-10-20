@@ -11557,7 +11557,7 @@ GameObject:
   - component: {fileID: 668540678}
   - component: {fileID: 668540680}
   - component: {fileID: 668540679}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: plat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24205,6 +24205,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 'Kaya '
       objectReference: {fileID: 0}
+    - target: {fileID: 9105069308953572735, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -99.6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -27303,7 +27307,7 @@ GameObject:
   - component: {fileID: 1183215167}
   - component: {fileID: 1183215166}
   - component: {fileID: 1183215165}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Tilemap_Plataformas
   m_TagString: Chao
   m_Icon: {fileID: 0}

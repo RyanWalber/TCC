@@ -435,21 +435,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: bixelalfa
       objectReference: {fileID: 0}
-    - target: {fileID: 6811637032311812766, guid: 7afffc04b74ecbf44b44775241a54fb8, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8510067182405498847, guid: 7afffc04b74ecbf44b44775241a54fb8, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8878035507013762089, guid: 7afffc04b74ecbf44b44775241a54fb8, type: 3}
       propertyPath: velocidade
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 8878035507013762089, guid: 7afffc04b74ecbf44b44775241a54fb8, type: 3}
-      propertyPath: distanciaPatrulha
-      value: 200
+      value: 50
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13066,6 +13058,10 @@ PrefabInstance:
     - target: {fileID: 8744568874949199937, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_Name
       value: 'Kaya '
+      objectReference: {fileID: 0}
+    - target: {fileID: 9105069308953572735, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -55.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
