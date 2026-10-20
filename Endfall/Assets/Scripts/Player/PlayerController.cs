@@ -10,6 +10,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float forcaDoPulo = 12f;
     [SerializeField] private float tempoCoyote = 0.15f; // Tolerância para imperfeições do chão (em segundos)
 
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField, Min(0.01f)] private float groundCheckRaio = 0.12f;
+    [SerializeField] private LayerMask chaoLayers = 1 << 3; // Layer "Ground" do projeto
+    [SerializeField] private bool desenharGroundCheck = true;
+    private Collider2D colliderJogador;
+
     [Header("Dash")]
     [SerializeField] private float forcaDoDash = 20f;
     [SerializeField] private float duracaoDash = 0.2f;
@@ -38,7 +45,18 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        colliderJogador = GetComponent<Collider2D>();
         sistemaFuria = GetComponent<SistemaFuria>();
+
+        if (groundCheck == null)
+        {
+            Transform encontrado = transform.Find("GroundCheck");
+            if (encontrado == null)
+                encontrado = transform.Find("GroundCheck (1)");
+
+            if (encontrado != null)
+                groundCheck = encontrado;
+        }
         gravidadeOriginal = rb.gravityScale;
         pulosRestantes = maxPulos;
 
@@ -103,9 +121,8 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // O estado de chão é recalculado pelos contatos de colisão de cada ciclo físico.
-        // Assim, tocar apenas a lateral de uma plataforma não mantém a Kaya "no chão".
-        estaNoChao = false;
+        // Detecção contínua abaixo dos pés: mais estável nas junções entre plataformas.
+        estaNoChao = VerificarChao();
 
         if (estaDandoDash)
         {
@@ -188,6 +205,47 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, puloEfetivo);
+    }
+
+    private bool VerificarChao()
+    {
+        Vector2 ponto;
+
+        if (groundCheck != null)
+        {
+            ponto = groundCheck.position;
+        }
+        else if (colliderJogador != null)
+        {
+            // Fallback se a cena ainda não tiver o Transform GroundCheck atribuído.
+            Bounds limites = colliderJogador.bounds;
+            ponto = new Vector2(limites.center.x, limites.min.y + groundCheckRaio * 0.5f);
+        }
+        else
+        {
+            return false;
+        }
+
+        Collider2D chao = Physics2D.OverlapCircle(ponto, groundCheckRaio, chaoLayers);
+        return chao != null && chao != colliderJogador && !chao.isTrigger;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!desenharGroundCheck) return;
+
+        Vector2 ponto;
+        Collider2D col = GetComponent<Collider2D>();
+
+        if (groundCheck != null)
+            ponto = groundCheck.position;
+        else if (col != null)
+            ponto = new Vector2(col.bounds.center.x, col.bounds.min.y + groundCheckRaio * 0.5f);
+        else
+            ponto = transform.position;
+
+        Gizmos.color = estaNoChao ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(ponto, groundCheckRaio);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
