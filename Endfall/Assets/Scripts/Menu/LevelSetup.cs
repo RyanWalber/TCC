@@ -28,9 +28,8 @@ public class LevelSetup : MonoBehaviour
 
         Vector3 posicaoDestino = pontoInicial != null ? pontoInicial.position : jogador.transform.position;
 
-        if (usarCheckpointSalvo && dados != null && dados.passouCheckpoint)
+        if (dados != null && dados.passouCheckpoint)
         {
-            // Nunca usa a coordenada de um checkpoint pertencente a outra fase.
             // Saves antigos não possuem nomeCenaCheckpoint, então usamos nomeCena como fallback.
             string cenaCheckpoint = !string.IsNullOrEmpty(dados.nomeCenaCheckpoint)
                 ? dados.nomeCenaCheckpoint
@@ -38,7 +37,15 @@ public class LevelSetup : MonoBehaviour
 
             if (cenaCheckpoint == cenaAtual)
             {
-                posicaoDestino = dados.posicaoCheckpoint;
+                if (usarCheckpointSalvo)
+                {
+                    posicaoDestino = dados.posicaoCheckpoint;
+                }
+            }
+            else if (SaveManager.Instance != null)
+            {
+                // O checkpoint pertence a outra fase; evita que a morte retorne à cena antiga.
+                SaveManager.Instance.DescartarCheckpointDeOutraCena(cenaAtual);
             }
         }
 
