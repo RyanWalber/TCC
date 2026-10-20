@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private float direcaoDash;
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
+    private readonly HashSet<GameObject> objetosChao = new HashSet<GameObject>();
 
     private SistemaFuria sistemaFuria;
 
@@ -56,7 +58,7 @@ public class PlayerController : MonoBehaviour
         if (SaveManager.Instance != null && sistemaFuria != null)
         {
             float furiaSalva = SaveManager.Instance.GetFuriaKaya();
-            sistemaFuria.AdicionarFuria(furiaSalva);
+            sistemaFuria.DefinirFuria(furiaSalva);
         }
     }
 
@@ -135,7 +137,9 @@ public class PlayerController : MonoBehaviour
         if (playerAnimation == null) return;
 
         bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
-        bool noChaoParaAnimacao = contadorCoyote > 0f;
+        // O tempo de coyote serve apenas para permitir o pulo, não para
+        // manter a animação de chão quando a Kaya já está no ar.
+        bool noChaoParaAnimacao = estaNoChao;
 
         playerAnimation.DefinirAndando(estaMovimentando);
         playerAnimation.DefinirNoChao(noChaoParaAnimacao);
@@ -202,6 +206,7 @@ public class PlayerController : MonoBehaviour
         {
             if (contato.normal.y > 0.5f)
             {
+                objetosChao.Add(collision.gameObject);
                 estaNoChao = true;
                 pulosRestantes = maxPulos;
 
@@ -216,7 +221,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (estaSubindoPulo || Mathf.Abs(rb.linearVelocity.y) > 0.1f)
+        // Só perdemos o estado de chão ao sair de um objeto que realmente
+        // fornecia apoio por cima. Sair de uma parede não deve afetar o pulo.
+        if (objetosChao.Remove(collision.gameObject) && objetosChao.Count == 0)
         {
             estaNoChao = false;
         }
