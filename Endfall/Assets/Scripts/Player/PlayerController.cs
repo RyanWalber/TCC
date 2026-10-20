@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private float inputHorizontal;
-    private bool estaNoChao = true;
+    private bool estaNoChao = false;
     private int pulosRestantes;
     private int maxPulos = 2; // Total: 1 do chão + 1 no ar
 
