@@ -1,12 +1,15 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Configurações de Vida")]
     [SerializeField] private float vidaMaxima = 100f;
     private float vidaAtual;
+    public float VidaAtual => vidaAtual;
+    public float VidaMaxima => vidaMaxima;
 
     [Header("Imagens da UI")]
     [SerializeField] private Image fillVida;          // Barra Vermelha (vida)
@@ -34,9 +37,13 @@ public class PlayerHealth : MonoBehaviour
 
     private void Start()
     {
-        vidaAtual = vidaMaxima;
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
+
+        float vidaSalva = SaveManager.Instance != null
+            ? SaveManager.Instance.GetVidaKaya()
+            : vidaMaxima;
+        vidaAtual = Mathf.Clamp(vidaSalva, 1f, vidaMaxima);
 
         // Pega todos os sprites do corpo da Kaya
         todosSprites = GetComponentsInChildren<SpriteRenderer>();
@@ -65,6 +72,15 @@ public class PlayerHealth : MonoBehaviour
             {
                 fillVidaFantasma.fillAmount -= velocidadeFantasma * Time.deltaTime;
             }
+        }
+
+        // Mantém o estado atual pronto para salvamentos manuais/autosaves.
+        if (SaveManager.Instance != null)
+        {
+            float furiaAtual = sistemaFuria != null
+                ? sistemaFuria.FuriaAtual
+                : SaveManager.Instance.GetFuriaKaya();
+            SaveManager.Instance.AtualizarStatusKaya(vidaAtual, furiaAtual);
         }
     }
 
@@ -126,14 +142,20 @@ public class PlayerHealth : MonoBehaviour
 
     private void Morrer()
     {
+        if (estaMorta) return;
         estaMorta = true;
 
-        if (painelGameOver != null)
+        // A morte restaura o último checkpoint, sem abrir Game Over.
+        if (SaveManager.Instance != null)
         {
-            painelGameOver.SetActive(true);
+            SaveManager.Instance.RenascerNoCheckpoint();
+            return;
         }
 
-        Time.timeScale = 0f;
+        // Fallback para cenas de teste que não tenham SaveManager.
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void AtualizarUIImediato()
