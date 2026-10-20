@@ -13,6 +13,16 @@ public class ZonaMorte : MonoBehaviour
 
     public void RenascerNoCheckpoint()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.RenascerNoCheckpoint();
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 }
