@@ -30,7 +30,17 @@ public class LevelManager : MonoBehaviour
     {
         if (moedasNaCena.Count == 0)
         {
-            moedasNaCena.AddRange(FindObjectsByType<Coin>(FindObjectsSortMode.None));
+            moedasNaCena.AddRange(
+                FindObjectsByType<Coin>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None
+                )
+            );
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.RegistrarTotalMoedasFase(moedasNaCena.Count);
         }
 
         if (SaveManager.Instance == null) return;
@@ -61,10 +71,15 @@ public class LevelManager : MonoBehaviour
 
     public void ColetarMoeda(string idMoeda)
     {
-        moedasFaseAtual++;
+        if (string.IsNullOrEmpty(idMoeda))
+        {
+            return;
+        }
+
         if (!moedasColetadasTemporarias.Contains(idMoeda))
         {
             moedasColetadasTemporarias.Add(idMoeda);
+            moedasFaseAtual++;
         }
     }
 
