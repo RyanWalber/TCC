@@ -3,29 +3,29 @@ using UnityEngine.UI;
 
 public class SistemaFuria : MonoBehaviour
 {
-    [Header("Configurações da Fúria")]
+    [Header("ConfiguraÃ§Ãµes da FÃºria")]
     [SerializeField] private float furiaMaxima = 100f;
     [SerializeField] private float consumoPorSegundo = 20f;
     [SerializeField] private float furiaAtual = 0f;
 
-    // Propriedade pública para leitura externa (Solução para o erro CS0122)
+    // Propriedade pÃºblica para leitura externa (SoluÃ§Ã£o para o erro CS0122)
     public float FuriaAtual => furiaAtual;
     public float FuriaMaxima => furiaMaxima;
 
-    [Header("Multiplicadores de Atributos em Fúria")]
+    [Header("Multiplicadores de Atributos em FÃºria")]
     [Tooltip("Ex: 1.4 = +40% de velocidade de movimento")]
     public float multVelocidade = 1.4f;
     [Tooltip("Ex: 1.25 = +25% de altura do pulo")]
     public float multPulo = 1.25f;
-    [Tooltip("Ex: 0.5 = atira com metade do tempo de espera (2x mais rápido)")]
+    [Tooltip("Ex: 0.5 = atira com metade do tempo de espera (2x mais rÃ¡pido)")]
     public float multCadencia = 0.5f;
     [Tooltip("Ex: 2.0 = dobro de dano")]
     public float multDano = 2.0f;
 
-    [Header("UI da Fúria")]
+    [Header("UI da FÃºria")]
     [SerializeField] private Image fillFuria;
 
-    [Header("Efeitos Visuais de Fúria")]
+    [Header("Efeitos Visuais de FÃºria")]
     [SerializeField] private Outline luzNeonFuria;
     [SerializeField] private GameObject vinhetaTelaFuria;
 
@@ -78,18 +78,27 @@ public class SistemaFuria : MonoBehaviour
         AtualizarUI();
     }
 
+    // Define a quantidade exata ao carregar um save (nÃ£o soma ao valor atual).
+    public void DefinirFuria(float valor)
+    {
+        furiaAtual = Mathf.Clamp(valor, 0f, furiaMaxima);
+        estaEmFuria = false;
+        AtualizarUI();
+        AtualizarEfeitosVisuais();
+    }
+
     private void AtivarFuria()
     {
         estaEmFuria = true;
         AtualizarEfeitosVisuais();
-        Debug.Log(">>> MODO FÚRIA ATIVADO! <<<");
+        Debug.Log(">>> MODO FÃšRIA ATIVADO! <<<");
     }
 
     private void DesativarFuria()
     {
         estaEmFuria = false;
         AtualizarEfeitosVisuais();
-        Debug.Log("Fúria Desativada.");
+        Debug.Log("FÃºria Desativada.");
     }
 
     private void AtualizarUI()
