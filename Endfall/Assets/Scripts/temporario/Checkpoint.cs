@@ -35,10 +35,16 @@ public class Checkpoint : MonoBehaviour
             // 2. Regista a posição no SaveManager
             Vector3 posicaoSalvar = pontoDeRenascer != null ? pontoDeRenascer.position : other.transform.position;
 
-            if (SaveManager.Instance != null)
+            if (LevelManager.Instance != null)
             {
-                SaveManager.Instance.RegistrarCheckpoint(posicaoSalvar);
+                LevelManager.Instance.ProcessarCheckpoint(posicaoSalvar);
                 Debug.Log(">>> Checkpoint ativado e salvo em: " + posicaoSalvar);
+            }
+            else if (SaveManager.Instance != null)
+            {
+                // Fallback para cenas que ainda não têm LevelManager.
+                SaveManager.Instance.RegistrarCheckpoint(posicaoSalvar);
+                Debug.LogWarning("Checkpoint salvo sem sincronizar moedas: LevelManager não foi encontrado.");
             }
             else
             {
