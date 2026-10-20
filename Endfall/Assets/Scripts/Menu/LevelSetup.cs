@@ -28,7 +28,7 @@ public class LevelSetup : MonoBehaviour
 
         Vector3 posicaoDestino = pontoInicial != null ? pontoInicial.position : jogador.transform.position;
 
-        if (usarCheckpointSalvo && dados != null && dados.passouCheckpoint && dados.posicaoCheckpoint != Vector3.zero)
+        if (usarCheckpointSalvo && dados != null && dados.passouCheckpoint)
         {
             // Nunca usa a coordenada de um checkpoint pertencente a outra fase.
             // Saves antigos não possuem nomeCenaCheckpoint, então usamos nomeCena como fallback.
