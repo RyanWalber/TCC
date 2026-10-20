@@ -13,7 +13,13 @@ public class LevelSetup : MonoBehaviour
     {
         if (jogador == null)
         {
-            Debug.LogError("[LevelSetup] Objeto do Jogador não atribuído no Inspector!");
+            // Fallback para builds/cenas em que a referência não foi atribuída.
+            jogador = GameObject.FindGameObjectWithTag("Player");
+        }
+
+        if (jogador == null)
+        {
+            Debug.LogError("[LevelSetup] Não foi encontrado um objeto Player. Atribua a Kaya no Inspector e confira a Tag.");
             return;
         }
 
