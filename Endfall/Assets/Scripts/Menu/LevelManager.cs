@@ -51,11 +51,8 @@ public class LevelManager : MonoBehaviour
         {
             if (dados.passouCheckpoint)
             {
-                if (playerTransform != null)
-                {
-                    playerTransform.position = dados.posicaoCheckpoint;
-                }
-
+                // A posição do jogador é aplicada apenas pelo LevelSetup da cena atual.
+                // Isso evita que o LevelManager sobrescreva o ponto inicial ao trocar de fase.
                 moedasFaseAtual = dados.moedasNoCheckpoint;
             }
 
