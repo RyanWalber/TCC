@@ -373,6 +373,10 @@ MonoBehaviour:
   alturaEmergir: 67.8
   velocidadeSubida: 2
   player: {fileID: 0}
+  tempoAvisoPoeira: 0.8
+  quantidadeParticulasPoeira: 18
+  efeitoPoeira: {fileID: 0}
+  offsetPoeira: {x: 32, y: 78, z: 0}
   vidaMaxima: 20
   danoNoJogador: 15
   forcaEmpurrao: 1000

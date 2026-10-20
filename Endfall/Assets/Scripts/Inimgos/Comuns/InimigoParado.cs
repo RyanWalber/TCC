@@ -63,7 +63,6 @@ public class InimigoParado : MonoBehaviour
     {
         if (efeitoPoeira != null) return;
 
-        // Cria um efeito simples automaticamente, sem exigir prefab ou configuração manual.
         GameObject objetoPoeira = new GameObject("AvisoPoeiraEmergencia");
         objetoPoeira.transform.position = posicaoOculta + offsetPoeira;
         efeitoPoeira = objetoPoeira.AddComponent<ParticleSystem>();
@@ -82,8 +81,8 @@ public class InimigoParado : MonoBehaviour
             Mathf.Max(0.08f, alturaEmergir * 0.025f),
             Mathf.Max(0.15f, alturaEmergir * 0.06f));
         main.startColor = new ParticleSystem.MinMaxGradient(
-            new Color(0.48f, 0.34f, 0.20f, 0.75f),
-            new Color(0.72f, 0.58f, 0.39f, 0.9f));
+            new Color(0f, 0f, 0f, 0.75f),
+            new Color(0f, 0f, 0f, 1f));
         main.maxParticles = Mathf.Max(quantidadeParticulasPoeira, 30);
 
         var emission = efeitoPoeira.emission;
@@ -95,8 +94,6 @@ public class InimigoParado : MonoBehaviour
         shape.angle = 55f;
         shape.radius = Mathf.Max(0.1f, alturaEmergir * 0.08f);
 
-        // O startSpeed e a forma Cone já espalham as partículas.
-        // Desativar este módulo evita o erro de curvas de velocidade incompatíveis.
         var velocity = efeitoPoeira.velocityOverLifetime;
         velocity.enabled = false;
 
