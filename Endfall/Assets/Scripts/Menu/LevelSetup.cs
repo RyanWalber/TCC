@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelSetup : MonoBehaviour
 {
@@ -17,12 +18,22 @@ public class LevelSetup : MonoBehaviour
         }
 
         SaveData dados = SaveManager.Instance != null ? SaveManager.Instance.GetDadosAtuais() : null;
+        string cenaAtual = SceneManager.GetActiveScene().name;
 
         Vector3 posicaoDestino = pontoInicial != null ? pontoInicial.position : jogador.transform.position;
 
         if (usarCheckpointSalvo && dados != null && dados.passouCheckpoint && dados.posicaoCheckpoint != Vector3.zero)
         {
-            posicaoDestino = dados.posicaoCheckpoint;
+            // Nunca usa a coordenada de um checkpoint pertencente a outra fase.
+            // Saves antigos não possuem nomeCenaCheckpoint, então usamos nomeCena como fallback.
+            string cenaCheckpoint = !string.IsNullOrEmpty(dados.nomeCenaCheckpoint)
+                ? dados.nomeCenaCheckpoint
+                : dados.nomeCena;
+
+            if (cenaCheckpoint == cenaAtual)
+            {
+                posicaoDestino = dados.posicaoCheckpoint;
+            }
         }
 
         jogador.transform.position = posicaoDestino;
