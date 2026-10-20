@@ -60,6 +60,8 @@ public class LevelSetup : MonoBehaviour
             {
                 dados.passouCheckpoint = false;
                 dados.posicaoCheckpoint = Vector3.zero;
+                dados.nomeCenaCheckpoint = "";
+                dados.checkpointStatusRegistrado = false;
             }
         }
     }
