@@ -22,6 +22,8 @@ public class InimigoParado : MonoBehaviour
     [Min(1)] public int quantidadeParticulasPoeira = 18;
     [Tooltip("Opcional: atribua um Particle System próprio. Se ficar vazio, o efeito será criado automaticamente.")]
     public ParticleSystem efeitoPoeira;
+    [Tooltip("Deslocamento da poeira em relação ao ponto onde o inimigo estava escondido. Aumente Y para colocar a poeira mais acima da plataforma.")]
+    public Vector3 offsetPoeira = new Vector3(0f, 0.5f, 0f);
 
     private bool preparandoEmergencia;
     private ParticleSystemRenderer renderizadorPoeira;
@@ -63,7 +65,7 @@ public class InimigoParado : MonoBehaviour
 
         // Cria um efeito simples automaticamente, sem exigir prefab ou configuração manual.
         GameObject objetoPoeira = new GameObject("AvisoPoeiraEmergencia");
-        objetoPoeira.transform.position = posicaoOculta;
+        objetoPoeira.transform.position = posicaoOculta + offsetPoeira;
         efeitoPoeira = objetoPoeira.AddComponent<ParticleSystem>();
         efeitoPoeira.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
@@ -93,10 +95,10 @@ public class InimigoParado : MonoBehaviour
         shape.angle = 55f;
         shape.radius = Mathf.Max(0.1f, alturaEmergir * 0.08f);
 
+        // O startSpeed e a forma Cone já espalham as partículas.
+        // Desativar este módulo evita o erro de curvas de velocidade incompatíveis.
         var velocity = efeitoPoeira.velocityOverLifetime;
-        velocity.enabled = true;
-        velocity.x = new ParticleSystem.MinMaxCurve(-0.6f, 0.6f);
-        velocity.y = new ParticleSystem.MinMaxCurve(0.2f, 0.8f);
+        velocity.enabled = false;
 
         renderizadorPoeira = objetoPoeira.GetComponent<ParticleSystemRenderer>();
         if (renderizadorPoeira != null)
@@ -115,7 +117,7 @@ public class InimigoParado : MonoBehaviour
 
         if (efeitoPoeira != null)
         {
-            efeitoPoeira.transform.position = posicaoOculta;
+            efeitoPoeira.transform.position = posicaoOculta + offsetPoeira;
             efeitoPoeira.Clear(true);
             efeitoPoeira.Play(true);
             efeitoPoeira.Emit(Mathf.Max(1, quantidadeParticulasPoeira));
