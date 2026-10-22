@@ -163,6 +163,21 @@ public class SaveManager : MonoBehaviour
     }
 
     public bool MoedaJaFoiColetada(string idMoeda) => dadosAtuais.moedasColetadasIDs.Contains(idMoeda);
+
+    public bool ElixirVidaJaFoiColetado(string id) =>
+        dadosAtuais != null && dadosAtuais.elixiresVidaColetadosIDs != null && dadosAtuais.elixiresVidaColetadosIDs.Contains(id);
+
+    public void RegistrarElixirVidaColetado(string id)
+    {
+        if (string.IsNullOrEmpty(id) || dadosAtuais == null) return;
+        if (dadosAtuais.elixiresVidaColetadosIDs == null)
+            dadosAtuais.elixiresVidaColetadosIDs = new List<string>();
+        if (!dadosAtuais.elixiresVidaColetadosIDs.Contains(id))
+            dadosAtuais.elixiresVidaColetadosIDs.Add(id);
+
+        SincronizarStatusKayaDoJogador();
+        fileDataHandler.Save(dadosAtuais, 0);
+    }
     public int GetMoedasAtuais() => moedasColetadasAtual;
 
     public void RegistrarTotalMoedasFase(int quantidade)
