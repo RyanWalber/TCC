@@ -253,12 +253,19 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.furiaKaya = furia;
     }
 
-    public void PrepararTransicaoDeFase(string nomeProximaCena)
+    public void PrepararTransicaoDeFase(string nomeProximaCena, float vidaDepoisDaRecuperacao)
     {
         if (dadosAtuais == null) dadosAtuais = new SaveData();
         if (LevelManager.Instance != null)
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
-        SincronizarStatusKayaDoJogador();
+
+        // Usa o valor explícito calculado antes da troca, sem depender da ordem dos Updates.
+        vidaKayaAtual = Mathf.Clamp(vidaDepoisDaRecuperacao, 1f, 100000f);
+        dadosAtuais.vidaKaya = vidaKayaAtual;
+        SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
+        if (furia != null)
+            furiaKayaAtual = furia.FuriaAtual;
+        dadosAtuais.furiaKaya = furiaKayaAtual;
 
         dadosAtuais.versaoDados = 2;
         dadosAtuais.nomeCena = nomeProximaCena;
@@ -309,10 +316,11 @@ public class SaveManager : MonoBehaviour
         AudioListener.pause = false;
         if (dadosAtuais == null) dadosAtuais = new SaveData();
 
-        // Morte: vida cheia, mas Fúria preservada no instante da morte.
+        // Morte: restaura a vida máxima real configurada na Kaya e preserva a Fúria.
         PlayerHealth hpAtual = Object.FindFirstObjectByType<PlayerHealth>();
         SistemaFuria furiaAtual = Object.FindFirstObjectByType<SistemaFuria>();
-        vidaKayaAtual = hpAtual != null ? hpAtual.VidaMaxima : 100f;
+        float vidaMaximaReal = hpAtual != null ? hpAtual.VidaMaxima : 100f;
+        vidaKayaAtual = vidaMaximaReal;
         furiaKayaAtual = furiaAtual != null ? furiaAtual.FuriaAtual : dadosAtuais.furiaKaya;
 
         string cenaDestino = SceneManager.GetActiveScene().name;

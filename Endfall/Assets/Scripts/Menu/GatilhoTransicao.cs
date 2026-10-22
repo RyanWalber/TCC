@@ -30,14 +30,21 @@ public class GatilhoTransicao : MonoBehaviour
 
     private IEnumerator TrocarDeCena()
     {
-        // Ao avançar de fase, recupera 25% da vida ATUAL (não da vida máxima).
-        PlayerHealth hp = FindFirstObjectByType<PlayerHealth>();
-        if (hp != null && hp.VidaAtual > 0f && hp.VidaAtual < hp.VidaMaxima)
-            hp.RecuperarVida(hp.VidaAtual * 0.25f);
+        // Ao avançar de fase, recupera 25% da vida atual e guarda exatamente esse resultado.
+        PlayerHealth hp = collision.GetComponentInParent<PlayerHealth>();
+        if (hp == null) hp = FindFirstObjectByType<PlayerHealth>();
 
-        // Define a cena de destino e estabelece o estado-base da nova fase antes do fade.
+        float vidaDepoisDaRecuperacao = hp != null ? hp.VidaAtual : 100f;
+        if (hp != null && hp.VidaAtual > 0f && hp.VidaAtual < hp.VidaMaxima)
+        {
+            float vidaAntes = hp.VidaAtual;
+            hp.RecuperarVida(vidaAntes * 0.25f);
+            vidaDepoisDaRecuperacao = hp.VidaAtual;
+        }
+
+        // Salva o valor calculado antes do fade para que a nova cena não restaure vida cheia.
         if (SaveManager.Instance != null && !string.IsNullOrEmpty(nomeProximaCena))
-            SaveManager.Instance.PrepararTransicaoDeFase(nomeProximaCena);
+            SaveManager.Instance.PrepararTransicaoDeFase(nomeProximaCena, vidaDepoisDaRecuperacao);
 
         // 2. EXECUTA O FADE DE TELA (se houver CanvasGroup na cena)
         if (canvasGroup != null)
