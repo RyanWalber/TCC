@@ -14,6 +14,8 @@ public class SaveManager : MonoBehaviour
     private int moedasColetadasAtual = 0;
     private int totalMoedasNaFase = 0;
     private bool aplicarPosicaoSalvaAoCarregar = false;
+    // Bloqueia atualizações da cena antiga durante o recarregamento pós-morte.
+    private bool renascimentoPendente = false;
 
     // --- Bônus: Controle de Vida e Fúria ---
     private float vidaKayaAtual = 100f; // Ajuste o valor inicial/máximo padrão
@@ -246,11 +248,21 @@ public class SaveManager : MonoBehaviour
     // --- MÉTODOS PARA VIDA E FÚRIA ---
     public void AtualizarStatusKaya(float vida, float furia)
     {
+        // A cena antiga ainda pode executar Update durante o fade/reload.
+        // Nunca permita que ela sobrescreva a vida cheia já preparada para o respawn.
+        if (renascimentoPendente) return;
+
         vidaKayaAtual = vida;
         furiaKayaAtual = furia;
         if (dadosAtuais == null) dadosAtuais = new SaveData();
         dadosAtuais.vidaKaya = vida;
         dadosAtuais.furiaKaya = furia;
+    }
+
+    // A nova instância do jogador chama este método depois de ler a vida salva em Start.
+    public void ConfirmarRenascimentoInicializado()
+    {
+        renascimentoPendente = false;
     }
 
     public void PrepararTransicaoDeFase(string nomeProximaCena, float vidaDepoisDaRecuperacao)
@@ -312,6 +324,8 @@ public class SaveManager : MonoBehaviour
 
     public void RenascerNoCheckpoint()
     {
+        // Vale tanto para morte por inimigo quanto para queda na ZonaMorte.
+        renascimentoPendente = true;
         Time.timeScale = 1f;
         AudioListener.pause = false;
         if (dadosAtuais == null) dadosAtuais = new SaveData();

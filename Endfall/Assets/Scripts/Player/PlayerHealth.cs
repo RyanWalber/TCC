@@ -45,6 +45,11 @@ public class PlayerHealth : MonoBehaviour
             : vidaMaxima;
         vidaAtual = Mathf.Clamp(vidaSalva, 1f, vidaMaxima);
 
+        // A nova Kaya já leu a vida salva (cheia após a morte). Só agora liberamos
+        // a sincronização de vida/Fúria para os próximos Updates.
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.ConfirmarRenascimentoInicializado();
+
         // Pega todos os sprites do corpo da Kaya
         todosSprites = GetComponentsInChildren<SpriteRenderer>();
         if (todosSprites != null && todosSprites.Length > 0)
@@ -66,6 +71,9 @@ public class PlayerHealth : MonoBehaviour
 
     private void Update()
     {
+        // Depois de morrer, não continue gravando vida 0 durante o carregamento da cena.
+        if (estaMorta) return;
+
         if (fillVidaFantasma != null && fillVida != null)
         {
             if (fillVidaFantasma.fillAmount > fillVida.fillAmount)
