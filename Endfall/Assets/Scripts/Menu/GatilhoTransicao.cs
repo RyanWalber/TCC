@@ -24,15 +24,19 @@ public class GatilhoTransicao : MonoBehaviour
         if (collision.CompareTag("Player") && !trocando)
         {
             trocando = true;
-            StartCoroutine(TrocarDeCena());
+            StartCoroutine(TrocarDeCena(collision));
         }
     }
 
-    private IEnumerator TrocarDeCena()
+    private IEnumerator TrocarDeCena(Collider2D jogadorCollider)
     {
-        // Ao avançar de fase, recupera 25% da vida atual e guarda exatamente esse resultado.
-        PlayerHealth hp = collision.GetComponentInParent<PlayerHealth>();
+        // Usa o collider que realmente entrou no gatilho; collision não existe dentro da coroutine.
+        PlayerHealth hp = jogadorCollider != null
+            ? jogadorCollider.GetComponentInParent<PlayerHealth>()
+            : null;
         if (hp == null) hp = FindFirstObjectByType<PlayerHealth>();
+
+        // Ao avançar de fase, recupera 25% da vida atual e guarda exatamente esse resultado.
 
         float vidaDepoisDaRecuperacao = hp != null ? hp.VidaAtual : 100f;
         if (hp != null && hp.VidaAtual > 0f && hp.VidaAtual < hp.VidaMaxima)
