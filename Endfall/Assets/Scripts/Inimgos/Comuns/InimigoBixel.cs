@@ -22,10 +22,24 @@ public class InimigoBixel : MonoBehaviour
     public float velocidade = 3f;
     public float distanciaPatrulha = 5f;
 
+    [Header("INVESTIDA")]
+    [Tooltip("Distância máxima para detectar a Kaya e iniciar a investida.")]
+    [Min(0f)] public float alcanceDeteccao = 5f;
+    [Tooltip("Velocidade horizontal durante a investida.")]
+    [Min(0f)] public float velocidadeInvestida = 8f;
+    [Tooltip("Duração da investida em segundos.")]
+    [Min(0.05f)] public float duracaoInvestida = 0.45f;
+    [Tooltip("Tempo de espera antes de poder investir novamente.")]
+    [Min(0f)] public float recargaInvestida = 2f;
+
     private Rigidbody2D rb;
     private Vector3 posicaoInicial;
     private bool indoParaDireita = true;
     private bool estaMorto = false;
+    private Transform jogador;
+    private float tempoInvestidaRestante;
+    private float tempoRecargaRestante;
+    private float direcaoInvestida;
 
     private void Start()
     {
@@ -39,13 +53,50 @@ public class InimigoBixel : MonoBehaviour
         if (armatureComponent == null)
             armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
+        GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");
+        if (jogadorObj != null) jogador = jogadorObj.transform;
+
         AtualizarEscala();
     }
 
     private void FixedUpdate()
     {
         if (estaMorto) return;
+
+        if (tempoRecargaRestante > 0f)
+            tempoRecargaRestante -= Time.fixedDeltaTime;
+
+        if (tempoInvestidaRestante > 0f)
+        {
+            tempoInvestidaRestante -= Time.fixedDeltaTime;
+            rb.linearVelocity = new Vector2(direcaoInvestida * velocidadeInvestida, rb.linearVelocity.y);
+            return;
+        }
+
+        if (jogador == null)
+        {
+            GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");
+            if (jogadorObj != null) jogador = jogadorObj.transform;
+        }
+
+        if (tempoRecargaRestante <= 0f && jogador != null &&
+            Mathf.Abs(jogador.position.y - transform.position.y) <= 2f &&
+            Vector2.Distance(transform.position, jogador.position) <= alcanceDeteccao)
+        {
+            IniciarInvestida();
+            return;
+        }
+
         Patrulhar();
+    }
+
+    private void IniciarInvestida()
+    {
+        direcaoInvestida = jogador.position.x >= transform.position.x ? 1f : -1f;
+        Virar(direcaoInvestida > 0f);
+        tempoInvestidaRestante = duracaoInvestida;
+        tempoRecargaRestante = recargaInvestida;
+        rb.linearVelocity = new Vector2(direcaoInvestida * velocidadeInvestida, rb.linearVelocity.y);
     }
 
     private void Update()
