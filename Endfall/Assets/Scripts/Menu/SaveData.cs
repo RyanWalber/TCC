@@ -12,7 +12,6 @@ public class SaveData
     public Vector3 posicaoCheckpoint = Vector3.zero;
     public int moedasNoCheckpoint = 0;
     public List<string> moedasColetadasIDs = new List<string>();
-        elixiresVidaColetadosIDs = new List<string>();
     public List<string> elixiresVidaColetadosIDs = new List<string>();
 
     public float vidaKaya = 100f;
@@ -32,6 +31,7 @@ public class SaveData
         posicaoCheckpoint = Vector3.zero;
         moedasNoCheckpoint = 0;
         moedasColetadasIDs = new List<string>();
+        elixiresVidaColetadosIDs = new List<string>();
 
         vidaKaya = 100f;
         furiaKaya = 0f;
