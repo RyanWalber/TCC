@@ -28,7 +28,12 @@ public class LevelSetup : MonoBehaviour
 
         Vector3 posicaoDestino = pontoInicial != null ? pontoInicial.position : jogador.transform.position;
 
-        if (dados != null && dados.passouCheckpoint)
+        // Ao carregar um slot/autosave com posição registrada, ela tem prioridade.
+        if (dados != null && SaveManager.Instance != null && SaveManager.Instance.ConsumirPosicaoSalvaAoCarregar())
+        {
+            posicaoDestino = dados.posicaoSalvamento;
+        }
+        else if (dados != null && dados.passouCheckpoint)
         {
             // Saves antigos não possuem nomeCenaCheckpoint, então usamos nomeCena como fallback.
             string cenaCheckpoint = !string.IsNullOrEmpty(dados.nomeCenaCheckpoint)

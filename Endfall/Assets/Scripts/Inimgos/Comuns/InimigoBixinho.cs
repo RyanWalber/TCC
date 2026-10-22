@@ -127,7 +127,7 @@ public class InimigoBixinho : MonoBehaviour
 
         if (playerHealth != null)
         {
-            playerHealth.TomarDano(danoNoJogador);
+            playerHealth.TomarDanoDeInimigo(danoNoJogador);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();

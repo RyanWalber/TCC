@@ -38,6 +38,9 @@ public class SistemaFuria : MonoBehaviour
 
     private void Start()
     {
+        // Carrega a Fúria escolhida no slot ou preservada pelo renascimento.
+        if (SaveManager.Instance != null)
+            furiaAtual = Mathf.Clamp(SaveManager.Instance.GetFuriaKaya(), 0f, furiaMaxima);
         AtualizarUI();
         AtualizarEfeitosVisuais();
     }

@@ -30,17 +30,14 @@ public class GatilhoTransicao : MonoBehaviour
 
     private IEnumerator TrocarDeCena()
     {
-        // 1. RESETA O CHECKPOINT NO SAVE MANAGER
-        // Garante que o jogador nasça no 'PontoInicial' da nova fase e não no checkpoint antigo
-        if (SaveManager.Instance != null)
-        {
-            SaveData dados = SaveManager.Instance.GetDadosAtuais();
-            if (dados != null)
-            {
-                dados.passouCheckpoint = false;
-                dados.posicaoCheckpoint = Vector3.zero;
-            }
-        }
+        // Ao avançar de fase, recupera 25% da vida ATUAL (não da vida máxima).
+        PlayerHealth hp = FindFirstObjectByType<PlayerHealth>();
+        if (hp != null && hp.VidaAtual > 0f && hp.VidaAtual < hp.VidaMaxima)
+            hp.RecuperarVida(hp.VidaAtual * 0.25f);
+
+        // Define a cena de destino e estabelece o estado-base da nova fase antes do fade.
+        if (SaveManager.Instance != null && !string.IsNullOrEmpty(nomeProximaCena))
+            SaveManager.Instance.PrepararTransicaoDeFase(nomeProximaCena);
 
         // 2. EXECUTA O FADE DE TELA (se houver CanvasGroup na cena)
         if (canvasGroup != null)

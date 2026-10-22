@@ -49,12 +49,7 @@ public class LevelManager : MonoBehaviour
 
         if (dados != null)
         {
-            if (dados.passouCheckpoint)
-            {
-                // A posição do jogador é aplicada apenas pelo LevelSetup da cena atual.
-                // Isso evita que o LevelManager sobrescreva o ponto inicial ao trocar de fase.
-                moedasFaseAtual = dados.moedasNoCheckpoint;
-            }
+            moedasFaseAtual = SaveManager.Instance.GetMoedasAtuais();
 
             foreach (Coin moeda in moedasNaCena)
             {
@@ -80,15 +75,22 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void RegistrarColetaveisPendentesNoSave()
+    {
+        if (SaveManager.Instance == null) return;
+
+        foreach (string id in moedasColetadasTemporarias)
+            SaveManager.Instance.ColetarMoeda(id);
+
+        moedasColetadasTemporarias.Clear();
+        moedasFaseAtual = SaveManager.Instance.GetMoedasAtuais();
+    }
+
     public void ProcessarCheckpoint(Vector3 posicaoCentro)
     {
         if (SaveManager.Instance != null)
         {
-            foreach (string id in moedasColetadasTemporarias)
-            {
-                SaveManager.Instance.ColetarMoeda(id);
-            }
-
+            RegistrarColetaveisPendentesNoSave();
             SaveManager.Instance.RegistrarCheckpoint(posicaoCentro);
         }
     }

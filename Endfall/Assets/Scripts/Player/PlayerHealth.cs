@@ -96,11 +96,6 @@ public class PlayerHealth : MonoBehaviour
             fillVida.fillAmount = vidaAtual / vidaMaxima;
         }
 
-        if (sistemaFuria != null)
-        {
-            sistemaFuria.AdicionarFuria(furiaPorDanoTomado);
-        }
-
         if (hudJuice != null)
         {
             hudJuice.TremerHUD();
@@ -115,6 +110,17 @@ public class PlayerHealth : MonoBehaviour
         {
             StartCoroutine(RotinaInvencibilidade());
         }
+    }
+
+    public void TomarDanoDeInimigo(float quantidadeDano)
+    {
+        if (estaMorta || estaInvencivel) return;
+
+        // Soma a Fúria antes do dano, assim até um golpe fatal conta como dano recebido.
+        if (sistemaFuria != null)
+            sistemaFuria.AdicionarFuria(furiaPorDanoTomado);
+
+        TomarDano(quantidadeDano);
     }
 
     private IEnumerator RotinaInvencibilidade()

@@ -13,6 +13,7 @@ public class SaveManager : MonoBehaviour
     private FileDataHandler fileDataHandler;
     private int moedasColetadasAtual = 0;
     private int totalMoedasNaFase = 0;
+    private bool aplicarPosicaoSalvaAoCarregar = false;
 
     // --- Bônus: Controle de Vida e Fúria ---
     private float vidaKayaAtual = 100f; // Ajuste o valor inicial/máximo padrão
@@ -67,6 +68,9 @@ public class SaveManager : MonoBehaviour
         // Reseta dados no Novo Jogo
         moedasColetadasAtual = 0;
         dadosAtuais.moedasNoCheckpoint = 0;
+        dadosAtuais.moedasAtuais = 0;
+        dadosAtuais.temPosicaoSalvamento = false;
+        aplicarPosicaoSalvaAoCarregar = false;
 
         // Reseta Vida e Fúria para os valores padrão no Novo Jogo
         ResetarStatusKaya();
@@ -85,21 +89,33 @@ public class SaveManager : MonoBehaviour
 
     public void CarregarDados(SaveData dados)
     {
-        if (dados != null)
+        if (dados == null) return;
+        dadosAtuais = dados;
+
+        // Compatibilidade com salvamentos antigos que não guardavam posição exata.
+        if (dadosAtuais.versaoDados < 2)
         {
-            dadosAtuais = dados;
-            fileDataHandler.Save(dadosAtuais, 0);
-
-            // Sincroniza os atributos contidos no slot carregado.
-            moedasColetadasAtual = dadosAtuais.moedasNoCheckpoint;
-            vidaKayaAtual = dadosAtuais.vidaKaya;
-            furiaKayaAtual = dadosAtuais.furiaKaya;
-
-            if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
-            {
-                CarregarCenaComFade(dadosAtuais.nomeCena);
-            }
+            dadosAtuais.moedasAtuais = dadosAtuais.moedasNoCheckpoint;
+            dadosAtuais.moedasColetadasIDsCheckpoint = dadosAtuais.moedasColetadasIDs != null
+                ? new List<string>(dadosAtuais.moedasColetadasIDs) : new List<string>();
+            dadosAtuais.elixiresVidaColetadosIDsCheckpoint = dadosAtuais.elixiresVidaColetadosIDs != null
+                ? new List<string>(dadosAtuais.elixiresVidaColetadosIDs) : new List<string>();
+            dadosAtuais.versaoDados = 2;
         }
+
+        if (dadosAtuais.moedasColetadasIDs == null) dadosAtuais.moedasColetadasIDs = new List<string>();
+        if (dadosAtuais.elixiresVidaColetadosIDs == null) dadosAtuais.elixiresVidaColetadosIDs = new List<string>();
+        if (dadosAtuais.moedasColetadasIDsCheckpoint == null) dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>();
+        if (dadosAtuais.elixiresVidaColetadosIDsCheckpoint == null) dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>();
+
+        moedasColetadasAtual = dadosAtuais.moedasAtuais;
+        vidaKayaAtual = dadosAtuais.vidaKaya;
+        furiaKayaAtual = dadosAtuais.furiaKaya;
+        aplicarPosicaoSalvaAoCarregar = dadosAtuais.temPosicaoSalvamento;
+
+        fileDataHandler.Save(dadosAtuais, 0);
+        if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
+            CarregarCenaComFade(dadosAtuais.nomeCena);
     }
 
     public void CarregarSlot(int slot)
@@ -117,37 +133,53 @@ public class SaveManager : MonoBehaviour
 
     public void SalvarNoSlot(int slot)
     {
+        if (dadosAtuais == null) dadosAtuais = new SaveData();
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
+
         SincronizarStatusKayaDoJogador();
         dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        GameObject jogador = GameObject.FindGameObjectWithTag("Player");
+        if (jogador != null)
+        {
+            dadosAtuais.posicaoSalvamento = jogador.transform.position;
+            dadosAtuais.temPosicaoSalvamento = true;
+        }
 
-        // Garante que o estado de vida, fúria e moedas fiquem salvos
-        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        // Não modifica moedasNoCheckpoint: esse valor pertence ao snapshot de renascimento.
+        dadosAtuais.versaoDados = 2;
+        dadosAtuais.moedasAtuais = moedasColetadasAtual;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
-
         fileDataHandler.Save(dadosAtuais, slot);
         fileDataHandler.Save(dadosAtuais, 0);
     }
 
     public void RegistrarCheckpoint(Vector3 posicao)
     {
+        if (dadosAtuais == null) dadosAtuais = new SaveData();
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
         SincronizarStatusKayaDoJogador();
 
         string cenaAtual = SceneManager.GetActiveScene().name;
+        dadosAtuais.versaoDados = 2;
         dadosAtuais.passouCheckpoint = true;
         dadosAtuais.posicaoCheckpoint = posicao;
+        dadosAtuais.posicaoSalvamento = posicao;
+        dadosAtuais.temPosicaoSalvamento = true;
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        dadosAtuais.moedasAtuais = moedasColetadasAtual;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
         dadosAtuais.nomeCena = cenaAtual;
-
-        // Snapshot separado: morrer retorna exatamente aos atributos deste checkpoint,
-        // mesmo que um slot seja salvo depois com outros valores.
         dadosAtuais.nomeCenaCheckpoint = cenaAtual;
         dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
         dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
         dadosAtuais.checkpointStatusRegistrado = true;
-
+        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
+        dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
+        aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
     }
 
@@ -155,14 +187,19 @@ public class SaveManager : MonoBehaviour
 
     public void ColetarMoeda(string idMoeda)
     {
+        if (string.IsNullOrEmpty(idMoeda) || dadosAtuais == null) return;
+        if (dadosAtuais.moedasColetadasIDs == null) dadosAtuais.moedasColetadasIDs = new List<string>();
         if (!dadosAtuais.moedasColetadasIDs.Contains(idMoeda))
         {
             dadosAtuais.moedasColetadasIDs.Add(idMoeda);
             moedasColetadasAtual++;
+            dadosAtuais.moedasAtuais = moedasColetadasAtual;
         }
     }
 
-    public bool MoedaJaFoiColetada(string idMoeda) => dadosAtuais.moedasColetadasIDs.Contains(idMoeda);
+    public bool MoedaJaFoiColetada(string idMoeda) =>
+        dadosAtuais != null && dadosAtuais.moedasColetadasIDs != null &&
+        dadosAtuais.moedasColetadasIDs.Contains(idMoeda);
 
     public bool ElixirVidaJaFoiColetado(string id) =>
         dadosAtuais != null && dadosAtuais.elixiresVidaColetadosIDs != null && dadosAtuais.elixiresVidaColetadosIDs.Contains(id);
@@ -170,15 +207,34 @@ public class SaveManager : MonoBehaviour
     public void RegistrarElixirVidaColetado(string id)
     {
         if (string.IsNullOrEmpty(id) || dadosAtuais == null) return;
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
         if (dadosAtuais.elixiresVidaColetadosIDs == null)
             dadosAtuais.elixiresVidaColetadosIDs = new List<string>();
         if (!dadosAtuais.elixiresVidaColetadosIDs.Contains(id))
             dadosAtuais.elixiresVidaColetadosIDs.Add(id);
 
         SincronizarStatusKayaDoJogador();
+        GameObject jogador = GameObject.FindGameObjectWithTag("Player");
+        if (jogador != null)
+        {
+            dadosAtuais.posicaoSalvamento = jogador.transform.position;
+            dadosAtuais.temPosicaoSalvamento = true;
+            dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
+        }
+        dadosAtuais.moedasAtuais = moedasColetadasAtual;
         fileDataHandler.Save(dadosAtuais, 0);
     }
+
     public int GetMoedasAtuais() => moedasColetadasAtual;
+
+    public bool ConsumirPosicaoSalvaAoCarregar()
+    {
+        bool resultado = aplicarPosicaoSalvaAoCarregar &&
+                         dadosAtuais != null && dadosAtuais.temPosicaoSalvamento;
+        aplicarPosicaoSalvaAoCarregar = false;
+        return resultado;
+    }
 
     public void RegistrarTotalMoedasFase(int quantidade)
     {
@@ -192,8 +248,32 @@ public class SaveManager : MonoBehaviour
     {
         vidaKayaAtual = vida;
         furiaKayaAtual = furia;
+        if (dadosAtuais == null) dadosAtuais = new SaveData();
         dadosAtuais.vidaKaya = vida;
         dadosAtuais.furiaKaya = furia;
+    }
+
+    public void PrepararTransicaoDeFase(string nomeProximaCena)
+    {
+        if (dadosAtuais == null) dadosAtuais = new SaveData();
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
+        SincronizarStatusKayaDoJogador();
+
+        dadosAtuais.versaoDados = 2;
+        dadosAtuais.nomeCena = nomeProximaCena;
+        dadosAtuais.passouCheckpoint = false;
+        dadosAtuais.posicaoCheckpoint = Vector3.zero;
+        dadosAtuais.nomeCenaCheckpoint = "";
+        dadosAtuais.checkpointStatusRegistrado = false;
+        dadosAtuais.temPosicaoSalvamento = false;
+        dadosAtuais.posicaoSalvamento = Vector3.zero;
+        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        dadosAtuais.moedasAtuais = moedasColetadasAtual;
+        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
+        dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
+        aplicarPosicaoSalvaAoCarregar = false;
+        fileDataHandler.Save(dadosAtuais, 0);
     }
 
     public float GetVidaKaya() => vidaKayaAtual;
@@ -227,42 +307,47 @@ public class SaveManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         AudioListener.pause = false;
+        if (dadosAtuais == null) dadosAtuais = new SaveData();
 
-        if (dadosAtuais == null)
-            dadosAtuais = new SaveData();
+        // Morte: vida cheia, mas Fúria preservada no instante da morte.
+        PlayerHealth hpAtual = Object.FindFirstObjectByType<PlayerHealth>();
+        SistemaFuria furiaAtual = Object.FindFirstObjectByType<SistemaFuria>();
+        vidaKayaAtual = hpAtual != null ? hpAtual.VidaMaxima : 100f;
+        furiaKayaAtual = furiaAtual != null ? furiaAtual.FuriaAtual : dadosAtuais.furiaKaya;
 
         string cenaDestino = SceneManager.GetActiveScene().name;
-
         if (dadosAtuais.passouCheckpoint)
         {
             if (!string.IsNullOrEmpty(dadosAtuais.nomeCenaCheckpoint))
                 cenaDestino = dadosAtuais.nomeCenaCheckpoint;
             else if (!string.IsNullOrEmpty(dadosAtuais.nomeCena))
                 cenaDestino = dadosAtuais.nomeCena;
-
-            if (dadosAtuais.checkpointStatusRegistrado)
-            {
-                vidaKayaAtual = dadosAtuais.vidaKayaCheckpoint;
-                furiaKayaAtual = dadosAtuais.furiaKayaCheckpoint;
-            }
-            else
-            {
-                // Compatibilidade com saves antigos que não têm snapshot separado.
-                vidaKayaAtual = dadosAtuais.vidaKaya;
-                furiaKayaAtual = dadosAtuais.furiaKaya;
-            }
-        }
-        else
-        {
-            // Sem checkpoint ativado, volta ao início da cena com os valores padrão.
-            vidaKayaAtual = 100f;
-            furiaKayaAtual = 0f;
         }
 
+        // Reverte coletáveis e moedas para o snapshot do checkpoint/estado-base da fase.
+        moedasColetadasAtual = Mathf.Max(0, dadosAtuais.moedasNoCheckpoint);
+        dadosAtuais.moedasAtuais = moedasColetadasAtual;
+        if (dadosAtuais.moedasColetadasIDsCheckpoint != null)
+            dadosAtuais.moedasColetadasIDs = new List<string>(dadosAtuais.moedasColetadasIDsCheckpoint);
+        if (dadosAtuais.elixiresVidaColetadosIDsCheckpoint != null)
+            dadosAtuais.elixiresVidaColetadosIDs = new List<string>(dadosAtuais.elixiresVidaColetadosIDsCheckpoint);
+
+        dadosAtuais.versaoDados = 2;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
         dadosAtuais.nomeCena = cenaDestino;
+        if (dadosAtuais.passouCheckpoint)
+        {
+            dadosAtuais.posicaoSalvamento = dadosAtuais.posicaoCheckpoint;
+            dadosAtuais.temPosicaoSalvamento = true;
+        }
+        else
+        {
+            dadosAtuais.posicaoSalvamento = Vector3.zero;
+            dadosAtuais.temPosicaoSalvamento = false;
+        }
 
+        aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
         CarregarCenaComFade(cenaDestino);
     }
@@ -287,8 +372,7 @@ public class SaveManager : MonoBehaviour
         // Mantemos 'moedasColetadasAtual' e registramos o valor acumulado no checkpoint
         dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
 
-        // Limpamos apenas a lista de IDs coletados da fase passada, para não dar conflito com IDs da Fase 2
-        dadosAtuais.moedasColetadasIDs.Clear();
+        // Os IDs dos coletáveis possuem identificadores únicos e são preservados entre fases.
 
         // Salva o status de vida e fúria para a próxima fase
         dadosAtuais.vidaKaya = vidaKayaAtual;

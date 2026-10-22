@@ -118,7 +118,7 @@ public class InimigoBixao : MonoBehaviour
         PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>() ?? jogadorObj.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.TomarDano(danoNoJogador);
+            playerHealth.TomarDanoDeInimigo(danoNoJogador);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();

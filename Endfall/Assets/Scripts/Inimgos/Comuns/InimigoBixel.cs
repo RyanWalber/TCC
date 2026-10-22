@@ -235,7 +235,7 @@ public class InimigoBixel : MonoBehaviour
         PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>() ?? jogadorObj.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.TomarDano(danoNoPlayer);
+            playerHealth.TomarDanoDeInimigo(danoNoPlayer);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();

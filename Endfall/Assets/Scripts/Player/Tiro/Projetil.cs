@@ -43,20 +43,18 @@ public class Projetil : MonoBehaviour
 
         jaColidiu = true;
 
+        // Tag definida no projeto: "Inimigo". Colidir com chão, parede ou objetos
+        // comuns destrói o projétil, mas não concede Fúria.
+        bool acertouInimigo = collision.CompareTag("Inimigo") ||
+                              collision.transform.root.CompareTag("Inimigo");
+
         int danoCalculado = dano;
         SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
+        if (furia != null && furia.EstaEmFuria)
+            danoCalculado = Mathf.RoundToInt(dano * furia.multDano);
 
-        if (furia != null)
-        {
-            if (furia.EstaEmFuria)
-            {
-                danoCalculado = Mathf.RoundToInt(dano * furia.multDano);
-            }
-            else
-            {
-                furia.AdicionarFuria(furiaPorAcerto);
-            }
-        }
+        if (acertouInimigo && furia != null && !furia.EstaEmFuria)
+            furia.AdicionarFuria(furiaPorAcerto);
 
         collision.SendMessageUpwards("TomarDano", danoCalculado, SendMessageOptions.DontRequireReceiver);
 
