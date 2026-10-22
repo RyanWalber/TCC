@@ -740,7 +740,7 @@ MonoBehaviour:
   vida: 3
   danoNoPlayer: 1
   forcaEmpurrao: 8
-  velocidade: 100
+  velocidade: 250
   distanciaPatrulha: 200
 --- !u!1 &7390450515002595419
 GameObject:
