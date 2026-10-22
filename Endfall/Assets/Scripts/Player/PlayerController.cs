@@ -160,8 +160,14 @@ public class PlayerController : MonoBehaviour
         // manter a animação de chão quando a Kaya já está no ar.
         bool noChaoParaAnimacao = estaNoChao;
 
-        playerAnimation.DefinirAndando(estaMovimentando);
-        playerAnimation.DefinirNoChao(noChaoParaAnimacao);
+        // Atualiza os três parâmetros juntos e detecta a aterrissagem.
+        // AtualizarEstados força a transição para andar/ociosa ao tocar o chão,
+        // evitando que a Kaya fique presa no estado de pulo em determinadas fases.
+        playerAnimation.AtualizarEstados(
+            estaMovimentando,
+            noChaoParaAnimacao,
+            estaDandoDash
+        );
     }
 
     void Pular()
