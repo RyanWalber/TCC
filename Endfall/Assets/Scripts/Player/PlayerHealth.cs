@@ -158,6 +158,25 @@ public class PlayerHealth : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void RecuperarVida(float quantidade)
+    {
+        if (estaMorta || quantidade <= 0f) return;
+
+        vidaAtual = Mathf.Clamp(vidaAtual + quantidade, 0f, vidaMaxima);
+        AtualizarUIImediato();
+
+        if (hudJuice != null)
+        {
+            hudJuice.AtualizarRetrato(vidaAtual / vidaMaxima);
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            float furiaAtual = sistemaFuria != null ? sistemaFuria.FuriaAtual : SaveManager.Instance.GetFuriaKaya();
+            SaveManager.Instance.AtualizarStatusKaya(vidaAtual, furiaAtual);
+        }
+    }
+
     private void AtualizarUIImediato()
     {
         float pct = vidaAtual / vidaMaxima;
