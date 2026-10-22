@@ -701,7 +701,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811637032311812766}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -719,7 +719,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &8878035507013762089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -737,11 +737,17 @@ MonoBehaviour:
   animAndar: walk
   animParado: idle
   spriteInvertido: 0
-  vida: 3
-  danoNoPlayer: 1
-  forcaEmpurrao: 8
+  vida: 60
+  danoNoPlayer: 10
+  forcaEmpurrao: 15
   velocidade: 250
   distanciaPatrulha: 200
+  alcanceDeteccao: 400
+  alcanceVerticalDeteccao: 20
+  velocidadeInvestida: 1000
+  duracaoInvestida: 0.5
+  recargaInvestida: 5
+  mostrarGizmos: 1
 --- !u!1 &7390450515002595419
 GameObject:
   m_ObjectHideFlags: 0
