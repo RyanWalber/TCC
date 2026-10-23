@@ -4133,6 +4133,8 @@ GameObject:
   - component: {fileID: 1433506106}
   - component: {fileID: 1433506105}
   - component: {fileID: 1433506104}
+  - component: {fileID: 1999776001}
+  - component: {fileID: 1999776002}
   m_Layer: 0
   m_Name: BossMorte
   m_TagString: Inimigo
@@ -4173,41 +4175,45 @@ MonoBehaviour:
   raizVisual: {fileID: 98849053}
   prefabCorvo: {fileID: 2607479918619878126, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
   pontoLancamentoCorvos: {fileID: 469893147}
-  barraVida: {fileID: 421269863}
-  aoSerDerrotada:
-    m_PersistentCalls:
-      m_Calls: []
-  vidaMaxima: 100
-  tempoPiscarDano: 0.08
   distanciaDeteccao: 500
-  diferencaVerticalMaxima: 500
-  tempoEntreAtaques: 2.4
-  chanceHordaCorvos: 1
-  distanciaInvestidaLonga: 450
-  distanciaParadaAntesDaKaya: 55
-  visualOriginalOlhaEsquerda: 1
+  intervaloAtaques: 2.4
   quantidadeCorvos: 6
-  atrasoPrimeiroCorvo: 1.35
-  intervaloEntreCorvos: 0.01
+  intervaloCorvos: 0.16
   velocidadeCorvo: 520
-  danoCorvo: 5
-  tempoVidaCorvo: 4
-  recuperacaoHordaCorvos: 0.3
-  offsetLancamentoCorvos: {x: 25, y: 80}
-  dispersaoCorvosGraus: 15.2
-  corvoOriginalOlhaEsquerda: 1
-  tempoPreparacaoInvestida: 0.22
-  velocidadeInvestidaCurta: 700
-  velocidadeInvestidaLonga: 900
-  distanciaMaximaInvestidaCurta: 240
-  distanciaMaximaInvestidaLonga: 1100
-  tempoMaximoInvestidaCurta: 0.55
-  tempoMaximoInvestidaLonga: 1.4
-  inicioHitboxFoiceNormalizado: 0.3
-  fimHitboxFoiceNormalizado: 0.62
-  danoFoice: 25
-  recuperacaoDepoisDoGolpe: 0.35
-  duracaoMaximaAnimacaoGolpe: 1.5
+  velocidadeInvestida: 900
+--- !u!114 &1999776001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossVida
+  vidaMaxima: 150
+  barraDeVida: {fileID: 421269863}
+  conteinerBarraDeVida: {fileID: 421269861}
+  corDano: {r: 1, g: 0, b: 0, a: 1}
+  duracaoPiscar: 0.15
+  tempoParaDestruir: 0.5
+--- !u!114 &1999776002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b13c659e1d4631a4798fbf0437fbea06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
+  barraVidaUI: {fileID: 421269861}
+  jogador: {fileID: 1805055711}
+  distanciaAtivacao: 500
 --- !u!70 &1433506105
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
