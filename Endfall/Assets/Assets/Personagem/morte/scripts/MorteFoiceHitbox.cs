@@ -12,7 +12,7 @@ public class MorteFoiceHitbox : MonoBehaviour
 
     private Collider2D hitbox;
     private bool ativa;
-    private readonly HashSet<int> jogadoresAtingidos = new HashSet<int>();
+    private readonly HashSet<GameObject> jogadoresAtingidos = new HashSet<GameObject>();
 
     private void Awake()
     {
@@ -57,8 +57,7 @@ public class MorteFoiceHitbox : MonoBehaviour
 
         if (objetoJogador == null) return;
 
-        int id = objetoJogador.GetInstanceID();
-        if (!jogadoresAtingidos.Add(id)) return;
+        if (!jogadoresAtingidos.Add(objetoJogador)) return;
 
         PlayerHealth hp = outro.GetComponentInParent<PlayerHealth>();
         if (hp == null)
