@@ -319,7 +319,7 @@ GameObject:
   - component: {fileID: 98849054}
   m_Layer: 0
   m_Name: Morte
-  m_TagString: Inimigo
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -333,7 +333,7 @@ Transform:
   m_GameObject: {fileID: 98849052}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1767, y: -214.3, z: 0}
+  m_LocalPosition: {x: 0.2, y: 1.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -346,7 +346,7 @@ Transform:
   - {fileID: 1773557721}
   - {fileID: 1383935363}
   - {fileID: 1918600336}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1433506103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &98849054
 Animator:
@@ -1502,6 +1502,37 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &469893146
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 469893147}
+  m_Layer: 0
+  m_Name: "pontoslan\xE7amento"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &469893147
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 469893146}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.3, y: 19.4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1918600336}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &483327385
 GameObject:
   m_ObjectHideFlags: 0
@@ -4090,6 +4121,157 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1433506100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1433506103}
+  - component: {fileID: 1433506106}
+  - component: {fileID: 1433506105}
+  - component: {fileID: 1433506104}
+  m_Layer: 0
+  m_Name: BossMorte
+  m_TagString: Inimigo
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1433506103
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2090, y: -223.72855, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 98849053}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1433506104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4b8e6d0c2f74e099e6a3d17a5b2c841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MorteBossControllerGameplay
+  jogador: {fileID: 1805055711}
+  animator: {fileID: 98849054}
+  raizVisual: {fileID: 98849053}
+  prefabCorvo: {fileID: 2607479918619878126, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
+  pontoLancamentoCorvos: {fileID: 469893147}
+  barraVida: {fileID: 421269863}
+  aoSerDerrotada:
+    m_PersistentCalls:
+      m_Calls: []
+  vidaMaxima: 100
+  tempoPiscarDano: 0.08
+  distanciaDeteccao: 500
+  diferencaVerticalMaxima: 500
+  tempoEntreAtaques: 2.4
+  chanceHordaCorvos: 1
+  distanciaInvestidaLonga: 450
+  distanciaParadaAntesDaKaya: 55
+  visualOriginalOlhaEsquerda: 1
+  quantidadeCorvos: 6
+  atrasoPrimeiroCorvo: 1.35
+  intervaloEntreCorvos: 0.01
+  velocidadeCorvo: 520
+  danoCorvo: 5
+  tempoVidaCorvo: 4
+  recuperacaoHordaCorvos: 0.3
+  offsetLancamentoCorvos: {x: 25, y: 80}
+  dispersaoCorvosGraus: 15.2
+  corvoOriginalOlhaEsquerda: 1
+  tempoPreparacaoInvestida: 0.22
+  velocidadeInvestidaCurta: 700
+  velocidadeInvestidaLonga: 900
+  distanciaMaximaInvestidaCurta: 240
+  distanciaMaximaInvestidaLonga: 1100
+  tempoMaximoInvestidaCurta: 0.55
+  tempoMaximoInvestidaLonga: 1.4
+  inicioHitboxFoiceNormalizado: 0.3
+  fimHitboxFoiceNormalizado: 0.62
+  danoFoice: 25
+  recuperacaoDepoisDoGolpe: 0.35
+  duracaoMaximaAnimacaoGolpe: 1.5
+--- !u!70 &1433506105
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -10.407532, y: 11.086121}
+  m_Size: {x: 39.337524, y: 140.43036}
+  m_Direction: 0
+--- !u!50 &1433506106
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1479627210
 GameObject:
   m_ObjectHideFlags: 0
@@ -7032,6 +7214,7 @@ GameObject:
   - component: {fileID: 1918600336}
   - component: {fileID: 1918600338}
   - component: {fileID: 1918600337}
+  - component: {fileID: 1918600339}
   m_Layer: 0
   m_Name: foice_0
   m_TagString: Untagged
@@ -7051,7 +7234,8 @@ Transform:
   m_LocalPosition: {x: -66.69995, y: -2.300003, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 469893147}
   m_Father: {fileID: 98849053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 5.888}
 --- !u!60 &1918600337
@@ -7084,7 +7268,7 @@ PolygonCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -7777,6 +7961,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1918600339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918600335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8d7a721dcd74f9db914c93b528e6cc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MorteFoiceHitbox
+  dano: 75
 --- !u!224 &1919179231 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8466841392807878379, guid: e52882e63fc897a4aa7bf640aa394b1d, type: 3}
@@ -8481,63 +8678,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5674031725773032385, guid: 63cdfd5fdd6c740469a753fcbba05e76, type: 3}
   m_PrefabInstance: {fileID: 1240880976}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &1529204893480882543
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1533.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -151.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1674201011198829458, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2607479918619878126, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
-      propertyPath: m_Name
-      value: Corvo
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -8556,6 +8696,5 @@ SceneRoots:
   - {fileID: 69306170}
   - {fileID: 1583619002}
   - {fileID: 341915309}
-  - {fileID: 98849053}
   - {fileID: 1044985183}
-  - {fileID: 1529204893480882543}
+  - {fileID: 1433506103}
