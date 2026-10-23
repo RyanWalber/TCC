@@ -272,6 +272,11 @@ MonoBehaviour:
   m_AlwaysUpdate: 1
   m_AutoRebind: 0
   m_BoundsMode: 0
+--- !u!1 &60156738 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8774043995851094515, guid: 63cdfd5fdd6c740469a753fcbba05e76, type: 3}
+  m_PrefabInstance: {fileID: 1240880976}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &69306169
 GameObject:
   m_ObjectHideFlags: 0
@@ -1658,6 +1663,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: fillFuria
+      value: 
+      objectReference: {fileID: 1446279013}
+    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: vinhetaTelaFuria
+      value: 
+      objectReference: {fileID: 2114315931}
+    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: fillVida
+      value: 
+      objectReference: {fileID: 2052540702}
+    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: painelGameOver
+      value: 
+      objectReference: {fileID: 60156738}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1521
@@ -4181,39 +4202,8 @@ MonoBehaviour:
   intervaloCorvos: 0.16
   velocidadeCorvo: 520
   velocidadeInvestida: 900
---- !u!114 &1999776001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1433506100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossVida
-  vidaMaxima: 150
-  barraDeVida: {fileID: 421269863}
-  conteinerBarraDeVida: {fileID: 421269861}
-  corDano: {r: 1, g: 0, b: 0, a: 1}
-  duracaoPiscar: 0.15
-  tempoParaDestruir: 0.5
---- !u!114 &1999776002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1433506100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b13c659e1d4631a4798fbf0437fbea06, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
-  barraVidaUI: {fileID: 421269861}
-  jogador: {fileID: 1805055711}
-  distanciaAtivacao: 500
+  distanciaParadaAntesDaKaya: 70
+  danoFoice: 75
 --- !u!70 &1433506105
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4278,6 +4268,17 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &1446279013 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6022483893037333419, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
+  m_PrefabInstance: {fileID: 1549306395}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &1479627210
 GameObject:
   m_ObjectHideFlags: 0
@@ -7979,7 +7980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8d7a721dcd74f9db914c93b528e6cc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MorteFoiceHitbox
-  dano: 75
+  dano: 25
 --- !u!224 &1919179231 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8466841392807878379, guid: e52882e63fc897a4aa7bf640aa394b1d, type: 3}
@@ -8485,6 +8486,50 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 3
   m_ColliderType: 1
+--- !u!114 &1999776001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossVida
+  vidaMaxima: 1000
+  barraDeVida: {fileID: 421269863}
+  conteinerBarraDeVida: {fileID: 421269861}
+  corDano: {r: 1, g: 0, b: 0, a: 1}
+  duracaoPiscar: 0.15
+  tempoParaDestruir: 0.5
+--- !u!114 &1999776002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433506100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b13c659e1d4631a4798fbf0437fbea06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
+  barraVidaUI: {fileID: 421269861}
+  jogador: {fileID: 1805055711}
+  distanciaAtivacao: 500
+--- !u!114 &2052540702 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4106979661948300572, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
+  m_PrefabInstance: {fileID: 1549306395}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &2057938176
 GameObject:
   m_ObjectHideFlags: 0

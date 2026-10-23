@@ -16,20 +16,23 @@ public class MorteBossControllerGameplay : MonoBehaviour
     [SerializeField] private Transform pontoLancamentoCorvos;
 
     [Header("Detecção")]
-    [Min(1f)] [SerializeField] private float distanciaDeteccao = 500f;
-    [Min(0.1f)] [SerializeField] private float intervaloAtaques = 2.4f;
+    [Min(1f)][SerializeField] private float distanciaDeteccao = 500f;
+    [Min(0.1f)][SerializeField] private float intervaloAtaques = 2.4f;
 
     [Header("Horda de corvos")]
-    [Min(1)] [SerializeField] private int quantidadeCorvos = 6;
-    [Min(0.05f)] [SerializeField] private float intervaloCorvos = 0.16f;
+    [Min(1)][SerializeField] private int quantidadeCorvos = 6;
+    [Min(0.05f)][SerializeField] private float intervaloCorvos = 0.16f;
     [Tooltip("Velocidade de voo dos corvos. Pode ser ajustada durante o balanceamento.")]
-    [Min(1f)] [SerializeField] private float velocidadeCorvo = 520f;
+    [Min(1f)][SerializeField] private float velocidadeCorvo = 520f;
 
     [Header("Investida")]
-    [Min(1f)] [SerializeField] private float velocidadeInvestida = 900f;
+    [Min(1f)][SerializeField] private float velocidadeInvestida = 900f;
+    [Tooltip("Distância que a Morte mantém da Kaya ao terminar a investida. Ajuste no Inspector.")]
+    [Min(0f)][SerializeField] private float distanciaParadaAntesDaKaya = 70f;
+    [Tooltip("Dano causado por um acerto da foice. Com 150 de vida, 75 de dano equivale a dois golpes.")]
+    [Min(0f)][SerializeField] private float danoFoice = 75f;
 
     private const int DanoCorvo = 5;
-    private const float DanoFoice = 11f;
     private const float TempoVidaCorvo = 4f;
     private const float TempoPreparacaoInvestida = 0.22f;
     private const float AtrasoLancamentoCorvos = 0.65f;
@@ -145,8 +148,12 @@ public class MorteBossControllerGameplay : MonoBehaviour
     {
         if (jogador == null || raizVisual == null || !escalaCapturada) return;
 
-        // Corrigido após o teste visual: inverter a raiz faz a arte olhar para o jogador.
-        float sinal = jogador.position.x < transform.position.x ? -1f : 1f;
+        // A arte original da Morte olha para a esquerda.
+        // Se Kaya estiver à esquerda, mantém a escala original; se estiver à direita, espelha.
+        const bool ArteOriginalOlhaParaEsquerda = true;
+        bool jogadorAEsquerda = jogador.position.x < transform.position.x;
+        bool precisaEspelhar = ArteOriginalOlhaParaEsquerda ? !jogadorAEsquerda : jogadorAEsquerda;
+        float sinal = precisaEspelhar ? -1f : 1f;
         raizVisual.localScale = new Vector3(
             Mathf.Abs(escalaVisualOriginal.x) * sinal,
             escalaVisualOriginal.y,
@@ -163,7 +170,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
             if (hitboxFoice == null)
                 hitboxFoice = col.gameObject.AddComponent<MorteFoiceHitbox>();
 
-            hitboxFoice.ConfigurarDano(DanoFoice);
+            hitboxFoice.ConfigurarDano(danoFoice);
             hitboxFoice.DefinirAtiva(false);
             return;
         }
@@ -243,11 +250,15 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
         float xJogadorNoInicio = jogador.position.x;
         float diferencaX = xJogadorNoInicio - transform.position.x;
-        bool longa = Mathf.Abs(diferencaX) > distanciaDeteccao * 0.45f;
+        float distanciaInicial = Mathf.Abs(diferencaX);
+        bool longa = distanciaInicial > distanciaDeteccao * 0.45f;
 
-        // Destino fixo: mudanças de posição da Kaya depois deste ponto não alteram a rota.
-        destinoInvestidaX = xJogadorNoInicio;
-        movimentoAtivo = Mathf.Abs(destinoInvestidaX - transform.position.x) > 0.5f;
+        // Destino fixo antes da Kaya, mantendo a distância definida no Inspector.
+        // Se a boss já estiver dentro dessa distância, ela não avança mais em direção ao jogador.
+        float direcao = Mathf.Sign(diferencaX);
+        float distanciaDeAvanco = Mathf.Max(0f, distanciaInicial - distanciaParadaAntesDaKaya);
+        destinoInvestidaX = transform.position.x + direcao * distanciaDeAvanco;
+        movimentoAtivo = distanciaDeAvanco > 0.5f;
 
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
 
@@ -255,8 +266,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.Play(EstadoInvestidaLonga, 0, 0f);
 
         float tempo = 0f;
-        float distanciaInicial = Mathf.Abs(destinoInvestidaX - transform.position.x);
-        float limiteTempo = Mathf.Max(1.4f, distanciaInicial / Mathf.Max(1f, velocidadeInvestida) + 0.5f);
+        float distanciaPercorrer = Mathf.Abs(destinoInvestidaX - transform.position.x);
+        float limiteTempo = Mathf.Max(1.4f, distanciaPercorrer / Mathf.Max(1f, velocidadeInvestida) + 0.5f);
 
         while (movimentoAtivo && tempo < limiteTempo)
         {

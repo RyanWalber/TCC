@@ -8,7 +8,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class MorteFoiceHitbox : MonoBehaviour
 {
-    [SerializeField, Min(0f)] private float dano = 25f;
+    [SerializeField, Min(0f)] private float dano = 75f;
 
     private Collider2D hitbox;
     private bool ativa;
