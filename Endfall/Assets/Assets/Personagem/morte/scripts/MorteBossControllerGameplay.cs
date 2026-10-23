@@ -115,7 +115,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private void AtualizarOrientacao()
     {
         if (jogador == null || raizVisual == null || !escalaCapturada) return;
-        float sinal = jogador.position.x < transform.position.x ? -1f : 1f;
+        // O sprite original da Morte já está virado para a esquerda.
+        // Portanto, escala positiva olha para a Kaya quando ela está à esquerda;
+        // invertemos apenas quando o jogador está à direita.
+        float sinal = jogador.position.x < transform.position.x ? 1f : -1f;
         raizVisual.localScale = new Vector3(Mathf.Abs(escalaVisualOriginal.x) * sinal,
                                             escalaVisualOriginal.y, escalaVisualOriginal.z);
     }
@@ -268,6 +271,43 @@ public class MorteBossControllerGameplay : MonoBehaviour
     }
 
     public void ReceberDano(int quantidadeDano) => TomarDano(quantidadeDano);
+
+    private void OnDrawGizmosSelected()
+    {
+        // A IA mede distância apenas no eixo X; os gizmos mostram essa faixa horizontal.
+        Vector3 centro = transform.position;
+        float alturaGizmo = 35f;
+
+        // Alcance máximo para a boss perceber a Kaya.
+        Gizmos.color = new Color(1f, 0.85f, 0.1f, 1f);
+        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaDeteccao), alturaGizmo);
+
+        // Dentro desta faixa, a Morte prefere a investida; fora dela, usa os corvos.
+        Gizmos.color = new Color(1f, 0.25f, 0.25f, 1f);
+        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaDeteccao * 0.45f), alturaGizmo * 0.65f);
+
+        // Alcance máximo permitido para a investida.
+        Gizmos.color = new Color(0.2f, 0.85f, 1f, 1f);
+        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaMaximaInvestida), alturaGizmo * 1.3f);
+
+        if (jogador != null)
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawLine(centro, new Vector3(jogador.position.x, centro.y, centro.z));
+            Gizmos.DrawSphere(new Vector3(jogador.position.x, centro.y, centro.z), 5f);
+        }
+    }
+
+    private static void DesenharFaixaHorizontal(Vector3 centro, float distancia, float meiaAltura)
+    {
+        Vector3 esquerda = new Vector3(centro.x - distancia, centro.y, centro.z);
+        Vector3 direita = new Vector3(centro.x + distancia, centro.y, centro.z);
+        Gizmos.DrawLine(esquerda, direita);
+        Gizmos.DrawLine(esquerda + Vector3.up * meiaAltura, esquerda - Vector3.up * meiaAltura);
+        Gizmos.DrawLine(direita + Vector3.up * meiaAltura, direita - Vector3.up * meiaAltura);
+        Gizmos.DrawWireSphere(esquerda, 4f);
+        Gizmos.DrawWireSphere(direita, 4f);
+    }
 
     private void OnDisable()
     {
