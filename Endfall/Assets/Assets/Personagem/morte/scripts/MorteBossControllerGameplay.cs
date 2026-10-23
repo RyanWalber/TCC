@@ -2,8 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// IA da Morte. A vida, a barra e a derrota ficam no sistema universal BossVida.
-/// Este script cuida apenas dos dois ataques e das animações.
+/// Controla somente os ataques da Morte. Vida e barra são gerenciadas pelos componentes
+/// universais BossVida e BossHealthBarController.
 /// </summary>
 [DisallowMultipleComponent]
 public class MorteBossControllerGameplay : MonoBehaviour
@@ -15,17 +15,28 @@ public class MorteBossControllerGameplay : MonoBehaviour
     [SerializeField] private GameObject prefabCorvo;
     [SerializeField] private Transform pontoLancamentoCorvos;
 
-    [Header("Combate")]
-    [Min(1f)] [SerializeField] private float distanciaDeteccao = 800f;
+    [Header("Detecção")]
+    [Min(1f)] [SerializeField] private float distanciaDeteccao = 500f;
     [Min(0.1f)] [SerializeField] private float intervaloAtaques = 2.4f;
-    [Min(1)] [SerializeField] private int quantidadeCorvos = 5;
-    [Min(0.01f)] [SerializeField] private float intervaloCorvos = 0.13f;
+
+    [Header("Horda de corvos")]
+    [Min(1)] [SerializeField] private int quantidadeCorvos = 6;
+    [Min(0.05f)] [SerializeField] private float intervaloCorvos = 0.16f;
+    [Tooltip("Velocidade de voo dos corvos. Pode ser ajustada durante o balanceamento.")]
     [Min(1f)] [SerializeField] private float velocidadeCorvo = 520f;
-    [Min(0.1f)] [SerializeField] private float vidaCorvo = 4f;
-    [Min(0f)] [SerializeField] private float danoCorvo = 5f;
-    [Min(0f)] [SerializeField] private float danoFoice = 11f;
+
+    [Header("Investida")]
     [Min(1f)] [SerializeField] private float velocidadeInvestida = 900f;
-    [Min(0.1f)] [SerializeField] private float distanciaMaximaInvestida = 1100f;
+
+    private const int DanoCorvo = 5;
+    private const float DanoFoice = 11f;
+    private const float TempoVidaCorvo = 4f;
+    private const float TempoPreparacaoInvestida = 0.22f;
+    private const float AtrasoLancamentoCorvos = 0.65f;
+    private const float EspacamentoVerticalCorvos = 35f;
+    private const float DuracaoJanelaFoice = 0.8f;
+    private const float InicioJanelaFoice = 0.30f;
+    private const float FimJanelaFoice = 0.62f;
 
     private Rigidbody2D corpoFisico;
     private MorteFoiceHitbox hitboxFoice;
@@ -35,6 +46,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private bool movimentoAtivo;
     private bool atacando;
     private bool escalaCapturada;
+    private bool proximoAtaqueSeraCorvos = true;
 
     private static readonly int TriggerCorvos = Animator.StringToHash("AtaqueCorvos");
     private static readonly int TriggerInvestida = Animator.StringToHash("Investida");
@@ -49,6 +61,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
             corpoFisico.bodyType = RigidbodyType2D.Kinematic;
             corpoFisico.gravityScale = 0f;
             corpoFisico.freezeRotation = true;
+            corpoFisico.useFullKinematicContacts = true;
+            corpoFisico.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         }
 
         if (jogador == null)
@@ -72,6 +86,14 @@ public class MorteBossControllerGameplay : MonoBehaviour
         PrepararHitboxFoice();
     }
 
+    private void Start()
+    {
+        if (animator == null)
+            Debug.LogError("[Morte] Não encontrei o Animator nos filhos de BossMorte.", this);
+        if (prefabCorvo == null)
+            Debug.LogWarning("[Morte] Arraste o prefab Corvo para o campo Prefab Corvo.", this);
+    }
+
     private void Update()
     {
         if (jogador == null)
@@ -82,15 +104,22 @@ public class MorteBossControllerGameplay : MonoBehaviour
         }
 
         AtualizarOrientacao();
+
         if (atacando || Time.time < proximoAtaque) return;
 
-        if (Mathf.Abs(jogador.position.x - transform.position.x) > distanciaDeteccao)
+        // O círculo do Gizmo corresponde a esta mesma detecção por distância.
+        if (Vector2.Distance(transform.position, jogador.position) > distanciaDeteccao)
             return;
+
+        PlayerHealth vidaJogador = jogador.GetComponentInParent<PlayerHealth>();
+        if (vidaJogador == null)
+            vidaJogador = jogador.GetComponentInChildren<PlayerHealth>(true);
+        if (vidaJogador != null && vidaJogador.VidaAtual <= 0f) return;
 
         atacando = true;
 
-        // A horda é usada quando a Kaya está mais distante; perto, a Morte investe.
-        if (Mathf.Abs(jogador.position.x - transform.position.x) > distanciaDeteccao * 0.45f && prefabCorvo != null)
+        // Padrão fixo: horda de corvos -> investida -> horda -> investida.
+        if (proximoAtaqueSeraCorvos && prefabCorvo != null)
             StartCoroutine(AtaqueCorvos());
         else
             StartCoroutine(AtaqueInvestida());
@@ -115,12 +144,14 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private void AtualizarOrientacao()
     {
         if (jogador == null || raizVisual == null || !escalaCapturada) return;
-        // O sprite original da Morte já está virado para a esquerda.
-        // Portanto, escala positiva olha para a Kaya quando ela está à esquerda;
-        // invertemos apenas quando o jogador está à direita.
+
+        // A arte original já olha para a esquerda. Mantém a escala original
+        // quando Kaya está à esquerda e espelha apenas quando Kaya está à direita.
         float sinal = jogador.position.x < transform.position.x ? 1f : -1f;
-        raizVisual.localScale = new Vector3(Mathf.Abs(escalaVisualOriginal.x) * sinal,
-                                            escalaVisualOriginal.y, escalaVisualOriginal.z);
+        raizVisual.localScale = new Vector3(
+            Mathf.Abs(escalaVisualOriginal.x) * sinal,
+            escalaVisualOriginal.y,
+            escalaVisualOriginal.z);
     }
 
     private void PrepararHitboxFoice()
@@ -130,13 +161,15 @@ public class MorteBossControllerGameplay : MonoBehaviour
             if (col == null || !col.gameObject.name.ToLowerInvariant().Contains("foice")) continue;
 
             hitboxFoice = col.GetComponent<MorteFoiceHitbox>();
-            if (hitboxFoice == null) hitboxFoice = col.gameObject.AddComponent<MorteFoiceHitbox>();
-            hitboxFoice.ConfigurarDano(danoFoice);
+            if (hitboxFoice == null)
+                hitboxFoice = col.gameObject.AddComponent<MorteFoiceHitbox>();
+
+            hitboxFoice.ConfigurarDano(DanoFoice);
             hitboxFoice.DefinirAtiva(false);
             return;
         }
 
-        Debug.LogWarning("[Morte] Não encontrei Collider2D em um objeto com 'foice' no nome.", this);
+        Debug.LogWarning("[Morte] Não encontrei Collider2D num objeto cujo nome contém 'foice'.", this);
     }
 
     private IEnumerator AtaqueCorvos()
@@ -147,8 +180,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.SetTrigger(TriggerCorvos);
         }
 
-        // Dá tempo para a animação de lançamento começar.
-        yield return new WaitForSeconds(0.65f);
+        yield return new WaitForSeconds(AtrasoLancamentoCorvos);
 
         for (int i = 0; i < quantidadeCorvos; i++)
         {
@@ -157,7 +189,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
                 yield return new WaitForSeconds(intervaloCorvos);
         }
 
-        FinalizarAtaque();
+        FinalizarAtaque(foiHordaCorvos: true);
     }
 
     private void LancarCorvo(int indice)
@@ -169,22 +201,29 @@ public class MorteBossControllerGameplay : MonoBehaviour
             ? pontoLancamentoCorvos.position
             : transform.position + new Vector3(lado * 25f, 80f, 0f);
 
-        // Espalha as origens verticalmente e um pouco na horizontal para os corvos
-        // não aparecerem empilhados no mesmo ponto.
-        float altura = (indice - (quantidadeCorvos - 1) * 0.5f) * 13f;
-        float deslocamentoX = (indice % 2 == 0 ? -1f : 1f) * (5f + indice * 2f);
+        // Cada corvo sai de uma altura e deslocamento horizontal diferentes.
+        // A fileira se espalha para cima e para baixo, em vez de nascer empilhada.
+        float centro = (quantidadeCorvos - 1) * 0.5f;
+        float altura = (indice - centro) * EspacamentoVerticalCorvos;
+        float deslocamentoX = (indice % 2 == 0 ? -1f : 1f) * (8f + (indice / 2) * 12f);
         Vector3 origem = origemBase + new Vector3(deslocamentoX, altura, 0f);
 
         Vector2 direcao = ((Vector2)jogador.position - (Vector2)origem).normalized;
-        if (direcao.sqrMagnitude < 0.001f) direcao = new Vector2(lado, 0f);
+        if (direcao.sqrMagnitude < 0.001f)
+            direcao = new Vector2(lado, 0f);
 
         GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
         CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
-        if (projetil == null) projetil = corvo.AddComponent<CorvoBossProjectile>();
+        if (projetil == null)
+            projetil = corvo.AddComponent<CorvoBossProjectile>();
 
-        Collider2D[] collidersDono = GetComponentsInChildren<Collider2D>(true);
-        projetil.Configurar(direcao, velocidadeCorvo, Mathf.RoundToInt(danoCorvo), vidaCorvo,
-                            collidersDono, true);
+        projetil.Configurar(
+            direcao,
+            velocidadeCorvo,
+            DanoCorvo,
+            TempoVidaCorvo,
+            GetComponentsInChildren<Collider2D>(true),
+            arteOriginalOlhaEsquerda: true);
     }
 
     private IEnumerator AtaqueInvestida()
@@ -195,67 +234,80 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.SetTrigger(TriggerInvestida);
         }
 
-        yield return new WaitForSeconds(0.22f);
-        if (jogador == null) { FinalizarAtaque(); yield break; }
+        // Preparação da animação; o destino é capturado quando a investida começa de fato.
+        yield return new WaitForSeconds(TempoPreparacaoInvestida);
+        if (jogador == null)
+        {
+            FinalizarAtaque(foiHordaCorvos: false);
+            yield break;
+        }
 
-        // Captura a posição uma única vez: a Kaya pode desviar depois que a investida começa.
         float xJogadorNoInicio = jogador.position.x;
-        float direcao = Mathf.Sign(xJogadorNoInicio - transform.position.x);
-        if (Mathf.Approximately(direcao, 0f)) direcao = 1f;
-        float distancia = Mathf.Min(Mathf.Abs(xJogadorNoInicio - transform.position.x), distanciaMaximaInvestida);
-        destinoInvestidaX = transform.position.x + direcao * distancia;
-        movimentoAtivo = distancia > 0.5f;
+        float diferencaX = xJogadorNoInicio - transform.position.x;
+        bool longa = Mathf.Abs(diferencaX) > distanciaDeteccao * 0.45f;
+
+        // Destino fixo: mudanças de posição da Kaya depois deste ponto não alteram a rota.
+        destinoInvestidaX = xJogadorNoInicio;
+        movimentoAtivo = Mathf.Abs(destinoInvestidaX - transform.position.x) > 0.5f;
 
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
 
-        if (distancia > distanciaDeteccao * 0.45f && animator != null && animator.HasState(0, EstadoInvestidaLonga))
+        if (longa && animator != null && animator.HasState(0, EstadoInvestidaLonga))
             animator.Play(EstadoInvestidaLonga, 0, 0f);
 
         float tempo = 0f;
-        while (movimentoAtivo && tempo < 1.4f)
+        float distanciaInicial = Mathf.Abs(destinoInvestidaX - transform.position.x);
+        float limiteTempo = Mathf.Max(1.4f, distanciaInicial / Mathf.Max(1f, velocidadeInvestida) + 0.5f);
+
+        while (movimentoAtivo && tempo < limiteTempo)
         {
             tempo += Time.deltaTime;
             yield return null;
         }
+
         movimentoAtivo = false;
 
         if (animator != null && animator.HasState(0, EstadoAtaqueFoice))
             animator.Play(EstadoAtaqueFoice, 0, 0f);
 
+        yield return null;
         yield return StartCoroutine(JanelaFoice());
-        FinalizarAtaque();
+        FinalizarAtaque(foiHordaCorvos: false);
     }
 
     private IEnumerator JanelaFoice()
     {
         if (hitboxFoice == null)
         {
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSeconds(DuracaoJanelaFoice);
             yield break;
         }
 
         float tempo = 0f;
-        const float duracao = 0.8f;
-        while (tempo < duracao)
+        while (tempo < DuracaoJanelaFoice)
         {
-            float progresso = tempo / duracao;
-            hitboxFoice.DefinirAtiva(progresso >= 0.30f && progresso <= 0.62f);
+            float progresso = tempo / DuracaoJanelaFoice;
+            hitboxFoice.DefinirAtiva(
+                progresso >= InicioJanelaFoice && progresso <= FimJanelaFoice);
             tempo += Time.deltaTime;
             yield return null;
         }
+
         hitboxFoice.DefinirAtiva(false);
     }
 
-    private void FinalizarAtaque()
+    private void FinalizarAtaque(bool foiHordaCorvos)
     {
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
+
         movimentoAtivo = false;
         atacando = false;
         proximoAtaque = Time.time + intervaloAtaques;
+        proximoAtaqueSeraCorvos = !foiHordaCorvos;
     }
 
-    // Mantém compatibilidade com os projéteis que enviam dano por SendMessageUpwards.
-    // A vida real continua sendo controlada pelo componente universal BossVida.
+    // O projétil da Kaya envia dano inteiro pelo SendMessageUpwards.
+    // A vida e a barra continuam centralizadas no componente universal BossVida.
     public void TomarDano(int quantidadeDano)
     {
         if (quantidadeDano <= 0) return;
@@ -266,51 +318,19 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
         if (vidaUniversal != null)
             vidaUniversal.TomarDano(quantidadeDano);
-        else
-            Debug.LogWarning("[Morte] Não encontrei BossVida no pai ou nos filhos. Adicione o componente universal de vida da boss.", this);
     }
 
     public void ReceberDano(int quantidadeDano) => TomarDano(quantidadeDano);
 
     private void OnDrawGizmosSelected()
     {
-        // A IA mede distância apenas no eixo X; os gizmos mostram essa faixa horizontal.
-        Vector3 centro = transform.position;
-        float alturaGizmo = 35f;
-
-        // Alcance máximo para a boss perceber a Kaya.
         Gizmos.color = new Color(1f, 0.85f, 0.1f, 1f);
-        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaDeteccao), alturaGizmo);
-
-        // Dentro desta faixa, a Morte prefere a investida; fora dela, usa os corvos.
-        Gizmos.color = new Color(1f, 0.25f, 0.25f, 1f);
-        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaDeteccao * 0.45f), alturaGizmo * 0.65f);
-
-        // Alcance máximo permitido para a investida.
-        Gizmos.color = new Color(0.2f, 0.85f, 1f, 1f);
-        DesenharFaixaHorizontal(centro, Mathf.Max(0f, distanciaMaximaInvestida), alturaGizmo * 1.3f);
-
-        if (jogador != null)
-        {
-            Gizmos.color = Color.white;
-            Gizmos.DrawLine(centro, new Vector3(jogador.position.x, centro.y, centro.z));
-            Gizmos.DrawSphere(new Vector3(jogador.position.x, centro.y, centro.z), 5f);
-        }
-    }
-
-    private static void DesenharFaixaHorizontal(Vector3 centro, float distancia, float meiaAltura)
-    {
-        Vector3 esquerda = new Vector3(centro.x - distancia, centro.y, centro.z);
-        Vector3 direita = new Vector3(centro.x + distancia, centro.y, centro.z);
-        Gizmos.DrawLine(esquerda, direita);
-        Gizmos.DrawLine(esquerda + Vector3.up * meiaAltura, esquerda - Vector3.up * meiaAltura);
-        Gizmos.DrawLine(direita + Vector3.up * meiaAltura, direita - Vector3.up * meiaAltura);
-        Gizmos.DrawWireSphere(esquerda, 4f);
-        Gizmos.DrawWireSphere(direita, 4f);
+        Gizmos.DrawWireSphere(transform.position, distanciaDeteccao);
     }
 
     private void OnDisable()
     {
+        StopAllCoroutines();
         movimentoAtivo = false;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
     }
