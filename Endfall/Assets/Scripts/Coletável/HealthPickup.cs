@@ -126,7 +126,17 @@ public class HealthPickup : MonoBehaviour
 
         foreach (HealthPickup elixir in elixiresDaCena)
         {
-            if (!string.IsNullOrWhiteSpace(elixir.idUnico) && utilizados.Add(elixir.idUnico))
+            // Um prefab duplicado pode herdar o mesmo ID em cenas DIFERENTES.
+            // Nao basta procurar duplicatas so na cena atualmente aberta:
+            // IDs herdados do asset precisam virar overrides exclusivos.
+            HealthPickup origem = PrefabUtility.GetCorrespondingObjectFromSource(elixir);
+            bool idHerdadoDoPrefab = origem != null &&
+                !string.IsNullOrWhiteSpace(elixir.idUnico) &&
+                elixir.idUnico == origem.idUnico;
+
+            if (!idHerdadoDoPrefab &&
+                !string.IsNullOrWhiteSpace(elixir.idUnico) &&
+                utilizados.Add(elixir.idUnico))
                 continue;
 
             string novoId;
