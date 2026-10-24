@@ -1,5 +1,9 @@
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class HealthPickup : MonoBehaviour
 {
     [Header("Configuração do elixir")]
@@ -13,9 +17,9 @@ public class HealthPickup : MonoBehaviour
         if (string.IsNullOrWhiteSpace(idUnico))
             GerarNovoId();
 
-        // Corrige IDs repetidos entre instâncias colocadas na cena.
-        // A instância com o ID de instância do Unity maior recebe um novo ID,
-        // evitando que todas as poções sejam registradas como uma só.
+#if UNITY_EDITOR
+        // No Editor, detecta IDs repetidos entre objetos da cena sem usar
+        // GetInstanceID(), que está obsoleto nas versões recentes do Unity.
         if (!gameObject.scene.IsValid() || !gameObject.scene.isLoaded)
             return;
 
@@ -25,13 +29,17 @@ public class HealthPickup : MonoBehaviour
             if (outro == this || outro.idUnico != idUnico)
                 continue;
 
-            if (GetInstanceID() > outro.GetInstanceID())
-            {
+            string meuIdGlobal = GlobalObjectId.GetGlobalObjectIdSlow(this).ToString();
+            string outroIdGlobal = GlobalObjectId.GetGlobalObjectIdSlow(outro).ToString();
+
+            // Mantém o ID no objeto cujo identificador global vem primeiro.
+            // O outro recebe um novo ID quando o Unity validar esse objeto.
+            if (string.CompareOrdinal(meuIdGlobal, outroIdGlobal) > 0)
                 GerarNovoId();
-            }
 
             break;
         }
+#endif
     }
 
     private void GerarNovoId()
@@ -41,7 +49,8 @@ public class HealthPickup : MonoBehaviour
 
     private void Start()
     {
-        // Mantém um ID estável durante as execuções para o salvamento funcionar.
+        // Não gerar um ID novo a cada inicialização: ele precisa continuar
+        // igual para que o sistema de salvamento reconheça a poção coletada.
         if (string.IsNullOrWhiteSpace(idUnico))
             GerarNovoId();
 
