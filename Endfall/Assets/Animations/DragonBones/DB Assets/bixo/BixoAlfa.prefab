@@ -367,16 +367,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b292a0bf7f6eb834ea4d5d3564b0ebea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoParado
-  armatureComponent: {fileID: 0}
+  armatureComponent: {fileID: 8097832843650113953}
   raioDeteccao: 120
   offsetDeteccao: {x: 40, y: 25}
   alturaEmergir: 67.8
-  velocidadeSubida: 2
+  velocidadeSubida: 20
   player: {fileID: 0}
   tempoAvisoPoeira: 0.8
   quantidadeParticulasPoeira: 18
   efeitoPoeira: {fileID: 0}
   offsetPoeira: {x: 32, y: 78, z: 0}
   vidaMaxima: 20
-  danoNoJogador: 15
+  danoNoJogador: 20
   forcaEmpurrao: 1000
