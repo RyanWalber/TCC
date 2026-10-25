@@ -41,9 +41,12 @@ public class PlayerController : MonoBehaviour
     private SistemaFuria sistemaFuria;
 
     public bool EstaDandoDash => estaDandoDash;
+    public bool EstaMovendoNoChao => estaNoChao && !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.1f;
+    private KayaAudioManager audioKaya;
 
     void Start()
     {
+        audioKaya = GetComponent<KayaAudioManager>();
         rb = GetComponent<Rigidbody2D>();
         colliderJogador = GetComponent<Collider2D>();
         sistemaFuria = GetComponent<SistemaFuria>();
@@ -189,6 +192,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (audioKaya != null) audioKaya.TocarPulo();
         contadorCoyote = 0f;
         estaSubindoPulo = true;
         estaNoChao = false;
@@ -272,6 +276,8 @@ public class PlayerController : MonoBehaviour
         {
             if (contato.normal.y > 0.5f)
             {
+                if (!estaNoChao && !estaDandoDash && audioKaya != null)
+                    audioKaya.TocarAterrissagem();
                 estaNoChao = true;
                 pulosRestantes = maxPulos;
 
@@ -286,6 +292,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator ExecutarDash()
     {
+        if (audioKaya != null) audioKaya.TocarDash();
         podeDarDash = false;
         estaDandoDash = true;
         direcaoDash = inputHorizontal;
