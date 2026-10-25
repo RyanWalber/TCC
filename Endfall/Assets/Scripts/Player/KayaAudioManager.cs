@@ -9,6 +9,12 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField] private AudioSource fontePassos;
     [SerializeField] private AudioSource fonteRespiracaoNormal;
     [SerializeField] private AudioSource fonteRespiracaoCansada;
+    [SerializeField] private AudioSource fonteAmbiente;
+
+    [Header("Ambiente da fase (loop 2D)")]
+    [Tooltip("Vento ou som de fundo da fase. Deixe vazio para explorar em silencio.")]
+    [SerializeField] private AudioClip somAmbiente;
+    [SerializeField, Range(0f, 1f)] private float volumeAmbiente = 0.25f;
 
     [Header("Movimentacao")]
     [SerializeField] private AudioClip passos;
@@ -83,6 +89,12 @@ public class KayaAudioManager : MonoBehaviour
             fonteRespiracaoCansada == fonteRespiracaoNormal)
             fonteRespiracaoCansada = CriarFonte("Audio - Respiracao Cansada");
 
+        // O ambiente precisa de uma fonte propria para nao interromper os efeitos da Kaya.
+        if (fonteAmbiente == null || fonteAmbiente == fonteEfeitos ||
+            fonteAmbiente == fontePassos || fonteAmbiente == fonteRespiracaoNormal ||
+            fonteAmbiente == fonteRespiracaoCansada)
+            fonteAmbiente = CriarFonte("Audio - Ambiente da Fase");
+
         // Compatibilidade com os clips que ja foram arrastados para os AudioSources.
         if (tiro == null && fonteEfeitos.clip != null) tiro = fonteEfeitos.clip;
         if (respiracaoNormal == null && fonteRespiracaoNormal.clip != null)
@@ -92,12 +104,15 @@ public class KayaAudioManager : MonoBehaviour
         ConfigurarFonte(fontePassos, false);
         ConfigurarFonte(fonteRespiracaoNormal, true);
         ConfigurarFonte(fonteRespiracaoCansada, true);
+        ConfigurarFonte(fonteAmbiente, true);
 
         // So as fontes de respiracao tocam continuamente.
         fonteEfeitos.Stop();
         fontePassos.Stop();
         IniciarRespiracao(fonteRespiracaoNormal, respiracaoNormal, volumeRespiracaoNormal);
         IniciarRespiracao(fonteRespiracaoCansada, respiracaoCansada, 0f);
+        // Um loop independente para vento/ambiencia, sem piano nem musica obrigatoria.
+        IniciarRespiracao(fonteAmbiente, somAmbiente, volumeAmbiente);
     }
 
     private AudioSource CriarFonte(string nome)
