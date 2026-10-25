@@ -34,9 +34,11 @@ public class PlayerHealth : MonoBehaviour
 
     private bool estaInvencivel = false;
     private bool estaMorta = false;
+    private KayaAudioManager audioKaya;
 
     private void Start()
     {
+        audioKaya = GetComponent<KayaAudioManager>();
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
 
@@ -96,6 +98,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (estaMorta || estaInvencivel) return;
 
+        if (audioKaya != null) audioKaya.TocarDano();
         vidaAtual -= quantidadeDano;
         vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
@@ -158,6 +161,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (estaMorta) return;
         estaMorta = true;
+        if (audioKaya != null) audioKaya.TocarMorte();
 
         // A morte restaura o último checkpoint, sem abrir Game Over.
         if (SaveManager.Instance != null)
