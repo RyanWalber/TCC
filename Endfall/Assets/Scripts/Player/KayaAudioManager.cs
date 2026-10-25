@@ -17,9 +17,19 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float volumeAmbiente = 0.25f;
 
     [Header("Movimentacao")]
+    [Tooltip("Passo unico (usado quando nao ha variacoes preenchidas).")]
     [SerializeField] private AudioClip passos;
+    [Tooltip("Opcional: arraste aqui as quatro pisadas para alternar automaticamente.")]
+    [SerializeField] private AudioClip[] variacoesPassos;
     [SerializeField, Range(0f, 1f)] private float volumePassos = 0.35f;
-    [SerializeField, Min(0.1f)] private float intervaloPassos = 0.32f;
+
+    [Header("Sincronia dos passos com a animacao")]
+    [Tooltip("Nome do estado de caminhada no Animator da Kaya.")]
+    [SerializeField] private string estadoAnimacaoAndar = "kayandando";
+    [Tooltip("Instante da primeira pisada dentro do ciclo da animacao (0 a 1).")]
+    [SerializeField, Range(0f, 1f)] private float fasePrimeiraPisada = 0.15f;
+    [Tooltip("Instante da segunda pisada dentro do ciclo da animacao (0 a 1).")]
+    [SerializeField, Range(0f, 1f)] private float faseSegundaPisada = 0.65f;
     [SerializeField] private AudioClip pulo;
     [SerializeField, Range(0f, 1f)] private float volumePulo = 0.65f;
     [SerializeField] private AudioClip aterrissagem;
@@ -58,7 +68,11 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float volumeCheckpoint = 0.7f;
 
     private PlayerController movimento;
-    private float proximoPasso;
+    private Animator animatorPassos;
+    private int hashEstadoAndar;
+    private float ultimoTempoDaAnimacao;
+    private bool passosSincronizados;
+    private int indiceVariacaoPasso;
     private float ultimoEventoCombate = float.NegativeInfinity;
     private float misturaCansaco;
     private bool morreu;
@@ -66,6 +80,8 @@ public class KayaAudioManager : MonoBehaviour
     private void Awake()
     {
         movimento = GetComponentInParent<PlayerController>();
+        animatorPassos = GetComponentInChildren<Animator>(true);
+        hashEstadoAndar = Animator.StringToHash(estadoAnimacaoAndar);
 
         // Aproveita os dois AudioSources que ja estavam configurados no TiroPlayer.
         TiroPlayer tiroAnterior = GetComponentInChildren<TiroPlayer>(true);
@@ -143,19 +159,76 @@ public class KayaAudioManager : MonoBehaviour
     {
         if (morreu) return;
 
-        AtualizarPassos();
         AtualizarRespiracao();
+    }
+
+    // O Animator atualiza sua pose antes do LateUpdate.
+    // Assim, as pisadas seguem o ciclo REAL da animacao, mesmo se sua velocidade mudar.
+    private void LateUpdate()
+    {
+        if (!morreu)
+            AtualizarPassos();
     }
 
     private void AtualizarPassos()
     {
-        if (passos == null || movimento == null || !movimento.EstaMovendoNoChao)
+        if (movimento == null || !movimento.EstaMovendoNoChao ||
+            animatorPassos == null || !animatorPassos.isActiveAndEnabled ||
+            animatorPassos.IsInTransition(0))
+        {
+            passosSincronizados = false;
             return;
+        }
 
-        if (Time.time < proximoPasso) return;
+        AnimatorStateInfo estado = animatorPassos.GetCurrentAnimatorStateInfo(0);
+        if (estado.shortNameHash != hashEstadoAndar)
+        {
+            passosSincronizados = false;
+            return;
+        }
 
-        fontePassos.PlayOneShot(passos, volumePassos);
-        proximoPasso = Time.time + intervaloPassos;
+        float tempoAtual = estado.normalizedTime;
+        if (!passosSincronizados || tempoAtual < ultimoTempoDaAnimacao)
+        {
+            ultimoTempoDaAnimacao = tempoAtual;
+            passosSincronizados = true;
+            return;
+        }
+
+        // normalizedTime avanca por ciclos: 0..1, 1..2, 2..3...
+        // Detectar a passagem por cada marca impede que o som derive do movimento.
+        if (Mathf.FloorToInt(tempoAtual - fasePrimeiraPisada) >
+            Mathf.FloorToInt(ultimoTempoDaAnimacao - fasePrimeiraPisada))
+            TocarUmaPisada();
+
+        if (Mathf.FloorToInt(tempoAtual - faseSegundaPisada) >
+            Mathf.FloorToInt(ultimoTempoDaAnimacao - faseSegundaPisada))
+            TocarUmaPisada();
+
+        ultimoTempoDaAnimacao = tempoAtual;
+    }
+
+    private void TocarUmaPisada()
+    {
+        if (fontePassos == null) return;
+
+        AudioClip clip = passos;
+        if (variacoesPassos != null && variacoesPassos.Length > 0)
+        {
+            // Busca a proxima variacao valida, sem exigir todos os campos preenchidos.
+            for (int i = 0; i < variacoesPassos.Length; i++)
+            {
+                int posicao = (indiceVariacaoPasso + i) % variacoesPassos.Length;
+                if (variacoesPassos[posicao] == null) continue;
+
+                clip = variacoesPassos[posicao];
+                indiceVariacaoPasso = (posicao + 1) % variacoesPassos.Length;
+                break;
+            }
+        }
+
+        if (clip != null)
+            fontePassos.PlayOneShot(clip, volumePassos);
     }
 
     private void AtualizarRespiracao()
