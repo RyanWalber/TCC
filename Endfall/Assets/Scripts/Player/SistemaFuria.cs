@@ -33,11 +33,13 @@ public class SistemaFuria : MonoBehaviour
     [SerializeField] private KeyCode teclaFuria = KeyCode.Q;
 
     private bool estaEmFuria = false;
+    private KayaAudioManager audioKaya;
 
     public bool EstaEmFuria => estaEmFuria;
 
     private void Start()
     {
+        audioKaya = GetComponent<KayaAudioManager>();
         // Carrega a Fúria escolhida no slot ou preservada pelo renascimento.
         if (SaveManager.Instance != null)
             furiaAtual = Mathf.Clamp(SaveManager.Instance.GetFuriaKaya(), 0f, furiaMaxima);
@@ -93,6 +95,7 @@ public class SistemaFuria : MonoBehaviour
     private void AtivarFuria()
     {
         estaEmFuria = true;
+        if (audioKaya != null) audioKaya.TocarAtivarFuria();
         AtualizarEfeitosVisuais();
         Debug.Log(">>> MODO FÚRIA ATIVADO! <<<");
     }
@@ -100,6 +103,7 @@ public class SistemaFuria : MonoBehaviour
     private void DesativarFuria()
     {
         estaEmFuria = false;
+        if (audioKaya != null) audioKaya.TocarDesativarFuria();
         AtualizarEfeitosVisuais();
         Debug.Log("Fúria Desativada.");
     }
