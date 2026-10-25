@@ -25,6 +25,8 @@ public class Checkpoint : MonoBehaviour
         if (!jaAtivado && other.CompareTag("Player"))
         {
             jaAtivado = true;
+            KayaAudioManager audioKaya = other.GetComponentInParent<KayaAudioManager>();
+            if (audioKaya != null) audioKaya.TocarCheckpoint();
 
             // 1. Acende o fogo da pira
             if (fogoParticulas != null)
