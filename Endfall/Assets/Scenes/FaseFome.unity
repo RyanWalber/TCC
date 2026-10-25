@@ -27891,10 +27891,6 @@ PrefabInstance:
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1386497101}
-    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: velocidade
-      value: 140
-      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4280
@@ -27944,8 +27940,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8744568874949199937, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9137787154099114290}
+      insertIndex: 7
+      addedObject: {fileID: 9137787154099114298}
   m_SourcePrefab: {fileID: 100100000, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
 --- !u!212 &6859040141217149431
 SpriteRenderer:
@@ -29082,103 +29078,59 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
   m_PrefabInstance: {fileID: 6724941423854766951}
   m_PrefabAsset: {fileID: 0}
---- !u!82 &9137787154099114290
-AudioSource:
+--- !u!114 &9137787154099114298
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 674495939386932264}
   m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 666b5afb89b4d6949b26828183d985fa, type: 3}
-  m_PlayOnAwake: 0
-  m_Volume: 0.5
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c197e8640b0baa64a9b9e8730a13f6f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KayaAudioManager
+  fonteEfeitos: {fileID: 0}
+  fontePassos: {fileID: 0}
+  fonteRespiracaoNormal: {fileID: 0}
+  fonteRespiracaoCansada: {fileID: 0}
+  fonteAmbiente: {fileID: 0}
+  somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
+  volumeAmbiente: 0.25
+  passos: {fileID: 8300000, guid: 60274b222f5ec194a8f8e59e2a0710af, type: 3}
+  variacoesPassos: []
+  volumePassos: 0.16
+  estadoAnimacaoAndar: kayandando
+  fasePrimeiraPisada: 0.15
+  faseSegundaPisada: 0.65
+  pulo: {fileID: 0}
+  volumePulo: 0.65
+  aterrissagem: {fileID: 0}
+  volumeAterrissagem: 0.55
+  dash: {fileID: 0}
+  volumeDash: 0.65
+  tiro: {fileID: 0}
+  volumeTiro: 0.7
+  receberDano: {fileID: 0}
+  volumeDano: 0.75
+  morte: {fileID: 0}
+  volumeMorte: 0.8
+  ativarFuria: {fileID: 0}
+  volumeAtivarFuria: 0.7
+  desativarFuria: {fileID: 0}
+  volumeDesativarFuria: 0.6
+  respiracaoNormal: {fileID: 0}
+  volumeRespiracaoNormal: 0.12
+  respiracaoCansada: {fileID: 0}
+  volumeRespiracaoCansada: 0.55
+  esperaAposCombate: 3
+  duracaoFolegoPesado: 2
+  tempoRecuperacao: 8
+  suavidadeTransicao: 1
+  coletarElixir: {fileID: 0}
+  volumeElixir: 0.65
+  ativarCheckpoint: {fileID: 0}
+  volumeCheckpoint: 0.7
 --- !u!1 &9187884540879588011
 GameObject:
   m_ObjectHideFlags: 0
