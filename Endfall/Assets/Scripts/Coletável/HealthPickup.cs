@@ -67,6 +67,8 @@ public class HealthPickup : MonoBehaviour
         if (vida == null || vida.VidaAtual >= vida.VidaMaxima) return;
 
         vida.RecuperarVida(quantidadeVida);
+        KayaAudioManager audioKaya = vida.GetComponent<KayaAudioManager>();
+        if (audioKaya != null) audioKaya.TocarElixir();
 
         if (SaveManager.Instance != null && !string.IsNullOrWhiteSpace(idUnico))
             SaveManager.Instance.RegistrarElixirVidaColetado(idUnico);
