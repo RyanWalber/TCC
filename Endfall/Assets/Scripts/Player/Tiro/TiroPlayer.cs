@@ -20,6 +20,10 @@ public class TiroPlayer : MonoBehaviour
     [SerializeField, Min(0f)] private float esperaDepoisCombate = 3f;
     [SerializeField, Min(0.1f)] private float tempoRecuperacao = 8f;
 
+    public AudioSource FonteAudioTiro => audioTiro;
+    public AudioSource FonteAudioRespiracao => audioRespiracao;
+    private KayaAudioManager audioKaya;
+
     private float tempoProximoTiro;
     private float ultimoEventoCombate = -1000f;
     private bool recuperandoFolego;
@@ -29,8 +33,9 @@ public class TiroPlayer : MonoBehaviour
     private void Start()
     {
         sistemaFuria = GetComponentInParent<SistemaFuria>();
+        audioKaya = GetComponentInParent<KayaAudioManager>();
 
-        if (audioRespiracao != null)
+        if (audioKaya == null && audioRespiracao != null)
         {
             audioRespiracao.loop = true;
             audioRespiracao.volume = volumeRespiracaoNormal;
@@ -51,7 +56,7 @@ public class TiroPlayer : MonoBehaviour
                 tempoProximoTiro = Time.time + cadenciaEfetiva;
         }
 
-        AtualizarRespiracao();
+        if (audioKaya == null) AtualizarRespiracao();
     }
 
     private bool Atirar()
@@ -67,7 +72,8 @@ public class TiroPlayer : MonoBehaviour
             Instantiate(prefabEfeitoFogo, pontoDeDisparo.position, pontoDeDisparo.rotation, pontoDeDisparo);
 
         // PlayOneShot permite disparos seguidos sem cortar o som anterior.
-        if (audioTiro != null && audioTiro.clip != null)
+        if (audioKaya != null) audioKaya.TocarTiro();
+        else if (audioTiro != null && audioTiro.clip != null)
             audioTiro.PlayOneShot(audioTiro.clip, volumeTiro);
 
         RegistrarAcaoCombate();
@@ -76,6 +82,7 @@ public class TiroPlayer : MonoBehaviour
 
     public void RegistrarAcaoCombate()
     {
+        if (audioKaya != null) { audioKaya.RegistrarCombate(); return; }
         ultimoEventoCombate = Time.time;
         recuperandoFolego = false;
         if (audioRespiracao != null)
