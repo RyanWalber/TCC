@@ -36,9 +36,20 @@ public class PlayerHealth : MonoBehaviour
     private bool estaMorta = false;
     private KayaAudioManager audioKaya;
 
+    [Header("Animacao de Morte")]
+    [SerializeField] private Animator animatorKaya;
+    [SerializeField, Min(0.1f)] private float duracaoMorteFallback = 2.5f;
+    private static readonly int TriggerMorrer = Animator.StringToHash("Morrer");
+
     private void Start()
     {
         audioKaya = GetComponent<KayaAudioManager>();
+        if (animatorKaya == null)
+        {
+            PlayerAnimation animacao = GetComponentInChildren<PlayerAnimation>(true);
+            if (animacao != null) animatorKaya = animacao.GetComponent<Animator>();
+            if (animatorKaya == null) animatorKaya = GetComponentInChildren<Animator>(true);
+        }
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
 
@@ -161,16 +172,87 @@ public class PlayerHealth : MonoBehaviour
     {
         if (estaMorta) return;
         estaMorta = true;
+
+        // Impede que a rotina de invencibilidade altere as cores durante a morte.
+        StopAllCoroutines();
+
+        PlayerController controle = GetComponent<PlayerController>();
+        if (controle != null) controle.enabled = false;
+
+        TiroPlayer[] armas = GetComponentsInChildren<TiroPlayer>(true);
+        foreach (TiroPlayer arma in armas)
+            arma.enabled = false;
+
+        Rigidbody2D corpo = GetComponent<Rigidbody2D>();
+        if (corpo != null)
+        {
+            corpo.linearVelocity = Vector2.zero;
+            corpo.angularVelocity = 0f;
+            corpo.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+
         if (audioKaya != null) audioKaya.TocarMorte();
 
-        // A morte restaura o último checkpoint, sem abrir Game Over.
+        if (animatorKaya != null && animatorKaya.isActiveAndEnabled)
+        {
+            animatorKaya.ResetTrigger(TriggerMorrer);
+            animatorKaya.SetTrigger(TriggerMorrer);
+            StartCoroutine(AguardarAnimacaoMorte());
+        }
+        else
+        {
+            // Sem Animator valido, conserva o comportamento antigo de renascimento.
+            RenascerDepoisDaMorte();
+        }
+    }
+
+    private IEnumerator AguardarAnimacaoMorte()
+    {
+        // O Animator pode processar o Trigger apenas no proximo frame.
+        float tempoEsperaEstado = 0f;
+        while (tempoEsperaEstado < 1f)
+        {
+            if (animatorKaya == null) break;
+            AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
+            if (estado.IsName("kayamorrendo")) break;
+            tempoEsperaEstado += Time.deltaTime;
+            yield return null;
+        }
+
+        if (animatorKaya != null &&
+            animatorKaya.GetCurrentAnimatorStateInfo(0).IsName("kayamorrendo"))
+        {
+            // Aguarda o fim do estado real, mesmo que a duracao da animacao mude.
+            float seguranca = 0f;
+            float limite = Mathf.Max(duracaoMorteFallback, 0.5f) + 30f;
+            while (seguranca < limite)
+            {
+                AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
+                if (!estado.IsName("kayamorrendo") || estado.normalizedTime >= 1f)
+                    break;
+
+                seguranca += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerHealth] Estado 'kayamorrendo' nao encontrado no Animator. Confira o Trigger 'Morrer'.", this);
+            yield return new WaitForSeconds(duracaoMorteFallback);
+        }
+
+        RenascerDepoisDaMorte();
+    }
+
+    private void RenascerDepoisDaMorte()
+    {
+        // Mantem o save e o checkpoint existentes, apenas adiando a chamada.
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.RenascerNoCheckpoint();
             return;
         }
 
-        // Fallback para cenas de teste que não tenham SaveManager.
         Time.timeScale = 1f;
         AudioListener.pause = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
