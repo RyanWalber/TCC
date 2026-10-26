@@ -11,6 +11,8 @@ public class MiraMouse : MonoBehaviour
     [SerializeField] private float velocidadeTransicao = 12f;
 
     private Camera cameraPrincipal;
+    private PlayerHealth vidaKaya;
+    private bool orientacaoCongeladaNaMorte;
     private Vector3 posicaoOriginalKaya;
     private Transform centroDoPersonagem;
 
@@ -20,6 +22,7 @@ public class MiraMouse : MonoBehaviour
     void Start()
     {
         cameraPrincipal = Camera.main;
+        vidaKaya = GetComponentInParent<PlayerHealth>();
         centroDoPersonagem = transform.root;
 
         if (aniKaya == null && transform.parent != null)
@@ -35,6 +38,20 @@ public class MiraMouse : MonoBehaviour
 
     void LateUpdate()
     {
+        // Nao sobrescreve a rotacao do objeto Ani Kaya quando a animacao
+        // de morte o coloca na horizontal. A mira continua normal em vida.
+        if (vidaKaya != null && vidaKaya.VidaAtual <= 0f)
+        {
+            if (!orientacaoCongeladaNaMorte)
+            {
+                // Recoloca a pose da arma sob controle exclusivo da animacao.
+                timerTiro = 0f;
+                pesoMira = 0f;
+                orientacaoCongeladaNaMorte = true;
+            }
+            return;
+        }
+
         if (cameraPrincipal == null || aniKaya == null) return;
 
         Quaternion rotacaoAnimacao = transform.localRotation;
