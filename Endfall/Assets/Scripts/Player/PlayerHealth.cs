@@ -39,6 +39,15 @@ public class PlayerHealth : MonoBehaviour
     [Header("Animacao de Morte")]
     [SerializeField] private Animator animatorKaya;
     [SerializeField, Min(0.1f)] private float duracaoMorteFallback = 2.5f;
+
+    [Header("Estabilizacao visual durante a morte")]
+    [Tooltip("Objeto visual que recebe a animacao. Se vazio, usa o objeto do Animator.")]
+    [SerializeField] private Transform visualKaya;
+    [Tooltip("Impede que a animacao desloque a Kaya para frente e para tras no eixo X. Nao bloqueia a rotacao nem os ossos.")]
+    [SerializeField] private bool travarPosicaoHorizontalNaMorte = true;
+
+    private float posicaoXVisualNaMorte;
+    private bool posicaoMorteCapturada;
     private static readonly int TriggerMorrer = Animator.StringToHash("Morrer");
 
     private void Start()
@@ -50,6 +59,9 @@ public class PlayerHealth : MonoBehaviour
             if (animacao != null) animatorKaya = animacao.GetComponent<Animator>();
             if (animatorKaya == null) animatorKaya = GetComponentInChildren<Animator>(true);
         }
+        if (visualKaya == null && animatorKaya != null)
+            visualKaya = animatorKaya.transform;
+
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
 
@@ -103,6 +115,20 @@ public class PlayerHealth : MonoBehaviour
                 : SaveManager.Instance.GetFuriaKaya();
             SaveManager.Instance.AtualizarStatusKaya(vidaAtual, furiaAtual);
         }
+    }
+
+    private void LateUpdate()
+    {
+        // O Animator aplica os keyframes antes do LateUpdate.
+        // Somente durante a morte: neutraliza deslocamentos horizontais do
+        // objeto visual, mantendo a pose, rotacao e movimento dos ossos.
+        if (!estaMorta || !travarPosicaoHorizontalNaMorte ||
+            !posicaoMorteCapturada || visualKaya == null)
+            return;
+
+        Vector3 posicao = visualKaya.localPosition;
+        posicao.x = posicaoXVisualNaMorte;
+        visualKaya.localPosition = posicao;
     }
 
     public void TomarDano(float quantidadeDano)
@@ -175,6 +201,16 @@ public class PlayerHealth : MonoBehaviour
 
         // Impede que a rotina de invencibilidade altere as cores durante a morte.
         StopAllCoroutines();
+
+        if (visualKaya != null)
+        {
+            posicaoXVisualNaMorte = visualKaya.localPosition.x;
+            posicaoMorteCapturada = true;
+        }
+
+        // Desativa toda a mira para nao disputar a rotacao com a animacao de morte.
+        foreach (MiraMouse mira in GetComponentsInChildren<MiraMouse>(true))
+            mira.enabled = false;
 
         PlayerController controle = GetComponent<PlayerController>();
         if (controle != null) controle.enabled = false;
