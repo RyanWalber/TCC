@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 9067443130348859836}
   - component: {fileID: 644927710069476239}
   - component: {fileID: 4098034864036435177}
+  - component: {fileID: 5637321679780660970}
   - component: {fileID: 3828932577259812292}
   - component: {fileID: 2501818598126200591}
   m_Layer: 0
@@ -228,6 +229,59 @@ MonoBehaviour:
   painelGameOver: {fileID: 0}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   tempoInvencivel: 0.8
+--- !u!114 &5637321679780660970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8744568874949199937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c197e8640b0baa64a9b9e8730a13f6f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KayaAudioManager
+  fonteEfeitos: {fileID: 0}
+  fontePassos: {fileID: 0}
+  fonteRespiracaoNormal: {fileID: 0}
+  fonteRespiracaoCansada: {fileID: 0}
+  fonteAmbiente: {fileID: 0}
+  somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
+  volumeAmbiente: 0.25
+  passos: {fileID: 8300000, guid: 60274b222f5ec194a8f8e59e2a0710af, type: 3}
+  variacoesPassos: []
+  volumePassos: 0.16
+  estadoAnimacaoAndar: kayandando
+  fasePrimeiraPisada: 0.15
+  faseSegundaPisada: 0.65
+  pulo: {fileID: 0}
+  volumePulo: 0.65
+  aterrissagem: {fileID: 0}
+  volumeAterrissagem: 0.55
+  dash: {fileID: 0}
+  volumeDash: 0.65
+  tiro: {fileID: 0}
+  volumeTiro: 0.7
+  receberDano: {fileID: 0}
+  volumeDano: 0.75
+  morte: {fileID: 0}
+  volumeMorte: 0.8
+  ativarFuria: {fileID: 0}
+  volumeAtivarFuria: 0.7
+  desativarFuria: {fileID: 0}
+  volumeDesativarFuria: 0.6
+  respiracaoNormal: {fileID: 0}
+  volumeRespiracaoNormal: 0.12
+  respiracaoCansada: {fileID: 0}
+  volumeRespiracaoCansada: 0.55
+  esperaAposCombate: 3
+  duracaoFolegoPesado: 2
+  tempoRecuperacao: 8
+  suavidadeTransicao: 1
+  coletarElixir: {fileID: 0}
+  volumeElixir: 0.65
+  ativarCheckpoint: {fileID: 0}
+  volumeCheckpoint: 0.7
 --- !u!82 &3828932577259812292
 AudioSource:
   m_ObjectHideFlags: 0
