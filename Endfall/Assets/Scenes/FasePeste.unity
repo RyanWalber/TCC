@@ -127,6 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
+      propertyPath: idUnico
+      value: 0f680b7d717f4801afb3955329ddc50b
+      objectReference: {fileID: 0}
     - target: {fileID: 3727759709875968788, guid: a209f35f5b804d94a8acba448269225d, type: 3}
       propertyPath: m_Name
       value: Vida (1)
@@ -1660,6 +1664,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
+      propertyPath: idUnico
+      value: 7358ed09b10b4dca87970c7c68a001b4
+      objectReference: {fileID: 0}
     - target: {fileID: 3727759709875968788, guid: a209f35f5b804d94a8acba448269225d, type: 3}
       propertyPath: m_Name
       value: Vida (3)
@@ -12331,6 +12339,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
+      propertyPath: idUnico
+      value: ef530d44f9ed477e820393c3445254d4
+      objectReference: {fileID: 0}
     - target: {fileID: 3727759709875968788, guid: a209f35f5b804d94a8acba448269225d, type: 3}
       propertyPath: m_Name
       value: Vida
@@ -13349,6 +13361,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
+      propertyPath: idUnico
+      value: 21dd293fa18442b0bf4d4de3897ec582
+      objectReference: {fileID: 0}
     - target: {fileID: 3727759709875968788, guid: a209f35f5b804d94a8acba448269225d, type: 3}
       propertyPath: m_Name
       value: Vida (2)
@@ -24348,7 +24364,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &904815470
 Transform:
   m_ObjectHideFlags: 0
@@ -24389,10 +24405,6 @@ PrefabInstance:
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1825194628}
-    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: velocidade
-      value: 150
-      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6050
@@ -151048,6 +151060,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
+      propertyPath: idUnico
+      value: 0d8ac930f232418eaa330eef8d382730
+      objectReference: {fileID: 0}
     - target: {fileID: 3727759709875968788, guid: a209f35f5b804d94a8acba448269225d, type: 3}
       propertyPath: m_Name
       value: Vida (4)
@@ -158993,54 +159009,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4942255250683408222, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
   m_PrefabInstance: {fileID: 1939771689}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1954468048
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1954468050}
-  - component: {fileID: 1954468049}
-  m_Layer: 0
-  m_Name: LevelManager (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1954468049
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1954468048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9716c4e0e1509c947a79d88b9eb7e660, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  playerTransform: {fileID: 938667681}
-  moedasNaCena: []
-  moedasFaseAtual: 0
-  moedasColetadasTemporarias: []
---- !u!4 &1954468050
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1954468048}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53.72118, y: -57.99461, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1956288462
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -161698,7 +161666,6 @@ SceneRoots:
   - {fileID: 277284000}
   - {fileID: 489992763}
   - {fileID: 293849250}
-  - {fileID: 1954468050}
   - {fileID: 1956288462}
   - {fileID: 788293240}
   - {fileID: 410474807}

@@ -984,7 +984,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &342559844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27891,42 +27891,6 @@ PrefabInstance:
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1386497101}
-    - target: {fileID: 5253500606166841097, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -31.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5253500606166841097, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 11.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: aterrissagem
-      value: 
-      objectReference: {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumePassos
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumeAterrissagem
-      value: 0.113
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: variacoesPassos.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: 'variacoesPassos.Array.data[0]'
-      value: 
-      objectReference: {fileID: 8300000, guid: 93c4d00141e5231439f7d89e9d049841, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: 'variacoesPassos.Array.data[1]'
-      value: 
-      objectReference: {fileID: 8300000, guid: 9258ace4cff31cd4f820629f7319565a, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: 'variacoesPassos.Array.data[2]'
-      value: 
-      objectReference: {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4280

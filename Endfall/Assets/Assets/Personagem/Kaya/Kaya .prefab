@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 5292599039293552525}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.6, y: -43.9, z: 0}
+  m_LocalPosition: {x: 5.5, y: -53.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -107,8 +107,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -4.3994026}
-  m_Size: {x: 35.800613, y: 81.11028}
+  m_Offset: {x: 5.237793, y: -20.456467}
+  m_Size: {x: 39.666016, y: 71.08914}
   m_Direction: 0
 --- !u!50 &963573127634581650
 Rigidbody2D:
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e18dc918a003441bc2148cc04ca3e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  velocidade: 140
+  velocidade: 150
   forcaDoPulo: 200
   tempoCoyote: 0.15
   groundCheck: {fileID: 9105069308953572735}
@@ -229,6 +229,10 @@ MonoBehaviour:
   painelGameOver: {fileID: 0}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   tempoInvencivel: 0.8
+  animatorKaya: {fileID: 0}
+  duracaoMorteFallback: 2.5
+  visualKaya: {fileID: 0}
+  travarPosicaoHorizontalNaMorte: 1
 --- !u!114 &5637321679780660970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -249,15 +253,18 @@ MonoBehaviour:
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 0.25
   passos: {fileID: 8300000, guid: 60274b222f5ec194a8f8e59e2a0710af, type: 3}
-  variacoesPassos: []
-  volumePassos: 0.16
+  variacoesPassos:
+  - {fileID: 8300000, guid: 93c4d00141e5231439f7d89e9d049841, type: 3}
+  - {fileID: 8300000, guid: 9258ace4cff31cd4f820629f7319565a, type: 3}
+  - {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
+  volumePassos: 0.1
   estadoAnimacaoAndar: kayandando
   fasePrimeiraPisada: 0.15
   faseSegundaPisada: 0.65
   pulo: {fileID: 0}
   volumePulo: 0.65
-  aterrissagem: {fileID: 0}
-  volumeAterrissagem: 0.55
+  aterrissagem: {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
+  volumeAterrissagem: 0.113
   dash: {fileID: 0}
   volumeDash: 0.65
   tiro: {fileID: 0}
@@ -504,6 +511,14 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 1346867707582919281, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 8.896496
+      objectReference: {fileID: 0}
+    - target: {fileID: 1346867707582919281, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.7898102
+      objectReference: {fileID: 0}
     - target: {fileID: 1507947623755594714, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_TagString
       value: Player
@@ -574,11 +589,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6928856036780025634, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -36
+      value: -31.2
       objectReference: {fileID: 0}
     - target: {fileID: 6928856036780025634, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 20.9
+      value: 11.4
       objectReference: {fileID: 0}
     - target: {fileID: 6928856036780025634, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_LocalPosition.z
