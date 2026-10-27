@@ -110,6 +110,11 @@ public class SaveManager : MonoBehaviour
         if (dadosAtuais.moedasColetadasIDsCheckpoint == null) dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>();
         if (dadosAtuais.elixiresVidaColetadosIDsCheckpoint == null) dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>();
 
+        // Tanto saves antigos quanto novos retornam ao ultimo checkpoint.
+        // Nunca utiliza a posicao ou os coletaveis obtidos depois dele.
+        dadosAtuais = CriarSnapshotDoUltimoCheckpoint(dadosAtuais);
+        renascimentoPendente = true; // Bloqueia a Kaya da cena anterior durante a troca.
+
         moedasColetadasAtual = dadosAtuais.moedasAtuais;
         vidaKayaAtual = dadosAtuais.vidaKaya;
         furiaKayaAtual = dadosAtuais.furiaKaya;
@@ -136,25 +141,67 @@ public class SaveManager : MonoBehaviour
     public void SalvarNoSlot(int slot)
     {
         if (dadosAtuais == null) dadosAtuais = new SaveData();
-        if (LevelManager.Instance != null)
-            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
 
-        SincronizarStatusKayaDoJogador();
-        dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
-        GameObject jogador = GameObject.FindGameObjectWithTag("Player");
-        if (jogador != null)
+        // Salvar pelo menu NAO ativa checkpoint, nem consolida moedas ou
+        // atributos obtidos depois dele. O jogo em andamento segue intacto.
+        SaveData dadosCheckpoint = CriarSnapshotDoUltimoCheckpoint(dadosAtuais);
+        fileDataHandler.Save(dadosCheckpoint, slot);
+        fileDataHandler.Save(dadosCheckpoint, 0);
+    }
+
+    // Copia somente o progresso consolidado no ultimo checkpoint (ou o
+    // estado inicial da fase se ainda nao houve checkpoint nesta fase).
+    // Nunca modifica o estado vivo da partida durante um save manual.
+    private static SaveData CriarSnapshotDoUltimoCheckpoint(SaveData origem)
+    {
+        if (origem == null) return new SaveData();
+
+        List<string> moedasConfirmadas = origem.moedasColetadasIDsCheckpoint != null
+            ? new List<string>(origem.moedasColetadasIDsCheckpoint)
+            : new List<string>();
+        List<string> elixiresConfirmados = origem.elixiresVidaColetadosIDsCheckpoint != null
+            ? new List<string>(origem.elixiresVidaColetadosIDsCheckpoint)
+            : new List<string>();
+
+        bool checkpointAtivo = origem.passouCheckpoint;
+        // Saves antigos podem nao ter capturado vida/furia do checkpoint.
+        bool temStatusCheckpoint = origem.checkpointStatusRegistrado;
+
+        SaveData copia = new SaveData
         {
-            dadosAtuais.posicaoSalvamento = jogador.transform.position;
-            dadosAtuais.temPosicaoSalvamento = true;
-        }
+            versaoDados = 2,
+            faseAtual = origem.faseAtual,
+            nomeCena = checkpointAtivo && !string.IsNullOrEmpty(origem.nomeCenaCheckpoint)
+                ? origem.nomeCenaCheckpoint : origem.nomeCena,
+            passouCheckpoint = checkpointAtivo,
+            nomeCenaCheckpoint = origem.nomeCenaCheckpoint,
+            posicaoCheckpoint = origem.posicaoCheckpoint,
+            checkpointStatusRegistrado = temStatusCheckpoint,
+            vidaKayaCheckpoint = origem.vidaKayaCheckpoint,
+            furiaKayaCheckpoint = origem.furiaKayaCheckpoint,
 
-        // Não modifica moedasNoCheckpoint: esse valor pertence ao snapshot de renascimento.
-        dadosAtuais.versaoDados = 2;
-        dadosAtuais.moedasAtuais = moedasColetadasAtual;
-        dadosAtuais.vidaKaya = vidaKayaAtual;
-        dadosAtuais.furiaKaya = furiaKayaAtual;
-        fileDataHandler.Save(dadosAtuais, slot);
-        fileDataHandler.Save(dadosAtuais, 0);
+            // Nao grava posicao arbitraria: LevelSetup usa posicaoCheckpoint
+            // se houver, caso contrario utiliza o inicio da fase.
+            temPosicaoSalvamento = false,
+            posicaoSalvamento = Vector3.zero,
+
+            moedasNoCheckpoint = Mathf.Max(0, origem.moedasNoCheckpoint),
+            moedasAtuais = Mathf.Max(0, origem.moedasNoCheckpoint),
+            moedasColetadasIDsCheckpoint = moedasConfirmadas,
+            moedasColetadasIDs = new List<string>(moedasConfirmadas),
+            elixiresVidaColetadosIDsCheckpoint = elixiresConfirmados,
+            elixiresVidaColetadosIDs = new List<string>(elixiresConfirmados),
+
+            // Em cenas sem checkpoint usa a linha de base da fase,
+            // atualizada nas transicoes. Em saves antigos com checkpoint
+            // sem snapshot de status, preserva os valores gravados.
+            vidaKaya = temStatusCheckpoint || !checkpointAtivo
+                ? origem.vidaKayaCheckpoint : origem.vidaKaya,
+            furiaKaya = temStatusCheckpoint || !checkpointAtivo
+                ? origem.furiaKayaCheckpoint : origem.furiaKaya
+        };
+
+        return copia;
     }
 
     public void RegistrarCheckpoint(Vector3 posicao)
@@ -209,23 +256,14 @@ public class SaveManager : MonoBehaviour
     public void RegistrarElixirVidaColetado(string id)
     {
         if (string.IsNullOrEmpty(id) || dadosAtuais == null) return;
-        if (LevelManager.Instance != null)
-            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
         if (dadosAtuais.elixiresVidaColetadosIDs == null)
             dadosAtuais.elixiresVidaColetadosIDs = new List<string>();
         if (!dadosAtuais.elixiresVidaColetadosIDs.Contains(id))
             dadosAtuais.elixiresVidaColetadosIDs.Add(id);
 
-        SincronizarStatusKayaDoJogador();
-        GameObject jogador = GameObject.FindGameObjectWithTag("Player");
-        if (jogador != null)
-        {
-            dadosAtuais.posicaoSalvamento = jogador.transform.position;
-            dadosAtuais.temPosicaoSalvamento = true;
-            dadosAtuais.nomeCena = SceneManager.GetActiveScene().name;
-        }
-        dadosAtuais.moedasAtuais = moedasColetadasAtual;
-        fileDataHandler.Save(dadosAtuais, 0);
+        // O elixir permanece coletado nesta tentativa, mas so sera
+        // persistido quando a Kaya ativar o proximo checkpoint.
+        // Nao salva a posicao do jogador nem sobrescreve o autosave.
     }
 
     public int GetMoedasAtuais() => moedasColetadasAtual;
@@ -287,12 +325,24 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.checkpointStatusRegistrado = false;
         dadosAtuais.temPosicaoSalvamento = false;
         dadosAtuais.posicaoSalvamento = Vector3.zero;
-        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
-        dadosAtuais.moedasAtuais = moedasColetadasAtual;
-        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
+        dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
+        dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
+        // Cada cena inicia seu proprio conjunto de moedas; IDs e contagem
+        // da fase anterior jamais devem desativar moedas na fase seguinte.
+        ReiniciarMoedasParaNovaFase();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
         aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
+    }
+
+    private void ReiniciarMoedasParaNovaFase()
+    {
+        moedasColetadasAtual = 0;
+        totalMoedasNaFase = 0;
+        dadosAtuais.moedasAtuais = 0;
+        dadosAtuais.moedasNoCheckpoint = 0;
+        dadosAtuais.moedasColetadasIDs = new List<string>();
+        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>();
     }
 
     public float GetVidaKaya() => vidaKayaAtual;
@@ -384,17 +434,28 @@ public class SaveManager : MonoBehaviour
 
     public void AvancarFase()
     {
+        // A conclusao da fase consolida moedas pendentes antes de avancar.
+        // Sem isso, o autosave da vitoria perderia moedas depois da mudanca
+        // que faz o botao Salvar respeitar exclusivamente checkpoints.
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
+
         dadosAtuais.faseAtual++;
         dadosAtuais.passouCheckpoint = false;
         dadosAtuais.posicaoCheckpoint = Vector3.zero;
         dadosAtuais.nomeCenaCheckpoint = "";
         dadosAtuais.checkpointStatusRegistrado = false;
+        dadosAtuais.temPosicaoSalvamento = false;
+        dadosAtuais.posicaoSalvamento = Vector3.zero;
+        dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
+        dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
 
-        // CORREÇÃO DAS MOEDAS:
-        // Mantemos 'moedasColetadasAtual' e registramos o valor acumulado no checkpoint
-        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
+        // Ao entrar na proxima fase, contador e IDs das moedas iniciam zerados.
+        // Assim uma moeda com ID repetido em outra cena nao desaparece por engano.
+        ReiniciarMoedasParaNovaFase();
+        dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
 
-        // Os IDs dos coletáveis possuem identificadores únicos e são preservados entre fases.
+        // Preserva os demais dados da Kaya, como vida e Furia.
 
         // Salva o status de vida e fúria para a próxima fase
         dadosAtuais.vidaKaya = vidaKayaAtual;

@@ -37,12 +37,27 @@ public class PlayerController : MonoBehaviour
     private float direcaoDash;
     private float gravidadeOriginal;
     private bool estaSubindoPulo;
+    private PlataformaMovel plataformaSuporte;
+    private float impulsoVerticalExtraPlataforma;
 
     private SistemaFuria sistemaFuria;
 
     public bool EstaDandoDash => estaDandoDash;
     public bool EstaMovendoNoChao => estaNoChao && !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.1f;
     private KayaAudioManager audioKaya;
+
+    // Chamado apenas quando os pes estao em contato com o topo da plataforma.
+    public void DefinirPlataformaMovel(PlataformaMovel plataforma)
+    {
+        if (plataforma != null && !estaSubindoPulo)
+            plataformaSuporte = plataforma;
+    }
+
+    public void RemoverPlataformaMovel(PlataformaMovel plataforma)
+    {
+        if (plataformaSuporte == plataforma)
+            plataformaSuporte = null;
+    }
 
     void Start()
     {
@@ -125,7 +140,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         // Detecção contínua abaixo dos pés: mais estável nas junções entre plataformas.
-        estaNoChao = VerificarChao();
+        estaNoChao = VerificarChao() || (plataformaSuporte != null && !estaSubindoPulo);
 
         if (estaDandoDash)
         {
@@ -139,19 +154,20 @@ public class PlayerController : MonoBehaviour
             velocidadeEfetiva *= sistemaFuria.multVelocidade;
         }
 
+        Vector2 velocidadePlataforma = plataformaSuporte != null && estaNoChao
+            ? plataformaSuporte.VelocidadeAtual : Vector2.zero;
         float velocidadeY = rb.linearVelocity.y;
 
         if (!estaSubindoPulo && velocidadeY > 0f)
-        {
-            velocidadeY = 0f;
-        }
+            velocidadeY = Mathf.Max(0f, velocidadePlataforma.y);
 
-        if (velocidadeY > forcaDoPulo)
-        {
-            velocidadeY = forcaDoPulo;
-        }
+        // Nao limita o impulso herdado da plataforma no instante do pulo.
+        float limitePulo = forcaDoPulo + impulsoVerticalExtraPlataforma;
+        if (velocidadeY > limitePulo && estaSubindoPulo)
+            velocidadeY = limitePulo;
 
-        rb.linearVelocity = new Vector2(inputHorizontal * velocidadeEfetiva, velocidadeY);
+        float velocidadeX = inputHorizontal * velocidadeEfetiva + velocidadePlataforma.x;
+        rb.linearVelocity = new Vector2(velocidadeX, velocidadeY);
     }
 
     void AtualizarAnimacoes()
@@ -193,6 +209,12 @@ public class PlayerController : MonoBehaviour
         }
 
         if (audioKaya != null) audioKaya.TocarPulo();
+
+        // Ao pular de uma plataforma que sobe, herda seu movimento vertical.
+        // Sem isso, a plataforma rapida alcanca a Kaya e cancela o salto.
+        impulsoVerticalExtraPlataforma = plataformaSuporte != null
+            ? Mathf.Max(0f, plataformaSuporte.VelocidadeAtual.y) : 0f;
+        plataformaSuporte = null;
         contadorCoyote = 0f;
         estaSubindoPulo = true;
         estaNoChao = false;
@@ -214,7 +236,8 @@ public class PlayerController : MonoBehaviour
             playerAnimation.AjustarVelocidadePulo(multiplicadorVelocidade);
         }
 
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, puloEfetivo);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x,
+            puloEfetivo + impulsoVerticalExtraPlataforma);
     }
 
     private bool VerificarChao()
@@ -236,8 +259,18 @@ public class PlayerController : MonoBehaviour
             return false;
         }
 
-        Collider2D chao = Physics2D.OverlapCircle(ponto, groundCheckRaio, chaoLayers);
-        return chao != null && chao != colliderJogador && !chao.isTrigger;
+        Collider2D[] contatos = Physics2D.OverlapCircleAll(ponto, groundCheckRaio);
+        foreach (Collider2D chao in contatos)
+        {
+            if (chao == null || chao.isTrigger || chao == colliderJogador ||
+                chao.transform.IsChildOf(transform)) continue;
+
+            bool camadaChao = (chaoLayers.value & (1 << chao.gameObject.layer)) != 0;
+            bool plataforma = chao.GetComponentInParent<PlataformaMovel>() != null ||
+                              chao.GetComponentInParent<PlataformaDeQueda>() != null;
+            if (camadaChao || plataforma) return true;
+        }
+        return false;
     }
 
     private void OnDrawGizmosSelected()
@@ -280,6 +313,7 @@ public class PlayerController : MonoBehaviour
                     audioKaya.TocarAterrissagem();
                 estaNoChao = true;
                 pulosRestantes = maxPulos;
+                impulsoVerticalExtraPlataforma = 0f;
 
                 if (rb.linearVelocity.y <= 0.1f)
                 {

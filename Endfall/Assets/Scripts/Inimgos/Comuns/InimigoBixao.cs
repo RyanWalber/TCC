@@ -107,7 +107,7 @@ public class InimigoBixao : MonoBehaviour
             AplicarDanoEEmpurrar(obj);
             Fugir();
         }
-        else if (obj.CompareTag("Ataque") || obj.CompareTag("Projetil") || obj.CompareTag("Tiro") || obj.CompareTag("Bala"))
+        else if (obj.CompareTag("Ataque"))
         {
             TomarDano(1);
         }

@@ -198,13 +198,13 @@ MonoBehaviour:
   player: {fileID: 0}
   armatureComponent: {fileID: 4714697607845167709}
   animVoar: fly
-  velocidade: 100
+  velocidade: 400
   raioDetecao: 300
   distanciaFuga: 200
   tempoEspera: 1
-  vida: 3
-  danoNoJogador: 1
-  forcaEmpurrao: 8
+  vida: 40
+  danoNoJogador: 30
+  forcaEmpurrao: 100
 --- !u!1 &1905619740655798839
 GameObject:
   m_ObjectHideFlags: 0

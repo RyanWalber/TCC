@@ -7,16 +7,22 @@ public class PlataformaMovel : MonoBehaviour
     public float velocidade = 3f;
     public float tempoDeEspera = 1f;
 
+    [Header("Ativacao opcional")]
+    [Tooltip("Se marcado, a plataforma so inicia quando a Kaya pisar em cima. Desmarcado: funciona como antes.")]
+    [SerializeField] private bool iniciarAoPisar = false;
+    private bool movimentoLiberado;
+
     private int indicePontoAtual = 0;
     private float temporizadorEspera = 0f;
     private Vector3[] pontosGlobais;
     private Rigidbody2D rb;
-    private Rigidbody2D playerRb;
+    public Vector2 VelocidadeAtual { get; private set; }
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Kinematic;
+        movimentoLiberado = !iniciarAoPisar;
 
         pontosGlobais = new Vector3[pontos.Length + 1];
         pontosGlobais[0] = transform.position;
@@ -29,38 +35,29 @@ public class PlataformaMovel : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (pontosGlobais == null || pontosGlobais.Length <= 1) return;
+        VelocidadeAtual = Vector2.zero;
+        if (!movimentoLiberado || pontosGlobais == null || pontosGlobais.Length <= 1) return;
 
-        if (temporizadorEspera > 0)
+        if (temporizadorEspera > 0f)
         {
             temporizadorEspera -= Time.fixedDeltaTime;
+            return;
         }
-        else
+
+        Vector2 destino = pontosGlobais[indicePontoAtual];
+        Vector2 atual = rb.position;
+        Vector2 proximaPosicao = Vector2.MoveTowards(atual, destino,
+            Mathf.Max(0f, velocidade) * Time.fixedDeltaTime);
+
+        // So a plataforma move seu Rigidbody. A Kaya recebe a velocidade
+        // como suporte no PlayerController, sem concorrencia de MovePosition.
+        VelocidadeAtual = (proximaPosicao - atual) / Time.fixedDeltaTime;
+        rb.MovePosition(proximaPosicao);
+
+        if (Vector2.Distance(proximaPosicao, destino) < 0.01f)
         {
-            Vector3 destino = pontosGlobais[indicePontoAtual];
-            Vector3 novaPosicao = Vector3.MoveTowards(transform.position, destino, velocidade * Time.fixedDeltaTime);
-            Vector3 delta = novaPosicao - transform.position;
-
-            rb.MovePosition(novaPosicao);
-
-            if (playerRb != null)
-            {
-                if (playerRb.linearVelocity.y > 0.1f)
-                {
-                    playerRb = null;
-                }
-                else
-                {
-                    Vector2 deslocamentoPlayer = playerRb.linearVelocity * Time.fixedDeltaTime;
-                    playerRb.MovePosition(playerRb.position + (Vector2)delta + deslocamentoPlayer);
-                }
-            }
-
-            if (Vector3.Distance(transform.position, destino) < 0.01f)
-            {
-                indicePontoAtual = (indicePontoAtual + 1) % pontosGlobais.Length;
-                temporizadorEspera = tempoDeEspera;
-            }
+            indicePontoAtual = (indicePontoAtual + 1) % pontosGlobais.Length;
+            temporizadorEspera = tempoDeEspera;
         }
     }
 
@@ -76,25 +73,37 @@ public class PlataformaMovel : MonoBehaviour
 
     private void VerificarJogador(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (!collision.gameObject.CompareTag("Player")) return;
+
+        // Normal do contato na plataforma aponta para baixo quando
+        // o jogador esta sobre ela.
+        foreach (ContactPoint2D contato in collision.contacts)
         {
-            foreach (ContactPoint2D contato in collision.contacts)
+            if (contato.normal.y < -0.5f)
             {
-                if (contato.normal.y < -0.2f || collision.transform.position.y > transform.position.y + 0.1f)
+                PlayerController controle = collision.gameObject.GetComponent<PlayerController>();
+                if (controle == null) return;
+                controle.DefinirPlataformaMovel(this);
+
+                if (!movimentoLiberado && iniciarAoPisar)
                 {
-                    playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
-                    return;
+                    movimentoLiberado = true;
+                    // O ponto 0 ja e a posicao inicial. Segue diretamente
+                    // para o primeiro destino quando a Kaya pisa.
+                    if (pontosGlobais != null && pontosGlobais.Length > 1)
+                        indicePontoAtual = 1;
                 }
+                return;
             }
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            playerRb = null;
-        }
+        if (!collision.gameObject.CompareTag("Player")) return;
+
+        PlayerController controle = collision.gameObject.GetComponent<PlayerController>();
+        if (controle != null) controle.RemoverPlataformaMovel(this);
     }
 
     private void OnDrawGizmosSelected()
