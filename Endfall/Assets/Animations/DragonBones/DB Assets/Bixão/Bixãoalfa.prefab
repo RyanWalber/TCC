@@ -201,7 +201,7 @@ MonoBehaviour:
   velocidade: 400
   raioDetecao: 300
   distanciaFuga: 200
-  tempoEspera: 1
+  tempoEspera: 0.5
   vida: 40
   danoNoJogador: 30
   forcaEmpurrao: 100
