@@ -327,12 +327,22 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.posicaoSalvamento = Vector3.zero;
         dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
         dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
-        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
-        dadosAtuais.moedasAtuais = moedasColetadasAtual;
-        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
+        // Cada cena inicia seu proprio conjunto de moedas; IDs e contagem
+        // da fase anterior jamais devem desativar moedas na fase seguinte.
+        ReiniciarMoedasParaNovaFase();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
         aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
+    }
+
+    private void ReiniciarMoedasParaNovaFase()
+    {
+        moedasColetadasAtual = 0;
+        totalMoedasNaFase = 0;
+        dadosAtuais.moedasAtuais = 0;
+        dadosAtuais.moedasNoCheckpoint = 0;
+        dadosAtuais.moedasColetadasIDs = new List<string>();
+        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>();
     }
 
     public float GetVidaKaya() => vidaKayaAtual;
@@ -440,13 +450,12 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
         dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
 
-        // CORREÇÃO DAS MOEDAS:
-        // Mantemos 'moedasColetadasAtual' e registramos o valor acumulado no checkpoint
-        dadosAtuais.moedasNoCheckpoint = moedasColetadasAtual;
-        dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
+        // Ao entrar na proxima fase, contador e IDs das moedas iniciam zerados.
+        // Assim uma moeda com ID repetido em outra cena nao desaparece por engano.
+        ReiniciarMoedasParaNovaFase();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
 
-        // Os IDs dos coletáveis possuem identificadores únicos e são preservados entre fases.
+        // Preserva os demais dados da Kaya, como vida e Furia.
 
         // Salva o status de vida e fúria para a próxima fase
         dadosAtuais.vidaKaya = vidaKayaAtual;
