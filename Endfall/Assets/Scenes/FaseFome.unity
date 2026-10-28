@@ -28097,6 +28097,14 @@ PrefabInstance:
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1386497101}
+    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: groundCheckRaio
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: volumeAmbiente
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4280
