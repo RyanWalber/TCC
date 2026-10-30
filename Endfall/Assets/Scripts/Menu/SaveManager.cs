@@ -83,7 +83,8 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        CarregarCenaComFade(dadosAtuais.nomeCena);
+        // Novo Jogo exibe a introducao; o save continua apontando para FaseFome.
+        CarregarCenaComFade("Explicação");
     }
 
     public void CriarNovoJogo() => NovoJogo(0);

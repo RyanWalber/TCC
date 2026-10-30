@@ -79,7 +79,7 @@ public class MainMenuController : MonoBehaviour
             }
             else
             {
-                CarregarCenaComFade(nomePrimeiraFase);
+                CarregarCenaComFade("Explicação");
             }
         }
     }
