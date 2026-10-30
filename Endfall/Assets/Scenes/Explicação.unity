@@ -740,5 +740,8 @@ MonoBehaviour:
   mostrarApresentacaoAoTestar: 1
   intervaloPorCaractere: 0.03
   duracaoFadePagina: 0.65
+  somDigitacao: {fileID: 0}
+  fonteDigitacao: {fileID: 0}
+  volumeDigitacao: 0.35
   nomeDaProximaCena: FaseFome
   cortinaTransicao: {fileID: 702016638}

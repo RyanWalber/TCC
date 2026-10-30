@@ -25,6 +25,13 @@ public class ExplicacaoManager : MonoBehaviour
     [SerializeField] private bool mostrarApresentacaoAoTestar = true;
     [Min(0.1f)] [SerializeField] private float duracaoFadePagina = 0.65f;
 
+    [Header("Audio da digitacao (apresentacao e todos os fragmentos)")]
+    [Tooltip("Arraste aqui seu arquivo com o som de teclado.")]
+    [SerializeField] private AudioClip somDigitacao;
+    [Tooltip("Opcional: deixe vazio para criar um AudioSource 2D automaticamente.")]
+    [SerializeField] private AudioSource fonteDigitacao;
+    [Range(0f, 1f)] [SerializeField] private float volumeDigitacao = 0.35f;
+
     [Header("Boas-vindas: antes do Fragmento I")]
     [TextArea(5, 12)]
     [SerializeField] private string textoApresentacao =
@@ -143,6 +150,8 @@ public class ExplicacaoManager : MonoBehaviour
 
     private void Start()
     {
+        ConfigurarSomDigitacao();
+
         if (cortinaTransicao != null)
         {
             cortinaTransicao.enabled = false;
@@ -175,8 +184,52 @@ public class ExplicacaoManager : MonoBehaviour
         digitacao = StartCoroutine(RevelarTexto());
     }
 
+    // Um AudioSource proprio impede que o som de teclado interfira
+    // em musicas e outros efeitos do projeto.
+    private void ConfigurarSomDigitacao()
+    {
+        if (somDigitacao == null) return;
+
+        if (fonteDigitacao == null)
+        {
+            GameObject objetoAudio = new GameObject("SomDeTeclado");
+            objetoAudio.transform.SetParent(transform, false);
+            fonteDigitacao = objetoAudio.AddComponent<AudioSource>();
+        }
+
+        fonteDigitacao.playOnAwake = false;
+        fonteDigitacao.spatialBlend = 0f;
+        fonteDigitacao.loop = true;
+        fonteDigitacao.volume = Mathf.Clamp01(volumeDigitacao);
+        fonteDigitacao.clip = somDigitacao;
+    }
+
+    private void IniciarSomDigitacao()
+    {
+        if (fonteDigitacao == null || somDigitacao == null) return;
+        if (fonteDigitacao.isPlaying) return;
+
+        fonteDigitacao.clip = somDigitacao;
+        fonteDigitacao.loop = true;
+        fonteDigitacao.volume = Mathf.Clamp01(volumeDigitacao);
+        fonteDigitacao.Play();
+    }
+
+    private void PararSomDigitacao()
+    {
+        if (fonteDigitacao != null && fonteDigitacao.isPlaying)
+            fonteDigitacao.Stop();
+    }
+
+    private void OnDisable()
+    {
+        // Nada de audio tocando depois que a cena termina.
+        PararSomDigitacao();
+    }
+
     private void PrepararTexto(string conteudo)
     {
+        PararSomDigitacao();
         textoTela.text = conteudo;
         textoTela.maxVisibleCharacters = 0;
         textoTela.ForceMeshUpdate();
@@ -218,6 +271,7 @@ public class ExplicacaoManager : MonoBehaviour
 
     private IEnumerator AnimarPagina(float inicial, float final)
     {
+        PararSomDigitacao(); // Silencio durante os fades.
         if (cortinaEntrePaginas == null) yield break;
         cortinaEntrePaginas.raycastTarget = true;
         float tempo = 0f;
@@ -261,11 +315,17 @@ public class ExplicacaoManager : MonoBehaviour
         if (textoTela == null) yield break;
         textoTela.ForceMeshUpdate();
         int total = textoTela.textInfo.characterCount;
+
+        // Inicia somente quando as letras vao comecar a aparecer.
+        if (total > 0) IniciarSomDigitacao();
+
         for (int i = 1; i <= total; i++)
         {
             textoTela.maxVisibleCharacters = i;
             yield return new WaitForSecondsRealtime(Mathf.Max(0.005f, intervaloPorCaractere));
         }
+
+        PararSomDigitacao();
         terminouTexto = true;
         digitacao = null;
     }
@@ -282,6 +342,7 @@ public class ExplicacaoManager : MonoBehaviour
             // Primeiro clique revela tudo na pagina atual.
             if (digitacao != null) StopCoroutine(digitacao);
             digitacao = null;
+            PararSomDigitacao();
             if (textoTela != null)
                 textoTela.maxVisibleCharacters = int.MaxValue;
             terminouTexto = true;
@@ -295,6 +356,7 @@ public class ExplicacaoManager : MonoBehaviour
         {
             // Depois do fragmento: Fade Out -> fase -> Fade In global.
             trocandoCena = true;
+            PararSomDigitacao();
             LevelLoader.CarregarComFade(nomeDaProximaCena);
         }
     }
