@@ -31,8 +31,12 @@ public class InimigoBixel : MonoBehaviour
     [Min(0.05f)] public float duracaoInvestida = 0.45f;
     [Tooltip("Tempo de espera antes de poder investir novamente.")]
     [Min(0f)] public float recargaInvestida = 2f;
+    [Tooltip("Margem vertical entre os colliders do Bixel e da Kaya para detectar no mesmo nivel.")]
+    [Min(0f)] public float margemAlturaDeteccao = 15f;
 
     private Rigidbody2D rb;
+    private Collider2D colisorBixel;
+    private Collider2D colisorJogador;
     private Vector3 posicaoInicial;
     private bool indoParaDireita = true;
     private bool estaMorto = false;
@@ -45,6 +49,7 @@ public class InimigoBixel : MonoBehaviour
     {
         posicaoInicial = transform.position;
         rb = GetComponent<Rigidbody2D>();
+        colisorBixel = GetComponent<Collider2D>();
         rb.freezeRotation = true;
 
         if (pivoVisual == null && transform.childCount > 0)
@@ -53,9 +58,7 @@ public class InimigoBixel : MonoBehaviour
         if (armatureComponent == null)
             armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
-        GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");
-        if (jogadorObj != null) jogador = jogadorObj.transform;
-
+        LocalizarJogador();
         AtualizarEscala();
     }
 
@@ -74,20 +77,69 @@ public class InimigoBixel : MonoBehaviour
         }
 
         if (jogador == null)
-        {
-            GameObject jogadorObj = GameObject.FindGameObjectWithTag("Player");
-            if (jogadorObj != null) jogador = jogadorObj.transform;
-        }
+            LocalizarJogador();
 
-        if (tempoRecargaRestante <= 0f && jogador != null &&
-            Mathf.Abs(jogador.position.y - transform.position.y) <= 2f &&
-            Vector2.Distance(transform.position, jogador.position) <= alcanceDeteccao)
+        if (tempoRecargaRestante <= 0f && JogadorNoAlcanceDaInvestida())
         {
             IniciarInvestida();
             return;
         }
 
         Patrulhar();
+    }
+
+    private void LocalizarJogador()
+    {
+        GameObject objeto = GameObject.FindGameObjectWithTag("Player");
+
+        // Se a Tag estiver em um filho, usa o verdadeiro objeto da Kaya.
+        if (objeto != null)
+        {
+            PlayerHealth vida = objeto.GetComponentInParent<PlayerHealth>();
+            if (vida != null) objeto = vida.gameObject;
+        }
+        else
+        {
+            // Fallback para cenas que ainda nao configuraram a Tag.
+            PlayerHealth vida = FindFirstObjectByType<PlayerHealth>();
+            if (vida != null) objeto = vida.gameObject;
+        }
+
+        if (objeto == null) return;
+
+        jogador = objeto.transform;
+        colisorJogador = objeto.GetComponent<Collider2D>();
+        if (colisorJogador == null)
+            colisorJogador = objeto.GetComponentInChildren<Collider2D>();
+    }
+
+    private bool JogadorNoAlcanceDaInvestida()
+    {
+        if (jogador == null || alcanceDeteccao <= 0f) return false;
+
+        // O movimento e horizontal: a distancia de ataque tambem deve ser
+        // medida no eixo X. Nao usa a distancia entre os pivots dos rigs.
+        if (Mathf.Abs(jogador.position.x - transform.position.x) > alcanceDeteccao)
+            return false;
+
+        // Antes, a diferenca Y tinha que ser <= 2 unidades, mesmo com
+        // personagens/colliders de dezenas de unidades de altura.
+        // Agora verifica a separacao real entre os colliders no eixo Y.
+        if (colisorBixel != null && colisorJogador != null &&
+            colisorBixel.enabled && colisorJogador.enabled)
+        {
+            Bounds inimigo = colisorBixel.bounds;
+            Bounds player = colisorJogador.bounds;
+
+            float espacoVertical = Mathf.Max(0f,
+                Mathf.Max(inimigo.min.y - player.max.y,
+                          player.min.y - inimigo.max.y));
+            return espacoVertical <= margemAlturaDeteccao;
+        }
+
+        // Compatibilidade com um player sem Collider2D configurado.
+        return Mathf.Abs(jogador.position.y - transform.position.y)
+            <= Mathf.Max(margemAlturaDeteccao, alcanceDeteccao * 0.25f);
     }
 
     private void IniciarInvestida()
@@ -253,5 +305,23 @@ public class InimigoBixel : MonoBehaviour
         Vector3 centro = Application.isPlaying ? posicaoInicial : transform.position;
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(new Vector3(centro.x - distanciaPatrulha, centro.y, centro.z), new Vector3(centro.x + distanciaPatrulha, centro.y, centro.z));
+
+        // Amarelo: faixa real de deteccao da investida no mesmo nivel.
+        Collider2D colisor = Application.isPlaying ? colisorBixel : GetComponent<Collider2D>();
+        Gizmos.color = Color.yellow;
+        if (colisor != null)
+        {
+            Bounds b = colisor.bounds;
+            Gizmos.DrawWireCube(
+                new Vector3(transform.position.x, b.center.y, transform.position.z),
+                new Vector3(alcanceDeteccao * 2f,
+                            b.size.y + margemAlturaDeteccao * 2f, 0f));
+        }
+        else
+        {
+            Gizmos.DrawWireCube(
+                transform.position,
+                new Vector3(alcanceDeteccao * 2f, alcanceDeteccao * 0.5f, 0f));
+        }
     }
 }
