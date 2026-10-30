@@ -1079,7 +1079,7 @@ Transform:
   m_GameObject: {fileID: 342559843}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3456, y: 66, z: 0}
+  m_LocalPosition: {x: 10101, y: 255, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7777,7 +7777,7 @@ Transform:
   m_GameObject: {fileID: 985003579}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8823, y: 250, z: 0}
+  m_LocalPosition: {x: 10811, y: 264, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9442,6 +9442,7 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  iniciarAoPisar: 0
 --- !u!50 &1331005646
 Rigidbody2D:
   serializedVersion: 5
@@ -15169,7 +15170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1518499397
 Transform:
   m_ObjectHideFlags: 0
@@ -15521,6 +15522,7 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  iniciarAoPisar: 0
 --- !u!50 &1697135564
 Rigidbody2D:
   serializedVersion: 5
@@ -28701,6 +28703,10 @@ PrefabInstance:
     - target: {fileID: 1656106962486688395, guid: 591646c0fdcfc5d4ab90ded255294d08, type: 3}
       propertyPath: m_Name
       value: contagem
+      objectReference: {fileID: 0}
+    - target: {fileID: 1656106962486688395, guid: 591646c0fdcfc5d4ab90ded255294d08, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1837619413027263525, guid: 591646c0fdcfc5d4ab90ded255294d08, type: 3}
       propertyPath: m_Pivot.x

@@ -203,8 +203,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -216,7 +216,7 @@ MonoBehaviour:
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 60
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -305.07373, y: -212.22522, z: -291.8098, w: -232.12134}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -609,6 +609,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1791578108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791578106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5050f249345212846a7435163c12c90c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ExplicacaoManager
+  textoTela: {fileID: 155308069}
+  cortinaTransicao: {fileID: 702016638}
+  fragmentoParaTeste: 1
+  intervaloPorCaractere: 0.03
+  mostrarApresentacaoAoTestar: 1
+  duracaoFadePagina: 0.65
+  somDigitacao: {fileID: 8300000, guid: 7de1b1da7dfeff349b4c888412e0b49e, type: 3}
+  fonteDigitacao: {fileID: 0}
+  volumeDigitacao: 0.67
+  textoApresentacao: "<size=60><color=#E8C994>\n                          Bem-vindo
+    a EndFall</color></size>\n\nEm um mundo marcado pela ru\xEDna, a jornada de Kaya
+    est\xE1 apenas come\xE7ando.\nReinos feridos por calamidades escondem perigos,
+    escolhas e segredos.\nSiga em frente. Nem tudo \xE9 o que parece.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
+    OU CLIQUE</color></size>"
+  fragmento1: "<size=50><color=#E8C994>\n         FRAGMENTO I - O \xDALTIMO LEGADO</color></size>\n\nAntes
+    que os reinos fossem consumidos pela Fome, Peste, Guerra e Morte, existiam aqueles
+    que enfrentavam as sombras: os ca\xE7adores.\n\nKaya cresceu entre eles, aprendendo
+    que coragem n\xE3o \xE9 aus\xEAncia de medo, mas a escolha de proteger.\n\nAos
+    dezoito anos, ela ainda n\xE3o sabia quanto custaria carregar esse legado.\n\n<size=18><color=#B8B6B1>ESPA\xC7O
+    OU CLIQUE</color></size>"
+  fragmento2: "<size=35><color=#E8C994>FRAGMENTO II - A NOITE DAS CINZAS</color></size>\n\nA
+    fam\xEDlia de Kaya n\xE3o desapareceu por acaso. Em uma \xFAnica noite, sua casa
+    foi destru\xEDda e uma linhagem inteira de ca\xE7adores foi exterminada.\n\nSeus
+    pais morreram tentando resistir. Kaya foi a \xFAnica a sobreviver.\n\nRestou-lhe
+    uma lembran\xE7a que n\xE3o se apaga... e uma pergunta: quem levou a morte at\xE9
+    sua porta?\n\n<size=20><color=#B8B6B1>ESPA\xC7O OU CLIQUE</color></size>"
+  fragmento3: "<size=50><color=#E8C994>\n         FRAGMENTO III - O RASTRO DA VERDADE</color></size>\n\nA
+    cada dom\xEDnio atravessado, Kaya encontrou sinais de que o massacre era parte
+    de algo maior. A mesma for\xE7a que espalhava a Fome e a Peste alimentava a Guerra.\n\nOs
+    fragmentos da Colt, uma arma lend\xE1ria, poderiam romper esse ciclo.\n\nEla
+    j\xE1 n\xE3o procurava apenas vingan\xE7a. Procurava uma verdade que o mundo
+    parecia temer.\n\n<size=20><color=#B8B6B1>ESPA\xC7O OU CLIQUE</color></size>"
+  fragmento4: "<size=50><color=#E8C994>\n         FRAGMENTO IV - DIANTE DA MORTE</color></size>\n\nDepois
+    da Guerra, resta um \xFAltimo dom\xEDnio. Nele espera a sombra por tr\xE1s do
+    massacre que levou os pais de Kaya: a Morte.\n\nAgora ela conhece o inimigo que
+    precisa enfrentar. Mas sua \xFAltima batalha ser\xE1 maior que a vingan\xE7a.\n\nSe
+    vencer, talvez consiga libertar os reinos do ciclo de destrui\xE7\xE3o \u2014
+    e dar ao legado de sua fam\xEDlia um destino al\xE9m da dor.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
+    OU CLIQUE</color></size>"
+  nomeDaProximaCena: FaseFome
 --- !u!1 &1935869526
 GameObject:
   m_ObjectHideFlags: 0
@@ -722,26 +774,3 @@ SceneRoots:
   - {fileID: 1935869530}
   - {fileID: 232246662}
   - {fileID: 1791578107}
-
---- !u!114 &1791578108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1791578106}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5050f249345212846a7435163c12c90c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::ExplicacaoManager
-  textoTela: {fileID: 155308069}
-  fragmentoParaTeste: 1
-  mostrarApresentacaoAoTestar: 1
-  intervaloPorCaractere: 0.03
-  duracaoFadePagina: 0.65
-  somDigitacao: {fileID: 0}
-  fonteDigitacao: {fileID: 0}
-  volumeDigitacao: 0.35
-  nomeDaProximaCena: FaseFome
-  cortinaTransicao: {fileID: 702016638}
