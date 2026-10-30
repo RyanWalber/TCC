@@ -46,6 +46,20 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Impede que a animacao desloque a Kaya para frente e para tras no eixo X. Nao bloqueia a rotacao nem os ossos.")]
     [SerializeField] private bool travarPosicaoHorizontalNaMorte = true;
 
+    [Header("Pes fixos durante a queda")]
+    [Tooltip("Mantem a posicao dos pes no mundo enquanto o corpo executa kayamorrendo.")]
+    [SerializeField] private bool fixarPesDuranteMorte = true;
+    [Tooltip("Ponta do pe da primeira perna. Se vazio, tenta localizar automaticamente no rig.")]
+    [SerializeField] private Transform peMorte1;
+    [Tooltip("Ponta do pe da segunda perna. Se vazio, tenta localizar automaticamente no rig.")]
+    [SerializeField] private Transform peMorte2;
+    [Tooltip("Mantem tambem os pes na mesma altura do chao.")]
+    [SerializeField] private bool fixarAlturaDosPes = true;
+
+    private Vector3 posicaoReferenciaDosPes;
+    private bool referenciaDosPesCapturada;
+    private static readonly int EstadoMorrendo = Animator.StringToHash("kayamorrendo");
+
     private float posicaoXVisualNaMorte;
     private bool posicaoMorteCapturada;
     private static readonly int TriggerMorrer = Animator.StringToHash("Morrer");
@@ -61,6 +75,16 @@ public class PlayerHealth : MonoBehaviour
         }
         if (visualKaya == null && animatorKaya != null)
             visualKaya = animatorKaya.transform;
+
+        // Os dois caminhos pertencem ao rig original de Ani Kaya.
+        // Se alguma cena usar outro rig, os campos continuam editaveis no Inspector.
+        if (visualKaya != null)
+        {
+            if (peMorte1 == null)
+                peMorte1 = visualKaya.Find("kayaseparada_9/bone_1/bone_2/bone_3/bone_4");
+            if (peMorte2 == null)
+                peMorte2 = visualKaya.Find("kayaseparada_10/bone_1/bone_2/bone_3/bone_4");
+        }
 
         sistemaFuria = GetComponent<SistemaFuria>();
         hudJuice = FindFirstObjectByType<HUDJuice>();
@@ -119,16 +143,52 @@ public class PlayerHealth : MonoBehaviour
 
     private void LateUpdate()
     {
-        // O Animator aplica os keyframes antes do LateUpdate.
-        // Somente durante a morte: neutraliza deslocamentos horizontais do
-        // objeto visual, mantendo a pose, rotacao e movimento dos ossos.
-        if (!estaMorta || !travarPosicaoHorizontalNaMorte ||
-            !posicaoMorteCapturada || visualKaya == null)
-            return;
+        if (!estaMorta || visualKaya == null) return;
 
-        Vector3 posicao = visualKaya.localPosition;
-        posicao.x = posicaoXVisualNaMorte;
-        visualKaya.localPosition = posicao;
+        // O Animator atualiza as poses antes do LateUpdate. Compensamos
+        // somente a posicao do objeto visual: nunca alteramos os ossos,
+        // a rotacao da queda ou o Rigidbody2D do jogador.
+        if (fixarPesDuranteMorte && (peMorte1 != null || peMorte2 != null))
+        {
+            if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
+                return;
+
+            AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
+            if (estado.shortNameHash != EstadoMorrendo)
+                return;
+
+            Vector3 centroPes = ObterCentroPesNoMundo();
+            if (!referenciaDosPesCapturada)
+            {
+                // Captura no PRIMEIRO frame da animacao de morte, evitando
+                // que a pose anterior (ociosa/andar) cause um tranco.
+                posicaoReferenciaDosPes = centroPes;
+                referenciaDosPesCapturada = true;
+                return;
+            }
+
+            Vector3 correcao = posicaoReferenciaDosPes - centroPes;
+            if (!fixarAlturaDosPes) correcao.y = 0f;
+            correcao.z = 0f;
+            visualKaya.position += correcao;
+            return;
+        }
+
+        // Compatibilidade com outros rigs sem os ossos dos pes configurados.
+        if (travarPosicaoHorizontalNaMorte && posicaoMorteCapturada)
+        {
+            Vector3 posicao = visualKaya.localPosition;
+            posicao.x = posicaoXVisualNaMorte;
+            visualKaya.localPosition = posicao;
+        }
+    }
+
+    private Vector3 ObterCentroPesNoMundo()
+    {
+        if (peMorte1 != null && peMorte2 != null)
+            return (peMorte1.position + peMorte2.position) * 0.5f;
+
+        return peMorte1 != null ? peMorte1.position : peMorte2.position;
     }
 
     public void TomarDano(float quantidadeDano)
@@ -198,6 +258,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (estaMorta) return;
         estaMorta = true;
+        referenciaDosPesCapturada = false;
 
         // Impede que a rotina de invencibilidade altere as cores durante a morte.
         StopAllCoroutines();
