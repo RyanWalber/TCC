@@ -53,7 +53,7 @@ public class GatilhoTransicao : MonoBehaviour
         // A cortina global cuida do fade-out E fade-in da proxima cena.
         // Nao usa o antigo CanvasGroup para evitar fades duplicados.
         if (!string.IsNullOrEmpty(nomeProximaCena))
-            LevelLoader.CarregarComFade(nomeProximaCena);
+            ExplicacaoManager.ExibirAntesDaFase(nomeProximaCena);
         else
             Debug.LogError("[GatilhoTransicao] Preencha 'Nome Proxima Cena' no Inspector!");
 

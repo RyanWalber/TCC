@@ -83,8 +83,9 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        // Novo Jogo exibe a introducao; o save continua apontando para FaseFome.
-        CarregarCenaComFade("Explicação");
+        // Primeiro fragmento somente no Novo Jogo. O save ja aponta para FaseFome.
+        renascimentoPendente = true;
+        ExplicacaoManager.ExibirAntesDaFase(dadosAtuais.nomeCena);
     }
 
     public void CriarNovoJogo() => NovoJogo(0);
@@ -93,6 +94,7 @@ public class SaveManager : MonoBehaviour
     public void CarregarDados(SaveData dados)
     {
         if (dados == null) return;
+        ExplicacaoManager.CancelarFragmentoPendente();
         dadosAtuais = dados;
 
         // Compatibilidade com salvamentos antigos que não guardavam posição exata.
@@ -310,7 +312,10 @@ public class SaveManager : MonoBehaviour
         if (LevelManager.Instance != null)
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
 
-        // Usa o valor explícito calculado antes da troca, sem depender da ordem dos Updates.
+        // A Kaya da fase anterior nao pode sobrescrever o estado preparado
+        // enquanto o fragmento da historia estiver na tela.
+        renascimentoPendente = true;
+        // Usa o valor explicito calculado antes da troca.
         vidaKayaAtual = Mathf.Clamp(vidaDepoisDaRecuperacao, 1f, 100000f);
         dadosAtuais.vidaKaya = vidaKayaAtual;
         SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
@@ -320,6 +325,15 @@ public class SaveManager : MonoBehaviour
 
         dadosAtuais.versaoDados = 2;
         dadosAtuais.nomeCena = nomeProximaCena;
+        // Mantem o indice de progresso coerente tanto nas zonas de transicao
+        // quanto no fluxo VictoryZone.AvancarFase().
+        switch (nomeProximaCena)
+        {
+            case "FaseFome": dadosAtuais.faseAtual = 1; break;
+            case "FasePeste": dadosAtuais.faseAtual = 2; break;
+            case "FaseGuerra": dadosAtuais.faseAtual = 3; break;
+            case "FaseMorte": dadosAtuais.faseAtual = 4; break;
+        }
         dadosAtuais.passouCheckpoint = false;
         dadosAtuais.posicaoCheckpoint = Vector3.zero;
         dadosAtuais.nomeCenaCheckpoint = "";
@@ -442,6 +456,7 @@ public class SaveManager : MonoBehaviour
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
 
         dadosAtuais.faseAtual++;
+        renascimentoPendente = true;
         dadosAtuais.passouCheckpoint = false;
         dadosAtuais.posicaoCheckpoint = Vector3.zero;
         dadosAtuais.nomeCenaCheckpoint = "";
@@ -462,23 +477,24 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
 
-        if (dadosAtuais.faseAtual == 2)
+        switch (dadosAtuais.faseAtual)
         {
-            dadosAtuais.nomeCena = "FasePeste";
-        }
-        else
-        {
-            dadosAtuais.nomeCena = "Menu";
+            case 2: dadosAtuais.nomeCena = "FasePeste"; break;
+            case 3: dadosAtuais.nomeCena = "FaseGuerra"; break;
+            case 4: dadosAtuais.nomeCena = "FaseMorte"; break;
+            default: dadosAtuais.nomeCena = "Menu"; break;
         }
 
         fileDataHandler.Save(dadosAtuais, 0);
 
         if (Application.CanStreamedLevelBeLoaded(dadosAtuais.nomeCena))
         {
-            CarregarCenaComFade(dadosAtuais.nomeCena);
+            // A historia aparece so ao avancar, nunca em CarregarDados().
+            ExplicacaoManager.ExibirAntesDaFase(dadosAtuais.nomeCena);
         }
         else
         {
+            ExplicacaoManager.CancelarFragmentoPendente();
             CarregarCenaComFade("Menu");
         }
     }
