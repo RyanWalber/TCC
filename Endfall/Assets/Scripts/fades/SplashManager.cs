@@ -10,13 +10,6 @@ public class SplashManager : MonoBehaviour
     {
         yield return new WaitForSeconds(tempoDeEspera);
 
-        if (LevelLoader.Instance != null)
-        {
-            LevelLoader.Instance.CarregarCena(nomeCenaMenu);
-        }
-        else
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(nomeCenaMenu);
-        }
+        LevelLoader.CarregarComFade(nomeCenaMenu);
     }
 }

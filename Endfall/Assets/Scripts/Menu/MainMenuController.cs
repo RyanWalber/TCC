@@ -112,13 +112,6 @@ public class MainMenuController : MonoBehaviour
 
     public void CarregarCenaComFade(string nomeCena)
     {
-        if (LevelLoader.Instance != null)
-        {
-            LevelLoader.Instance.CarregarCena(nomeCena);
-        }
-        else
-        {
-            SceneManager.LoadScene(nomeCena);
-        }
+        LevelLoader.CarregarComFade(nomeCena);
     }
 }

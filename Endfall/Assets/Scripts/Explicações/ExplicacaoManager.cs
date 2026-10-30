@@ -22,7 +22,7 @@ public class ExplicacaoManager : MonoBehaviour
         {
             if (cortinaTransicao != null)
             {
-                cortinaTransicao.fillAmount = 0f;
+                cortinaTransicao.enabled = false;
                 cortinaTransicao.raycastTarget = false;
             }
             podeAvancar = true;

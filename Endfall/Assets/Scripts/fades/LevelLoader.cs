@@ -48,18 +48,33 @@ public class LevelLoader : MonoBehaviour
 
     private void Awake()
     {
+        // A Splash possui um LevelLoader no proprio Canvas. Persistir esse
+        // objeto preservaria a interface inteira da Splash na proxima cena.
+        // Mantemos apenas um controlador independente da UI de cada cena.
+        if (cortinaTransicao != null)
+        {
+            cortinaTransicao.enabled = false;
+            cortinaTransicao.raycastTarget = false;
+        }
+
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            // Destroi so o componente, nunca o Canvas da cena atual.
+            Destroy(this);
+            return;
+        }
+
+        if (GetComponent<Canvas>() != null || transform.parent != null)
+        {
+            GameObject controlador = new GameObject("LevelLoaderGlobal");
+            LevelLoader persistente = controlador.AddComponent<LevelLoader>();
+            persistente.tempoTransicao = tempoTransicao;
+            Destroy(this);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        // Evita que a cortina antiga da Splash e a global se sobreponham.
-        if (cortinaTransicao != null)
-            cortinaTransicao.enabled = false;
 
         CriarCortinaGlobal();
         DefinirAlpha(1f);
@@ -74,6 +89,15 @@ public class LevelLoader : MonoBehaviour
 
     private IEnumerator AbrirCena()
     {
+        // Garante pelo menos um frame inteiramente preto na primeira cena.
+        DefinirAlpha(1f);
+        yield return null;
+        if (emTransicao)
+        {
+            fadeInicial = null;
+            yield break;
+        }
+
         yield return AnimarFade(1f, 0f);
         if (!emTransicao && cortinaGlobal != null)
             cortinaGlobal.raycastTarget = false;
@@ -156,7 +180,10 @@ public class LevelLoader : MonoBehaviour
         while (!operacao.isDone)
             yield return null;
 
-        // Um frame para o LevelSetup posicionar a Kaya no checkpoint.
+        // Mantem a tela preta ate o Start/LevelSetup posicionar a Kaya.
+        // Um frame adicional permite a primeira renderizacao da nova cena.
+        DefinirAlpha(1f);
+        yield return null;
         yield return null;
         yield return AnimarFade(1f, 0f);
         cortinaGlobal.raycastTarget = false;
@@ -169,7 +196,9 @@ public class LevelLoader : MonoBehaviour
         float duracao = Mathf.Max(0.05f, tempoTransicao);
         while (tempo < duracao)
         {
-            tempo += Time.unscaledDeltaTime;
+            // Carregar uma fase pode gerar um frame muito longo. Sem limitar
+            // esse delta, o Fade In saltaria diretamente de preto para claro.
+            tempo += Mathf.Min(Time.unscaledDeltaTime, 0.05f);
             DefinirAlpha(Mathf.Lerp(inicio, fim, Mathf.Clamp01(tempo / duracao)));
             yield return null;
         }
