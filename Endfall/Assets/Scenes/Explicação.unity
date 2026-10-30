@@ -737,6 +737,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ExplicacaoManager
   textoTela: {fileID: 155308069}
   fragmentoParaTeste: 1
+  mostrarApresentacaoAoTestar: 1
   intervaloPorCaractere: 0.03
+  duracaoFadePagina: 0.65
   nomeDaProximaCena: FaseFome
   cortinaTransicao: {fileID: 702016638}

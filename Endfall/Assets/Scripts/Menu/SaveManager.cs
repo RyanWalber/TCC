@@ -83,9 +83,10 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        // Primeiro fragmento somente no Novo Jogo. O save ja aponta para FaseFome.
+        // Apenas Novo Jogo mostra Bem-vindo e depois Fragmento I.
+        // O save continua apontando diretamente para FaseFome.
         renascimentoPendente = true;
-        ExplicacaoManager.ExibirAntesDaFase(dadosAtuais.nomeCena);
+        ExplicacaoManager.ExibirIntroducaoNovoJogo();
     }
 
     public void CriarNovoJogo() => NovoJogo(0);

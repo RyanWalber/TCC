@@ -13,6 +13,7 @@ public class ExplicacaoManager : MonoBehaviour
     // Assim o save sempre aponta para a fase verdadeira, nao para a narrativa.
     private static int fragmentoPendente = -1;
     private static string proximaCenaPendente;
+    private static bool apresentacaoPendente;
 
     [Header("Interface")]
     [SerializeField] private TMP_Text textoTela;
@@ -21,6 +22,17 @@ public class ExplicacaoManager : MonoBehaviour
     [Header("Visualizacao direta no Editor")]
     [Range(1, 4)] [SerializeField] private int fragmentoParaTeste = 1;
     [Min(0.005f)] [SerializeField] private float intervaloPorCaractere = 0.03f;
+    [SerializeField] private bool mostrarApresentacaoAoTestar = true;
+    [Min(0.1f)] [SerializeField] private float duracaoFadePagina = 0.65f;
+
+    [Header("Boas-vindas: antes do Fragmento I")]
+    [TextArea(5, 12)]
+    [SerializeField] private string textoApresentacao =
+        "<size=35><color=#E8C994>Bem-vindo a EndFall.</color></size>\n\n" +
+        "Em um mundo marcado pela ruína, a jornada de Kaya está apenas começando.\n" +
+        "Reinos feridos por calamidades escondem perigos, escolhas e segredos.\n" +
+        "Siga em frente. Nem tudo é o que parece.\n\n" +
+        "<size=18><color=#B8B6B1>ESPAÇO OU CLIQUE: revelar texto / continuar</color></size>";
 
     [Header("Textos - editaveis no Inspector")]
     [TextArea(8, 16)]
@@ -39,6 +51,10 @@ public class ExplicacaoManager : MonoBehaviour
     [SerializeField] private string nomeDaProximaCena = "FaseFome";
 
     private Coroutine digitacao;
+    private Image cortinaEntrePaginas;
+    private int indiceAtual;
+    private bool apresentacaoAtual;
+    private bool trocandoPagina;
     private bool terminouTexto;
     private bool trocandoCena;
 
@@ -48,8 +64,19 @@ public class ExplicacaoManager : MonoBehaviour
         CancelarFragmentoPendente();
     }
 
-    // Chamado somente quando uma NOVA fase e alcancada, nunca no load/respawn.
+    // Novo Jogo: Bem-vindo -> Fragmento I -> FaseFome.
+    public static void ExibirIntroducaoNovoJogo()
+    {
+        ExibirAntesDaFaseInterno("FaseFome", true);
+    }
+
+    // Entre as fases: somente o fragmento correspondente.
     public static void ExibirAntesDaFase(string nomeCenaDestino)
+    {
+        ExibirAntesDaFaseInterno(nomeCenaDestino, false);
+    }
+
+    private static void ExibirAntesDaFaseInterno(string nomeCenaDestino, bool incluirApresentacao)
     {
         int indice = IndicePorCena(nomeCenaDestino);
         if (indice < 0)
@@ -69,6 +96,7 @@ public class ExplicacaoManager : MonoBehaviour
 
         fragmentoPendente = indice;
         proximaCenaPendente = nomeCenaDestino;
+        apresentacaoPendente = incluirApresentacao && indice == 0;
         LevelLoader.CarregarComFade(CenaExplicacao);
     }
 
@@ -76,6 +104,7 @@ public class ExplicacaoManager : MonoBehaviour
     {
         fragmentoPendente = -1;
         proximaCenaPendente = null;
+        apresentacaoPendente = false;
     }
 
     private static int IndicePorCena(string cena)
@@ -90,79 +119,183 @@ public class ExplicacaoManager : MonoBehaviour
         }
     }
 
+    private static string DestinoPorIndice(int i)
+    {
+        switch (i)
+        {
+            case 0: return "FaseFome";
+            case 1: return "FasePeste";
+            case 2: return "FaseGuerra";
+            default: return "FaseMorte";
+        }
+    }
+
+    private string FragmentoAtual()
+    {
+        switch (indiceAtual)
+        {
+            case 0: return fragmento1;
+            case 1: return fragmento2;
+            case 2: return fragmento3;
+            default: return fragmento4;
+        }
+    }
+
     private void Start()
     {
-        // A cortina global e unica e controla o fade da entrada e da saida.
         if (cortinaTransicao != null)
         {
             cortinaTransicao.enabled = false;
             cortinaTransicao.raycastTarget = false;
         }
 
-        int indice = fragmentoPendente >= 0
+        bool chamadoPelaCampanha = fragmentoPendente >= 0;
+        indiceAtual = chamadoPelaCampanha
             ? fragmentoPendente : Mathf.Clamp(fragmentoParaTeste - 1, 0, 3);
+        apresentacaoAtual = apresentacaoPendente ||
+            (!chamadoPelaCampanha && mostrarApresentacaoAoTestar && indiceAtual == 0);
+
         if (!string.IsNullOrEmpty(proximaCenaPendente))
             nomeDaProximaCena = proximaCenaPendente;
+        else if (!chamadoPelaCampanha)
+            nomeDaProximaCena = DestinoPorIndice(indiceAtual);
 
-        // A informacao ja foi consumida; nao vaza para futuras transicoes.
         CancelarFragmentoPendente();
-
         if (textoTela == null)
             textoTela = FindFirstObjectByType<TextMeshProUGUI>();
         if (textoTela == null)
         {
-            Debug.LogError("[ExplicacaoManager] Text (TMP) nao foi encontrado.", this);
+            Debug.LogError("[ExplicacaoManager] Text (TMP) nao encontrado.", this);
             terminouTexto = true;
             return;
         }
 
-        string historia = indice == 0 ? fragmento1 :
-                          indice == 1 ? fragmento2 :
-                          indice == 2 ? fragmento3 : fragmento4;
-        textoTela.text = historia;
+        PrepararTexto(apresentacaoAtual ? textoApresentacao : FragmentoAtual());
+        if (apresentacaoAtual) CriarCortinaPagina();
+        digitacao = StartCoroutine(RevelarTexto());
+    }
+
+    private void PrepararTexto(string conteudo)
+    {
+        textoTela.text = conteudo;
         textoTela.maxVisibleCharacters = 0;
         textoTela.ForceMeshUpdate();
+        terminouTexto = false;
+    }
+
+    private void CriarCortinaPagina()
+    {
+        if (cortinaEntrePaginas != null || textoTela == null) return;
+        Canvas canvas = textoTela.GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogWarning("[ExplicacaoManager] Canvas ausente; paginas sem fade local.", this);
+            return;
+        }
+
+        GameObject objeto = new GameObject("FadeApresentacaoFragmento",
+            typeof(RectTransform), typeof(Image));
+        RectTransform retangulo = objeto.GetComponent<RectTransform>();
+        retangulo.SetParent(canvas.transform, false);
+        retangulo.anchorMin = Vector2.zero;
+        retangulo.anchorMax = Vector2.one;
+        retangulo.offsetMin = Vector2.zero;
+        retangulo.offsetMax = Vector2.zero;
+        retangulo.SetAsLastSibling();
+
+        cortinaEntrePaginas = objeto.GetComponent<Image>();
+        cortinaEntrePaginas.color = new Color(0f, 0f, 0f, 0f);
+        cortinaEntrePaginas.raycastTarget = false;
+    }
+
+    private void AplicarAlpha(float alpha)
+    {
+        if (cortinaEntrePaginas == null) return;
+        Color cor = cortinaEntrePaginas.color;
+        cor.a = Mathf.Clamp01(alpha);
+        cortinaEntrePaginas.color = cor;
+    }
+
+    private IEnumerator AnimarPagina(float inicial, float final)
+    {
+        if (cortinaEntrePaginas == null) yield break;
+        cortinaEntrePaginas.raycastTarget = true;
+        float tempo = 0f;
+        float duracao = Mathf.Max(0.1f, duracaoFadePagina);
+        AplicarAlpha(inicial);
+        while (tempo < duracao)
+        {
+            tempo += Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+            AplicarAlpha(Mathf.Lerp(inicial, final, Mathf.Clamp01(tempo / duracao)));
+            yield return null;
+        }
+        AplicarAlpha(final);
+    }
+
+    private IEnumerator ApresentacaoParaFragmento()
+    {
+        trocandoPagina = true;
+        if (cortinaEntrePaginas == null) CriarCortinaPagina();
+
+        // Fade Out da apresentacao: tela toda preta antes de trocar o texto.
+        yield return AnimarPagina(0f, 1f);
+        apresentacaoAtual = false;
+        PrepararTexto(FragmentoAtual());
+        yield return null;
+
+        // Fade In do Fragmento I; texto comeca a surgir depois da abertura.
+        yield return AnimarPagina(1f, 0f);
+        if (cortinaEntrePaginas != null)
+            cortinaEntrePaginas.raycastTarget = false;
+        trocandoPagina = false;
         digitacao = StartCoroutine(RevelarTexto());
     }
 
     private IEnumerator RevelarTexto()
     {
-        // Sem WaitForSeconds escalado: funciona mesmo que a fase anterior
-        // tenha pausado Time.timeScale, como na tela de vitoria.
         yield return null;
-        int quantidade = textoTela.textInfo.characterCount;
-        for (int i = 1; i <= quantidade; i++)
+        // Nao perde caracteres enquanto o LevelLoader abre a cena.
+        while (LevelLoader.Instance != null && LevelLoader.Instance.EstaEmTransicao)
+            yield return null;
+
+        if (textoTela == null) yield break;
+        textoTela.ForceMeshUpdate();
+        int total = textoTela.textInfo.characterCount;
+        for (int i = 1; i <= total; i++)
         {
             textoTela.maxVisibleCharacters = i;
             yield return new WaitForSecondsRealtime(Mathf.Max(0.005f, intervaloPorCaractere));
         }
-
         terminouTexto = true;
         digitacao = null;
     }
 
     private void Update()
     {
-        if (trocandoCena) return;
-
-        bool avancar = Input.GetKeyDown(KeyCode.Space) ||
-                       Input.GetKeyDown(KeyCode.Return) ||
-                       Input.GetMouseButtonDown(0);
-        if (!avancar) return;
+        if (trocandoCena || trocandoPagina) return;
+        if (!Input.GetKeyDown(KeyCode.Space) &&
+            !Input.GetKeyDown(KeyCode.Return) &&
+            !Input.GetMouseButtonDown(0)) return;
 
         if (!terminouTexto)
         {
-            // Primeiro clique mostra a pagina completa.
+            // Primeiro clique revela tudo na pagina atual.
             if (digitacao != null) StopCoroutine(digitacao);
             digitacao = null;
             if (textoTela != null)
                 textoTela.maxVisibleCharacters = int.MaxValue;
             terminouTexto = true;
-            return;
         }
-
-        // Segundo clique avanca com a mesma cortina global do jogo.
-        trocandoCena = true;
-        LevelLoader.CarregarComFade(nomeDaProximaCena);
+        else if (apresentacaoAtual)
+        {
+            // Segundo clique: Bem-vindo -> Fade Out -> Fragmento I -> Fade In.
+            StartCoroutine(ApresentacaoParaFragmento());
+        }
+        else
+        {
+            // Depois do fragmento: Fade Out -> fase -> Fade In global.
+            trocandoCena = true;
+            LevelLoader.CarregarComFade(nomeDaProximaCena);
+        }
     }
 }

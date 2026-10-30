@@ -9,6 +9,9 @@ public class LevelLoader : MonoBehaviour
 {
     public static LevelLoader Instance { get; private set; }
 
+    // A narrativa pode aguardar o fim do Fade In antes de digitar.
+    public bool EstaEmTransicao => emTransicao || fadeInicial != null;
+
     [Header("UI de Transicao")]
     [SerializeField] private Image cortinaTransicao;
     [Min(0.05f)] [SerializeField] private float tempoTransicao = 0.6f;
