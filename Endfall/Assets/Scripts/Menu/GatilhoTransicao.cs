@@ -50,30 +50,13 @@ public class GatilhoTransicao : MonoBehaviour
         if (SaveManager.Instance != null && !string.IsNullOrEmpty(nomeProximaCena))
             SaveManager.Instance.PrepararTransicaoDeFase(nomeProximaCena, vidaDepoisDaRecuperacao);
 
-        // 2. EXECUTA O FADE DE TELA (se houver CanvasGroup na cena)
-        if (canvasGroup != null)
-        {
-            canvasGroup.blocksRaycasts = true;
-            float tempo = 0f;
-
-            while (tempo < duracaoFade)
-            {
-                tempo += Time.deltaTime;
-                canvasGroup.alpha = tempo / duracaoFade;
-                yield return null;
-            }
-
-            canvasGroup.alpha = 1f;
-        }
-
-        // 3. CARREGA A NOVA CENA
+        // A cortina global cuida do fade-out E fade-in da proxima cena.
+        // Nao usa o antigo CanvasGroup para evitar fades duplicados.
         if (!string.IsNullOrEmpty(nomeProximaCena))
-        {
-            SceneManager.LoadScene(nomeProximaCena);
-        }
+            LevelLoader.CarregarComFade(nomeProximaCena);
         else
-        {
-            Debug.LogError("[GatilhoTransicao] Preencha o campo 'Nome Proxima Cena' no Inspector!");
-        }
+            Debug.LogError("[GatilhoTransicao] Preencha 'Nome Proxima Cena' no Inspector!");
+
+        yield break;
     }
 }

@@ -493,13 +493,7 @@ public class SaveManager : MonoBehaviour
 
     private void CarregarCenaComFade(string nomeCena)
     {
-        if (LevelLoader.Instance != null)
-        {
-            LevelLoader.Instance.CarregarCena(nomeCena);
-        }
-        else
-        {
-            SceneManager.LoadScene(nomeCena);
-        }
+        // Inclui carregar slot, inicio de fase e renascimento no checkpoint.
+        LevelLoader.CarregarComFade(nomeCena);
     }
 }

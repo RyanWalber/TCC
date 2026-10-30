@@ -105,6 +105,6 @@ public class PauseMenuManager : MonoBehaviour
         estaPausado = false;
         Time.timeScale = 1f;
         AudioListener.pause = false;
-        SceneManager.LoadScene("Menu");
+        LevelLoader.CarregarComFade("Menu");
     }
 }

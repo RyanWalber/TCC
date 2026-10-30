@@ -17,10 +17,26 @@ public class ExplicacaoManager : MonoBehaviour
 
     private void Start()
     {
+        // O LevelLoader faz o FadeIn ao entrar nesta cena.
+        if (LevelLoader.Instance != null)
+        {
+            if (cortinaTransicao != null)
+            {
+                cortinaTransicao.fillAmount = 0f;
+                cortinaTransicao.raycastTarget = false;
+            }
+            podeAvancar = true;
+            return;
+        }
+
         if (cortinaTransicao != null)
         {
             cortinaTransicao.fillAmount = 1f;
             StartCoroutine(ExecutarFadeIn());
+        }
+        else
+        {
+            podeAvancar = true;
         }
     }
 
@@ -47,9 +63,17 @@ public class ExplicacaoManager : MonoBehaviour
         trocandoDeCena = true;
         podeAvancar = false;
 
-        yield return StartCoroutine(AnimarCortina(0f, 1f));
+        // A mesma cortina global fecha a cena e abre a seguinte.
+        if (LevelLoader.Instance != null)
+        {
+            LevelLoader.CarregarComFade(nomeDaProximaCena);
+            yield break;
+        }
 
-        SceneManager.LoadScene(nomeDaProximaCena);
+        if (cortinaTransicao != null)
+            yield return StartCoroutine(AnimarCortina(0f, 1f));
+
+        LevelLoader.CarregarComFade(nomeDaProximaCena);
     }
 
     private IEnumerator AnimarCortina(float inicio, float fim)

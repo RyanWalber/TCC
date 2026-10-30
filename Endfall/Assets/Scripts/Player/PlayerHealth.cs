@@ -56,6 +56,11 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Mantem tambem os pes na mesma altura do chao.")]
     [SerializeField] private bool fixarAlturaDosPes = true;
 
+    [Header("Direcao da queda")]
+    [Tooltip("Mantem a morte espelhada conforme a direcao em que Kaya estava olhando no momento do golpe fatal.")]
+    [SerializeField] private bool respeitarDirecaoAoMorrer = true;
+    private bool olhandoParaEsquerdaAoMorrer;
+
     private Vector3 posicaoReferenciaDosPes;
     private bool referenciaDosPesCapturada;
     private static readonly int EstadoMorrendo = Animator.StringToHash("kayamorrendo");
@@ -144,6 +149,16 @@ public class PlayerHealth : MonoBehaviour
     private void LateUpdate()
     {
         if (!estaMorta || visualKaya == null) return;
+
+        // A mira deixa de atuar quando Kaya morre. Algumas transicoes do
+        // Animator redefinem a orientacao para a direita. Reaplica somente
+        // o espelhamento Y, mantendo o giro Z e todas as animacoes dos ossos.
+        if (respeitarDirecaoAoMorrer)
+        {
+            Vector3 angulos = visualKaya.localEulerAngles;
+            angulos.y = olhandoParaEsquerdaAoMorrer ? 180f : 0f;
+            visualKaya.localEulerAngles = angulos;
+        }
 
         // O Animator atualiza as poses antes do LateUpdate. Compensamos
         // somente a posicao do objeto visual: nunca alteramos os ossos,
@@ -265,6 +280,9 @@ public class PlayerHealth : MonoBehaviour
 
         if (visualKaya != null)
         {
+            // A orientacao da MiraMouse e Y=180 para a esquerda e Y=0
+            // para a direita. Captura o lado ANTES de desativar a mira.
+            olhandoParaEsquerdaAoMorrer = Vector3.Dot(visualKaya.right, transform.right) < 0f;
             posicaoXVisualNaMorte = visualKaya.localPosition.x;
             posicaoMorteCapturada = true;
         }
@@ -352,7 +370,7 @@ public class PlayerHealth : MonoBehaviour
 
         Time.timeScale = 1f;
         AudioListener.pause = false;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        LevelLoader.CarregarComFade(SceneManager.GetActiveScene().name);
     }
 
     public void RecuperarVida(float quantidade)
