@@ -10,6 +10,7 @@ public class SplashManager : MonoBehaviour
     [SerializeField] private string nomeCenaMenu = "Menu";
     [Header("Titulo EndFall")]
     [SerializeField] private string titulo = "E N D F A L L";
+    [SerializeField] private TMP_FontAsset fonteTitulo;
     [SerializeField] private float tamanhoFonte = 110f;
     [SerializeField] private float tempoFadeIn = 1f;
     [SerializeField] private float tempoPermanencia = 1.5f;
@@ -35,6 +36,7 @@ public class SplashManager : MonoBehaviour
         rect.offsetMax = Vector2.zero;
         TextMeshProUGUI texto = textoObj.GetComponent<TextMeshProUGUI>();
         texto.text = titulo;
+        if (fonteTitulo != null) texto.font = fonteTitulo;
         texto.fontSize = tamanhoFonte;
         texto.enableAutoSizing = true;
         texto.fontSizeMin = 28f;
