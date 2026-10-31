@@ -9,7 +9,6 @@ public class PauseMenuManager : MonoBehaviour
 
     private bool estaPausado = false;
     private bool modoSalvar = false;
-    private PainelConfiguracoes painelConfiguracoes;
 
     private void Awake()
     {
@@ -20,26 +19,7 @@ public class PauseMenuManager : MonoBehaviour
 
     private void Start()
     {
-        if (painelPause == null) return;
-        Canvas canvas = painelPause.GetComponentInParent<Canvas>();
-        if (canvas == null) return;
-
-        painelConfiguracoes = PainelConfiguracoes.Criar(canvas.transform, () =>
-        {
-            if (painelPause != null) painelPause.SetActive(true);
-        });
-        PainelConfiguracoes.CriarBotaoAcesso(painelPause.transform,
-            AbrirConfiguracoesNaPausa);
-
         AudioManagerGlobal.Garantir().RegistrarBotoes();
-    }
-
-    private void AbrirConfiguracoesNaPausa()
-    {
-        if (painelConfiguracoes == null) return;
-        if (painelPause != null) painelPause.SetActive(false);
-        if (painelSlots != null) painelSlots.SetActive(false);
-        painelConfiguracoes.Abrir();
     }
 
     private void OnDestroy()
@@ -52,11 +32,7 @@ public class PauseMenuManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape))
         {
-            if (painelConfiguracoes != null && painelConfiguracoes.gameObject.activeSelf)
-            {
-                painelConfiguracoes.Fechar();
-            }
-            else if (painelSlots != null && painelSlots.activeSelf)
+            if (painelSlots != null && painelSlots.activeSelf)
             {
                 OnClickVoltarAoPause();
             }
@@ -89,7 +65,6 @@ public class PauseMenuManager : MonoBehaviour
 
         if (painelPause != null) painelPause.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
-        if (painelConfiguracoes != null) painelConfiguracoes.Esconder();
     }
 
     public void OnClickSalvarJogo()
@@ -135,7 +110,6 @@ public class PauseMenuManager : MonoBehaviour
         estaPausado = false;
         Time.timeScale = 1f;
         AudioListener.pause = false;
-        if (painelConfiguracoes != null) painelConfiguracoes.Esconder();
         LevelLoader.CarregarComFade("Menu");
     }
 }

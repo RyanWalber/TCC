@@ -6,6 +6,8 @@ public class MainMenuController : MonoBehaviour
     [Header("Painéis de UI")]
     [SerializeField] private GameObject painelPrincipal;
     [SerializeField] private GameObject painelSlots;
+    [Tooltip("Seu painel de configuracoes criado na Unity.")]
+    [SerializeField] private GameObject painelConfiguracoes;
 
     [Header("Botões e Configurações")]
     [SerializeField] private GameObject botaoContinuar;
@@ -14,7 +16,6 @@ public class MainMenuController : MonoBehaviour
     [Header("Audio opcional ao testar Menu diretamente (sem Splash)")]
     [SerializeField] private AudioClip musicaMenuTeste;
     [SerializeField] private AudioClip somCliqueTeste;
-    private PainelConfiguracoes painelConfiguracoes;
 
     private bool modoCarregar = false;
 
@@ -36,17 +37,7 @@ public class MainMenuController : MonoBehaviour
         audioGlobal.PreencherClipsAusentes(musicaMenuTeste, somCliqueTeste);
         if (!audioJaExistia) audioGlobal.IniciarNoMenu();
 
-        if (painelPrincipal != null)
-        {
-            Canvas canvas = painelPrincipal.GetComponentInParent<Canvas>();
-            if (canvas != null)
-            {
-                painelConfiguracoes = PainelConfiguracoes.Criar(canvas.transform,
-                    MostrarPainelPrincipal);
-                PainelConfiguracoes.CriarBotaoAcesso(painelPrincipal.transform,
-                    AbrirConfiguracoes);
-            }
-        }
+        if (painelConfiguracoes != null) painelConfiguracoes.SetActive(false);
         audioGlobal.RegistrarBotoes();
 
         if (botaoContinuar != null)
@@ -56,12 +47,30 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    private void AbrirConfiguracoes()
+    public void BotaoAbrirConfiguracoes()
     {
-        if (painelConfiguracoes == null) return;
+        if (painelConfiguracoes == null)
+        {
+            Debug.LogWarning("[Menu] Arraste seu painel de configuracoes para o MainMenuController.");
+            return;
+        }
         if (painelPrincipal != null) painelPrincipal.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
-        painelConfiguracoes.Abrir();
+        painelConfiguracoes.SetActive(true);
+        PainelConfiguracoes controle = painelConfiguracoes.GetComponent<PainelConfiguracoes>();
+        if (controle != null) controle.SincronizarInterface();
+        AudioManagerGlobal.Garantir().RegistrarBotoes();
+    }
+
+    public void BotaoFecharConfiguracoes()
+    {
+        if (painelConfiguracoes != null)
+        {
+            PainelConfiguracoes controle = painelConfiguracoes.GetComponent<PainelConfiguracoes>();
+            if (controle != null) controle.SalvarConfiguracoes();
+            painelConfiguracoes.SetActive(false);
+        }
+        MostrarPainelPrincipal();
     }
 
     public void BotaoNovoJogo()
@@ -123,12 +132,14 @@ public class MainMenuController : MonoBehaviour
 
     private void MostrarPainelPrincipal()
     {
+        if (painelConfiguracoes != null) painelConfiguracoes.SetActive(false);
         if (painelPrincipal != null) painelPrincipal.SetActive(true);
         if (painelSlots != null) painelSlots.SetActive(false);
     }
 
     private void MostrarPainelSlots()
     {
+        if (painelConfiguracoes != null) painelConfiguracoes.SetActive(false);
         if (painelPrincipal != null) painelPrincipal.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(true);
     }
