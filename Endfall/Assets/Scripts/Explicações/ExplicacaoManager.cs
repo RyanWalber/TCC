@@ -54,6 +54,16 @@ public class ExplicacaoManager : MonoBehaviour
     [TextArea(8, 16)]
     [SerializeField] private string fragmento4 = "<size=35><color=#E8C994>FRAGMENTO IV - DIANTE DA MORTE</color></size>\n\nDepois da Guerra, resta um último domínio. Nele espera a sombra por trás do massacre que levou os pais de Kaya: a Morte.\n\nAgora ela conhece o inimigo que precisa enfrentar. Mas sua última batalha será maior que a vingança.\n\nSe vencer, talvez consiga libertar os reinos do ciclo de destruição — e dar ao legado de sua família um destino além da dor.\n\n<size=18><color=#B8B6B1>ESPAÇO OU CLIQUE: revelar texto / continuar</color></size>";
 
+    [Header("Anuncio dos dominios - arquivos de voz opcionais")]
+    [SerializeField] private AudioClip vozDominioFome;
+    [SerializeField] private AudioClip vozDominioPeste;
+    [SerializeField] private AudioClip vozDominioGuerra;
+    [SerializeField] private AudioClip vozDominioMorte;
+    [Range(0f, 1f)] [SerializeField] private float volumeVozDominio = 1f;
+    [SerializeField] private float duracaoFadeTitulo = 0.7f;
+    [SerializeField] private float permanenciaTitulo = 1.4f;
+    [SerializeField] private float tamanhoTitulo = 82f;
+
     [Header("Destino padrao quando a cena e executada diretamente")]
     [SerializeField] private string nomeDaProximaCena = "FaseFome";
 
@@ -64,6 +74,7 @@ public class ExplicacaoManager : MonoBehaviour
     private bool trocandoPagina;
     private bool terminouTexto;
     private bool trocandoCena;
+    private bool exibindoDominio;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void LimparAoIniciarPlay()
@@ -332,7 +343,7 @@ public class ExplicacaoManager : MonoBehaviour
 
     private void Update()
     {
-        if (trocandoCena || trocandoPagina) return;
+        if (trocandoCena || trocandoPagina || exibindoDominio) return;
         if (!Input.GetKeyDown(KeyCode.Space) &&
             !Input.GetKeyDown(KeyCode.Return) &&
             !Input.GetMouseButtonDown(0)) return;
@@ -357,7 +368,72 @@ public class ExplicacaoManager : MonoBehaviour
             // Depois do fragmento: Fade Out -> fase -> Fade In global.
             trocandoCena = true;
             PararSomDigitacao();
-            LevelLoader.CarregarComFade(nomeDaProximaCena);
+            StartCoroutine(ExibirTituloDominio());
         }
     }
+    private AudioClip VozDoDominio()
+    {
+        switch (indiceAtual)
+        {
+            case 0: return vozDominioFome;
+            case 1: return vozDominioPeste;
+            case 2: return vozDominioGuerra;
+            default: return vozDominioMorte;
+        }
+    }
+
+    private string NomeDoDominio()
+    {
+        switch (indiceAtual)
+        {
+            case 0: return "DOMÍNIO DA FOME";
+            case 1: return "DOMÍNIO DA PESTE";
+            case 2: return "DOMÍNIO DA GUERRA";
+            default: return "DOMÍNIO DA MORTE";
+        }
+    }
+
+    private IEnumerator ExibirTituloDominio()
+    {
+        exibindoDominio = true;
+        PararSomDigitacao();
+        if (cortinaEntrePaginas == null) CriarCortinaPagina();
+
+        // Fecha o fragmento antes de mostrar o anuncio.
+        yield return AnimarPagina(0f, 1f);
+        if (textoTela == null)
+        {
+            LevelLoader.CarregarComFade(nomeDaProximaCena);
+            yield break;
+        }
+
+        string textoAnterior = textoTela.text;
+        float tamanhoAnterior = textoTela.fontSize;
+        TextAlignmentOptions alinhamentoAnterior = textoTela.alignment;
+        textoTela.text = NomeDoDominio();
+        textoTela.fontSize = tamanhoTitulo;
+        textoTela.alignment = TextAlignmentOptions.Center;
+        textoTela.maxVisibleCharacters = int.MaxValue;
+        textoTela.ForceMeshUpdate();
+
+        yield return AnimarPagina(1f, 0f);
+
+        AudioClip clipe = VozDoDominio();
+        AudioSource fonte = gameObject.AddComponent<AudioSource>();
+        fonte.playOnAwake = false;
+        fonte.spatialBlend = 0f;
+        fonte.volume = volumeVozDominio;
+        if (clipe != null) fonte.PlayOneShot(clipe);
+
+        yield return new WaitForSecondsRealtime(
+            Mathf.Max(Mathf.Max(0f, permanenciaTitulo), clipe != null ? clipe.length : 0f));
+
+        yield return AnimarPagina(0f, 1f);
+        // O LevelLoader faz a passagem preta para a fase e o Fade In.
+        textoTela.text = textoAnterior;
+        textoTela.fontSize = tamanhoAnterior;
+        textoTela.alignment = alinhamentoAnterior;
+        LevelLoader.CarregarComFade(nomeDaProximaCena);
+    }
+
 }

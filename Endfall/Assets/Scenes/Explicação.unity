@@ -660,6 +660,14 @@ MonoBehaviour:
     vencer, talvez consiga libertar os reinos do ciclo de destrui\xE7\xE3o \u2014
     e dar ao legado de sua fam\xEDlia um destino al\xE9m da dor.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
     OU CLIQUE</color></size>"
+  vozDominioFome: {fileID: 0}
+  vozDominioPeste: {fileID: 0}
+  vozDominioGuerra: {fileID: 0}
+  vozDominioMorte: {fileID: 0}
+  volumeVozDominio: 1
+  duracaoFadeTitulo: 0.7
+  permanenciaTitulo: 1.4
+  tamanhoTitulo: 82
   nomeDaProximaCena: FaseFome
 --- !u!1 &1935869526
 GameObject:

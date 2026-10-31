@@ -148,8 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4968bcf797ffd9b42a3d25aa097e5875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SplashManager
-  tempoDeEspera: 1.5
   nomeCenaMenu: Menu
+  titulo: E N D F A L L
+  tamanhoFonte: 110
+  tempoFadeIn: 1
+  tempoPermanencia: 1.5
+  tempoFadeOut: 0.8
+  vozEndFall: {fileID: 0}
+  volumeVoz: 1
 --- !u!4 &119513146
 Transform:
   m_ObjectHideFlags: 0
