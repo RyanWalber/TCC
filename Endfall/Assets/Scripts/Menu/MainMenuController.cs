@@ -11,6 +11,11 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject botaoContinuar;
     [SerializeField] private string nomePrimeiraFase = "FaseFome";
 
+    [Header("Audio opcional ao testar Menu diretamente (sem Splash)")]
+    [SerializeField] private AudioClip musicaMenuTeste;
+    [SerializeField] private AudioClip somCliqueTeste;
+    private PainelConfiguracoes painelConfiguracoes;
+
     private bool modoCarregar = false;
 
     private void Awake()
@@ -25,11 +30,38 @@ public class MainMenuController : MonoBehaviour
     {
         MostrarPainelPrincipal();
 
+        // A faixa ja esta tocando se viemos da Splash. Nunca reiniciar o loop.
+        bool audioJaExistia = AudioManagerGlobal.Instance != null;
+        AudioManagerGlobal audioGlobal = AudioManagerGlobal.Garantir();
+        audioGlobal.PreencherClipsAusentes(musicaMenuTeste, somCliqueTeste);
+        if (!audioJaExistia) audioGlobal.IniciarNoMenu();
+
+        if (painelPrincipal != null)
+        {
+            Canvas canvas = painelPrincipal.GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                painelConfiguracoes = PainelConfiguracoes.Criar(canvas.transform,
+                    MostrarPainelPrincipal);
+                PainelConfiguracoes.CriarBotaoAcesso(painelPrincipal.transform,
+                    AbrirConfiguracoes);
+            }
+        }
+        audioGlobal.RegistrarBotoes();
+
         if (botaoContinuar != null)
         {
             bool temAutosave = SaveManager.Instancia != null && SaveManager.Instancia.TemAutosave();
             botaoContinuar.SetActive(temAutosave);
         }
+    }
+
+    private void AbrirConfiguracoes()
+    {
+        if (painelConfiguracoes == null) return;
+        if (painelPrincipal != null) painelPrincipal.SetActive(false);
+        if (painelSlots != null) painelSlots.SetActive(false);
+        painelConfiguracoes.Abrir();
     }
 
     public void BotaoNovoJogo()

@@ -18,6 +18,8 @@ public class MiraMouse : MonoBehaviour
 
     private float timerTiro = 0f;
     private float pesoMira = 0f;
+    private float anguloMiraSuavizado;
+    private bool estavaMirando;
 
     void Start()
     {
@@ -47,6 +49,7 @@ public class MiraMouse : MonoBehaviour
                 // Recoloca a pose da arma sob controle exclusivo da animacao.
                 timerTiro = 0f;
                 pesoMira = 0f;
+                estavaMirando = false;
                 orientacaoCongeladaNaMorte = true;
             }
             return;
@@ -89,10 +92,13 @@ public class MiraMouse : MonoBehaviour
 
         bool miraAtiva = apertandoAtirar || timerTiro > 0;
         float pesoAlvo = miraAtiva ? 1f : 0f;
-        pesoMira = Mathf.MoveTowards(pesoMira, pesoAlvo, Time.deltaTime * velocidadeTransicao);
+        float sensibilidade = ConfiguracoesJogo.SensibilidadeMira;
+        pesoMira = Mathf.MoveTowards(pesoMira, pesoAlvo,
+            Time.deltaTime * velocidadeTransicao * sensibilidade);
 
         if (pesoMira <= 0f)
         {
+            estavaMirando = false;
             transform.localRotation = rotacaoAnimacao;
             return;
         }
@@ -101,7 +107,16 @@ public class MiraMouse : MonoBehaviour
         float anguloMundo = Mathf.Atan2(direcaoMundo.y, direcaoMundo.x) * Mathf.Rad2Deg;
         float anguloMira = olhandoEsquerda ? (180f - anguloMundo) : anguloMundo;
 
-        Quaternion rotacaoMira = Quaternion.Euler(0f, 0f, anguloMira);
+        // A sensibilidade regula a velocidade de resposta angular da mira 2D.
+        // A posicao do cursor e o virar da Kaya continuam normais.
+        if (!estavaMirando)
+            anguloMiraSuavizado = anguloMira;
+        else
+            anguloMiraSuavizado = Mathf.MoveTowardsAngle(anguloMiraSuavizado,
+                anguloMira, Mathf.Max(120f, velocidadeTransicao * 60f) *
+                sensibilidade * Time.deltaTime);
+        estavaMirando = true;
+        Quaternion rotacaoMira = Quaternion.Euler(0f, 0f, anguloMiraSuavizado);
 
         transform.localRotation = Quaternion.Slerp(rotacaoAnimacao, rotacaoMira, pesoMira);
     }

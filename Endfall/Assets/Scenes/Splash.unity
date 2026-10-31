@@ -154,6 +154,12 @@ MonoBehaviour:
   tempoFadeIn: 1
   tempoPermanencia: 1.5
   tempoFadeOut: 0.8
+  musicaDeMenu: {fileID: 0}
+  volumeMusicaMenu: 0.65
+  volumeMusicaNarrativa: 0.18
+  fadeEntradaMusica: 2
+  somCliqueBotoes: {fileID: 0}
+  volumeCliqueBotoes: 0.65
   vozEndFall: {fileID: 0}
   volumeVoz: 1
 --- !u!4 &119513146

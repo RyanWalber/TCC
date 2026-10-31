@@ -16,12 +16,29 @@ public class SplashManager : MonoBehaviour
     [Min(0f)] [SerializeField] private float atrasoVozAposFadeIn = 0.35f;
     [SerializeField] private float tempoPermanencia = 1.5f;
     [SerializeField] private float tempoFadeOut = 0.8f;
+    [Header("Trilha continua: Splash -> Menu -> Bem-vindo -> Fragmento I -> Fome")]
+    [Tooltip("Uma faixa em loop: nao reinicia quando muda de cena.")]
+    [SerializeField] private AudioClip musicaDeMenu;
+    [Range(0f, 1f)] [SerializeField] private float volumeMusicaMenu = 0.65f;
+    [Range(0f, 1f)] [SerializeField] private float volumeMusicaNarrativa = 0.18f;
+    [Min(0.1f)] [SerializeField] private float fadeEntradaMusica = 2f;
+
+    [Header("Som dos botoes (menu, slots e pausa)")]
+    [SerializeField] private AudioClip somCliqueBotoes;
+    [Range(0f, 1f)] [SerializeField] private float volumeCliqueBotoes = 0.65f;
+
     [Header("Narracao (adicione depois)")]
     [SerializeField] private AudioClip vozEndFall;
     [Range(0f, 1f)] [SerializeField] private float volumeVoz = 1f;
 
     private IEnumerator Start()
     {
+        // O AudioSource global permanece entre as cenas, em loop continuo.
+        AudioManagerGlobal audioGlobal = AudioManagerGlobal.Garantir();
+        audioGlobal.Configurar(musicaDeMenu, somCliqueBotoes, volumeMusicaMenu,
+            volumeMusicaNarrativa, volumeCliqueBotoes, fadeEntradaMusica);
+        audioGlobal.IniciarNaSplash();
+
         // Nao ha dependencia de prefab nem de um TMP arrastado no Inspector.
         GameObject canvasObj = new GameObject("AberturaEndFall", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         Canvas canvas = canvasObj.GetComponent<Canvas>();

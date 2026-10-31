@@ -144,6 +144,11 @@ public class LevelLoader : MonoBehaviour
             return;
         }
 
+        // O audio acompanha o Fade Out global, sem interromper o loop
+        // quando o destino for a tela de narrativa.
+        if (AudioManagerGlobal.Instance != null)
+            AudioManagerGlobal.Instance.AoIniciarTransicao(nomeCena, tempoTransicao);
+
         emTransicao = true;
         if (fadeInicial != null)
         {
