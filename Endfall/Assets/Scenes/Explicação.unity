@@ -660,13 +660,13 @@ MonoBehaviour:
     vencer, talvez consiga libertar os reinos do ciclo de destrui\xE7\xE3o \u2014
     e dar ao legado de sua fam\xEDlia um destino al\xE9m da dor.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
     OU CLIQUE</color></size>"
-  vozDominioFome: {fileID: 0}
-  vozDominioPeste: {fileID: 0}
-  vozDominioGuerra: {fileID: 0}
-  vozDominioMorte: {fileID: 0}
+  vozDominioFome: {fileID: 8300000, guid: e4921e594b0be7c4ead68dfebc16574d, type: 3}
+  vozDominioPeste: {fileID: 8300000, guid: 8de0a3bdf0e3e5c458ff5235bfe5202c, type: 3}
+  vozDominioGuerra: {fileID: 8300000, guid: 1ddb4929b7a6bc546a38529c69fcf165, type: 3}
+  vozDominioMorte: {fileID: 8300000, guid: 661841ce5df139c4886ebabdeabd013c, type: 3}
   volumeVozDominio: 1
-  duracaoFadeTitulo: 0.7
-  permanenciaTitulo: 1.4
+  duracaoFadeTitulo: 1
+  permanenciaTitulo: 2
   tamanhoTitulo: 82
   nomeDaProximaCena: FaseFome
 --- !u!1 &1935869526

@@ -150,17 +150,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SplashManager
   nomeCenaMenu: Menu
   titulo: E N D F A L L
+  fonteTitulo: {fileID: 11400000, guid: d3b228678bb6c0a4b9379379f75c4029, type: 2}
   tamanhoFonte: 110
-  tempoFadeIn: 1
-  tempoPermanencia: 1.5
+  tempoFadeIn: 5
+  atrasoVozAposFadeIn: 0.35
+  tempoPermanencia: 2
   tempoFadeOut: 0.8
-  musicaDeMenu: {fileID: 0}
-  volumeMusicaMenu: 0.65
-  volumeMusicaNarrativa: 0.18
-  fadeEntradaMusica: 2
+  musicaDeMenu: {fileID: 8300000, guid: b91b9951e8100484e893538be0aabab5, type: 3}
+  volumeMusicaMenu: 0.3
+  volumeMusicaNarrativa: 0.104
+  fadeEntradaMusica: 4
   somCliqueBotoes: {fileID: 0}
   volumeCliqueBotoes: 0.65
-  vozEndFall: {fileID: 0}
+  vozEndFall: {fileID: 8300000, guid: af19e6afc9d54ea4f8b1434c64c0895a, type: 3}
   volumeVoz: 1
 --- !u!4 &119513146
 Transform:
