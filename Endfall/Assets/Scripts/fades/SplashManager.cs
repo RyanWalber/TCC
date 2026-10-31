@@ -13,6 +13,7 @@ public class SplashManager : MonoBehaviour
     [SerializeField] private TMP_FontAsset fonteTitulo;
     [SerializeField] private float tamanhoFonte = 110f;
     [SerializeField] private float tempoFadeIn = 1f;
+    [Min(0f)] [SerializeField] private float atrasoVozAposFadeIn = 0.35f;
     [SerializeField] private float tempoPermanencia = 1.5f;
     [SerializeField] private float tempoFadeOut = 0.8f;
     [Header("Narracao (adicione depois)")]
@@ -57,6 +58,10 @@ public class SplashManager : MonoBehaviour
             yield return null;
 
         yield return AnimarTitulo(texto, baseCor, 0f, 1f, tempoFadeIn);
+        // A voz so comeca quando o titulo ja esta 100% visivel.
+        // Pequena pausa opcional para deixar a abertura mais cinematografica.
+        if (atrasoVozAposFadeIn > 0f)
+            yield return new WaitForSecondsRealtime(atrasoVozAposFadeIn);
         if (vozEndFall != null) voz.Play();
         float espera = Mathf.Max(0f, tempoPermanencia);
         if (vozEndFall != null) espera = Mathf.Max(espera, vozEndFall.length);
