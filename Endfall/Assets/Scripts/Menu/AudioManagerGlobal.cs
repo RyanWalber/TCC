@@ -122,6 +122,12 @@ public class AudioManagerGlobal : MonoBehaviour
             SomCliqueBotao som = botao.GetComponent<SomCliqueBotao>();
             if (som == null) som = botao.gameObject.AddComponent<SomCliqueBotao>();
             som.Registrar();
+
+            // Realce amarelo em botoes-texto e botoes-imagem, inclusive
+            // nos paineis de slots e configuracoes criados pelo usuario.
+            EfeitoHoverBotao hover = botao.GetComponent<EfeitoHoverBotao>();
+            if (hover == null) hover = botao.gameObject.AddComponent<EfeitoHoverBotao>();
+            hover.Registrar();
         }
     }
 
