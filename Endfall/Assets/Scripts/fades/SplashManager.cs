@@ -27,12 +27,23 @@ public class SplashManager : MonoBehaviour
     [SerializeField] private AudioClip somCliqueBotoes;
     [Range(0f, 1f)] [SerializeField] private float volumeCliqueBotoes = 0.65f;
 
+    [Header("Cursores do jogo (opcionais se usar Resources/Cursores)")]
+    [Tooltip("PNG transparente para Splash, Menu, Pausa e Explicacao.")]
+    [SerializeField] private Texture2D cursorMenu;
+    [Tooltip("PNG transparente de mira para FaseFome, FasePeste, FaseGuerra e FaseMorte.")]
+    [SerializeField] private Texture2D cursorMira;
+    [Tooltip("Posicao de clique em pixels, a partir do canto superior esquerdo da seta.")]
+    [SerializeField] private Vector2 pontoCliqueSeta = Vector2.zero;
+
     [Header("Narracao (adicione depois)")]
     [SerializeField] private AudioClip vozEndFall;
     [Range(0f, 1f)] [SerializeField] private float volumeVoz = 1f;
 
     private IEnumerator Start()
     {
+        // Um so cursor persiste em todas as cenas; no jogo vira mira.
+        CursorManagerGlobal.Garantir().Configurar(cursorMenu, cursorMira, pontoCliqueSeta);
+
         // O AudioSource global permanece entre as cenas, em loop continuo.
         AudioManagerGlobal audioGlobal = AudioManagerGlobal.Garantir();
         audioGlobal.Configurar(musicaDeMenu, somCliqueBotoes, volumeMusicaMenu,

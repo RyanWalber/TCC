@@ -162,6 +162,9 @@ MonoBehaviour:
   fadeEntradaMusica: 4
   somCliqueBotoes: {fileID: 0}
   volumeCliqueBotoes: 0.65
+  cursorMenu: {fileID: 0}
+  cursorMira: {fileID: 0}
+  pontoCliqueSeta: {x: 0, y: 0}
   vozEndFall: {fileID: 8300000, guid: af19e6afc9d54ea4f8b1434c64c0895a, type: 3}
   volumeVoz: 1
 --- !u!4 &119513146

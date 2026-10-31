@@ -55,6 +55,8 @@ public class PauseMenuManager : MonoBehaviour
 
         if (painelPause != null) painelPause.SetActive(true);
         if (painelSlots != null) painelSlots.SetActive(false);
+
+        CursorManagerGlobal.Garantir().DefinirModoPausa(true);
     }
 
     public void ContinuarJogo()
@@ -65,6 +67,8 @@ public class PauseMenuManager : MonoBehaviour
 
         if (painelPause != null) painelPause.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
+
+        CursorManagerGlobal.Garantir().DefinirModoPausa(false);
     }
 
     public void OnClickSalvarJogo()
