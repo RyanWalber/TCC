@@ -23,15 +23,49 @@ public class PainelConfiguracoes : MonoBehaviour
     [SerializeField] private TMP_Text textoSensibilidade;
     [SerializeField] private TMP_Text textoEstadoMusica;
 
-    private void Awake()
+    // Detecta os dois Sliders criados no painel, mesmo sem arrastar referencias.
+    // Na hierarquia do EndFall: primeiro Slider = Volume, segundo = Sensibilidade.
+    private void GarantirSliders()
     {
+        Slider[] encontrados = GetComponentsInChildren<Slider>(true);
+
+        if (sliderVolumeGeral == null)
+        {
+            foreach (Slider item in encontrados)
+            {
+                if (item != null && item != sliderSensibilidadeMira)
+                {
+                    sliderVolumeGeral = item;
+                    break;
+                }
+            }
+        }
+
+        if (sliderSensibilidadeMira == null || sliderSensibilidadeMira == sliderVolumeGeral)
+        {
+            sliderSensibilidadeMira = null;
+            foreach (Slider item in encontrados)
+            {
+                if (item != null && item != sliderVolumeGeral)
+                {
+                    sliderSensibilidadeMira = item;
+                    break;
+                }
+            }
+        }
+
+        if (sliderVolumeGeral == null || sliderSensibilidadeMira == null)
+            Debug.LogWarning("[Configuracoes] Dois Sliders filhos nao encontrados. " +
+                "Arraste Volume e Sensibilidade no Inspector.", this);
+
+        // Configura limites ANTES de registrar eventos. Assim a posicao
+        // visual inicial do Editor nao sobrescreve os valores salvos.
         if (sliderVolumeGeral != null)
         {
             sliderVolumeGeral.minValue = 0f;
             sliderVolumeGeral.maxValue = 1f;
             sliderVolumeGeral.wholeNumbers = false;
         }
-
         if (sliderSensibilidadeMira != null)
         {
             sliderSensibilidadeMira.minValue = 0.5f;
@@ -40,8 +74,14 @@ public class PainelConfiguracoes : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        GarantirSliders();
+    }
+
     private void OnEnable()
     {
+        GarantirSliders();
         // Quando o painel abre, recupera os ajustes anteriores sem disparar
         // callbacks nem substituir as preferencias por valores do Inspector.
         SincronizarInterface();
@@ -73,6 +113,7 @@ public class PainelConfiguracoes : MonoBehaviour
 
     public void SincronizarInterface()
     {
+        GarantirSliders();
         if (sliderVolumeGeral != null)
             sliderVolumeGeral.SetValueWithoutNotify(ConfiguracoesJogo.VolumeGeral);
 
@@ -116,6 +157,7 @@ public class PainelConfiguracoes : MonoBehaviour
     }
 
     // Botao opcional de restaurar configuracoes padrao.
+    [ContextMenu("Restaurar padroes: volume 100% e mira 1x")]
     public void RestaurarPadroes()
     {
         ConfiguracoesJogo.VolumeGeral = 1f;

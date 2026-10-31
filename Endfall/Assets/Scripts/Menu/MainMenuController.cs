@@ -37,7 +37,13 @@ public class MainMenuController : MonoBehaviour
         audioGlobal.PreencherClipsAusentes(musicaMenuTeste, somCliqueTeste);
         if (!audioJaExistia) audioGlobal.IniciarNoMenu();
 
-        if (painelConfiguracoes != null) painelConfiguracoes.SetActive(false);
+        if (painelConfiguracoes != null)
+        {
+            // Nao cria elementos visuais; so garante o script controlador.
+            if (painelConfiguracoes.GetComponent<PainelConfiguracoes>() == null)
+                painelConfiguracoes.AddComponent<PainelConfiguracoes>();
+            painelConfiguracoes.SetActive(false);
+        }
         audioGlobal.RegistrarBotoes();
 
         if (botaoContinuar != null)
@@ -56,9 +62,10 @@ public class MainMenuController : MonoBehaviour
         }
         if (painelPrincipal != null) painelPrincipal.SetActive(false);
         if (painelSlots != null) painelSlots.SetActive(false);
-        painelConfiguracoes.SetActive(true);
         PainelConfiguracoes controle = painelConfiguracoes.GetComponent<PainelConfiguracoes>();
-        if (controle != null) controle.SincronizarInterface();
+        if (controle == null) controle = painelConfiguracoes.AddComponent<PainelConfiguracoes>();
+        painelConfiguracoes.SetActive(true);
+        controle.SincronizarInterface();
         AudioManagerGlobal.Garantir().RegistrarBotoes();
     }
 
