@@ -203,7 +203,7 @@ MonoBehaviour:
   distanciaFuga: 200
   tempoEspera: 0.5
   vida: 40
-  danoNoJogador: 30
+  danoNoJogador: 15
   forcaEmpurrao: 100
 --- !u!1 &1905619740655798839
 GameObject:

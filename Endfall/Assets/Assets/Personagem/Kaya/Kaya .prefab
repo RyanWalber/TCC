@@ -182,8 +182,8 @@ MonoBehaviour:
   audioTiro: {fileID: 3828932577259812292}
   volumeTiro: 0.7
   audioRespiracao: {fileID: 2501818598126200591}
-  volumeRespiracaoNormal: 0.12
-  volumeRespiracaoCansada: 0.65
+  volumeRespiracaoNormal: 0.5
+  volumeRespiracaoCansada: 1
   esperaDepoisCombate: 3
   tempoRecuperacao: 8
 --- !u!114 &644927710069476239
@@ -233,6 +233,11 @@ MonoBehaviour:
   duracaoMorteFallback: 2.5
   visualKaya: {fileID: 0}
   travarPosicaoHorizontalNaMorte: 1
+  fixarPesDuranteMorte: 1
+  peMorte1: {fileID: 0}
+  peMorte2: {fileID: 0}
+  fixarAlturaDosPes: 1
+  respeitarDirecaoAoMorrer: 1
 --- !u!114 &5637321679780660970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,7 +256,7 @@ MonoBehaviour:
   fonteRespiracaoCansada: {fileID: 0}
   fonteAmbiente: {fileID: 0}
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
-  volumeAmbiente: 0.25
+  volumeAmbiente: 0.5
   passos: {fileID: 8300000, guid: 60274b222f5ec194a8f8e59e2a0710af, type: 3}
   variacoesPassos:
   - {fileID: 8300000, guid: 93c4d00141e5231439f7d89e9d049841, type: 3}

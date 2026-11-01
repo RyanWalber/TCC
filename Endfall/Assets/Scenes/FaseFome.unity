@@ -27511,12 +27511,16 @@ PrefabInstance:
       value: ceufome_0
       objectReference: {fileID: 0}
     - target: {fileID: 4852594269704481456, guid: 0c509a47c43147b4e8399c3bd0a840c0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 11.014299
+      objectReference: {fileID: 0}
+    - target: {fileID: 4852594269704481456, guid: 0c509a47c43147b4e8399c3bd0a840c0, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.8886719
       objectReference: {fileID: 0}
     - target: {fileID: 4852594269704481456, guid: 0c509a47c43147b4e8399c3bd0a840c0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 15.327576
+      value: 14.9921
       objectReference: {fileID: 0}
     - target: {fileID: 4852594269704481456, guid: 0c509a47c43147b4e8399c3bd0a840c0, type: 3}
       propertyPath: m_LocalPosition.z
