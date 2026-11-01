@@ -13,6 +13,7 @@ public class CursorManagerGlobal : MonoBehaviour
     private Texture2D cursorMenu;
     private Texture2D cursorMira;
     private Vector2 hotspotMenu = Vector2.zero;
+    private Vector2 offsetHotspotMira = Vector2.zero;
     private bool estaPausado;
     private bool temFoco = true;
 
@@ -69,9 +70,17 @@ public class CursorManagerGlobal : MonoBehaviour
     // tenta os nomes opcionais em Assets/Resources/Cursores.
     public void Configurar(Texture2D setaDoMenu, Texture2D miraDoJogo, Vector2 pontaDaSeta)
     {
+        Configurar(setaDoMenu, miraDoJogo, pontaDaSeta, Vector2.zero);
+    }
+
+    // O offset regula a posicao clicavel da textura sem alterar a posicao
+    // real do mouse usada pelo tiro e pela mira da Kaya.
+    public void Configurar(Texture2D setaDoMenu, Texture2D miraDoJogo, Vector2 pontaDaSeta, Vector2 offsetMira)
+    {
         if (setaDoMenu != null) cursorMenu = setaDoMenu;
         if (miraDoJogo != null) cursorMira = miraDoJogo;
         hotspotMenu = pontaDaSeta;
+        offsetHotspotMira = offsetMira;
         CarregarRecursosSeExistirem();
         AplicarCursor();
     }
@@ -126,7 +135,7 @@ public class CursorManagerGlobal : MonoBehaviour
         if (textura != null)
         {
             hotspot = mostrarMira
-                ? new Vector2(textura.width * 0.5f, textura.height * 0.5f)
+                ? new Vector2(textura.width * 0.5f, textura.height * 0.5f) + offsetHotspotMira
                 : hotspotMenu;
 
             // A coordenada do clique deve estar dentro da textura.
