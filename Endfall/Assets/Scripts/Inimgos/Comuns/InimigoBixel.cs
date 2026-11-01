@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DragonBones;
 using Transform = UnityEngine.Transform;
@@ -33,6 +34,15 @@ public class InimigoBixel : MonoBehaviour
     [Min(0f)] public float recargaInvestida = 2f;
     [Tooltip("Margem vertical entre os colliders do Bixel e da Kaya para detectar no mesmo nivel.")]
     [Min(0f)] public float margemAlturaDeteccao = 15f;
+    [Header("COLISAO LATERAL DA INVESTIDA")]
+    [Tooltip("Distancia minima de seguranca antes de uma parede na investida.")]
+    [Min(0f)] public float margemColisaoLateral = 0.1f;
+    [Tooltip("Breve pausa ao bater de lado em um collider solido.")]
+    [Min(0f)] public float pausaAposImpacto = 0.2f;
+
+    private readonly List<RaycastHit2D> impactosDaInvestida = new List<RaycastHit2D>(16);
+    private ContactFilter2D filtroInvestida;
+    private float tempoPausaImpactoRestante;
 
     private Rigidbody2D rb;
     private Collider2D colisorBixel;
@@ -52,6 +62,13 @@ public class InimigoBixel : MonoBehaviour
         colisorBixel = GetComponent<Collider2D>();
         rb.freezeRotation = true;
 
+        // Ajuda a evitar atravessamentos com velocidades altas.
+        // O Cast mais abaixo garante que a investida PARE ao ver uma parede lateral.
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        filtroInvestida = new ContactFilter2D();
+        filtroInvestida.useTriggers = false;
+        filtroInvestida.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
+
         if (pivoVisual == null && transform.childCount > 0)
             pivoVisual = transform.GetChild(0);
 
@@ -69,8 +86,22 @@ public class InimigoBixel : MonoBehaviour
         if (tempoRecargaRestante > 0f)
             tempoRecargaRestante -= Time.fixedDeltaTime;
 
+        // O Bixel para um instante apos bater de lado e depois patrulha
+        // em sentido contrario ao do obstaculo.
+        if (tempoPausaImpactoRestante > 0f)
+        {
+            tempoPausaImpactoRestante -= Time.fixedDeltaTime;
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            return;
+        }
+
         if (tempoInvestidaRestante > 0f)
         {
+            // Testa a distancia que seria percorrida NESTE passo de fisica.
+            // Isso evita atravessar paredes finas com velocidadeInvestida alta.
+            if (VerificarImpactoLateralPrevisto())
+                return;
+
             tempoInvestidaRestante -= Time.fixedDeltaTime;
             rb.linearVelocity = new Vector2(direcaoInvestida * velocidadeInvestida, rb.linearVelocity.y);
             return;
@@ -148,7 +179,79 @@ public class InimigoBixel : MonoBehaviour
         Virar(direcaoInvestida > 0f);
         tempoInvestidaRestante = duracaoInvestida;
         tempoRecargaRestante = recargaInvestida;
+
+        // Detecta uma parede mesmo no PRIMEIRO passo da investida.
+        if (VerificarImpactoLateralPrevisto())
+            return;
+
         rb.linearVelocity = new Vector2(direcaoInvestida * velocidadeInvestida, rb.linearVelocity.y);
+    }
+
+    private bool VerificarImpactoLateralPrevisto()
+    {
+        if (colisorBixel == null || !colisorBixel.enabled || velocidadeInvestida <= 0f)
+            return false;
+
+        Vector2 direcao = direcaoInvestida > 0f ? Vector2.right : Vector2.left;
+        float distanciaPasso = velocidadeInvestida * Time.fixedDeltaTime + margemColisaoLateral;
+        impactosDaInvestida.Clear();
+
+        // Faz uma varredura com o formato real do CapsuleCollider2D.
+        // Colisores Trigger sao ignorados (moedas, checkpoints, zonas etc.).
+        colisorBixel.Cast(direcao, filtroInvestida, impactosDaInvestida, distanciaPasso);
+
+        foreach (RaycastHit2D impacto in impactosDaInvestida)
+        {
+            if (impacto.collider == null || impacto.collider.isTrigger)
+                continue;
+
+            // Somente superficies VERTICAIS que se opoem ao movimento.
+            // Chao e teto possuem normal predominantemente em Y.
+            if (impacto.normal.x * direcaoInvestida > -0.65f)
+                continue;
+
+            // Quando um collider do piso sobrepoe ligeiramente os pes do
+            // inimigo, nao o interpreta como uma parede lateral.
+            if (impacto.distance <= 0.001f &&
+                impacto.collider.bounds.max.y <= colisorBixel.bounds.min.y + 0.5f)
+                continue;
+
+            PlayerHealth kayaAtingida = impacto.collider.GetComponentInParent<PlayerHealth>();
+            if (kayaAtingida != null)
+                AplicarDanoEEmpurrar(kayaAtingida.gameObject);
+
+            PararInvestidaPorImpacto();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void PararInvestidaPorImpacto()
+    {
+        if (tempoInvestidaRestante <= 0f) return;
+
+        tempoInvestidaRestante = 0f;
+        tempoPausaImpactoRestante = pausaAposImpacto;
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+
+        // Retoma a patrulha para o lado OPOSTO ao da colisao.
+        Virar(direcaoInvestida < 0f);
+    }
+
+    private void VerificarContatoLateral(Collision2D colisao)
+    {
+        if (estaMorto || tempoInvestidaRestante <= 0f) return;
+
+        for (int i = 0; i < colisao.contactCount; i++)
+        {
+            ContactPoint2D contato = colisao.GetContact(i);
+            if (contato.normal.x * direcaoInvestida <= -0.65f)
+            {
+                PararInvestidaPorImpacto();
+                return;
+            }
+        }
     }
 
     private void Update()
@@ -251,11 +354,13 @@ public class InimigoBixel : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D colisao)
     {
         ProcessarInteracao(colisao.gameObject);
+        VerificarContatoLateral(colisao);
     }
 
     private void OnCollisionStay2D(Collision2D colisao)
     {
         ProcessarInteracao(colisao.gameObject);
+        VerificarContatoLateral(colisao);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
