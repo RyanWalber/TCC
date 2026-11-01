@@ -15,6 +15,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float groundCheckRaio = 0.12f;
     [SerializeField] private LayerMask chaoLayers = 1 << 3; // Layer "Ground" do projeto
     [SerializeField] private bool desenharGroundCheck = true;
+
+    [Header("Protecao do pulo e das quinas")]
+    [Tooltip("Limita o impulso extra de plataformas que sobem. 0.2 = ate 20% da forca de pulo.")]
+    [Range(0f, 0.5f)] [SerializeField] private float maxHerancaVerticalPlataforma = 0.2f;
+
     private Collider2D colliderJogador;
 
     [Header("Dash")]
@@ -161,12 +166,17 @@ public class PlayerController : MonoBehaviour
         if (!estaSubindoPulo && velocidadeY > 0f)
             velocidadeY = Mathf.Max(0f, velocidadePlataforma.y);
 
-        // Nao limita o impulso herdado da plataforma no instante do pulo.
+        // Protecao global: qualquer impulso vertical inesperado da fisica
+        // (por exemplo, na quina de um collider) respeita o limite do pulo.
+        // O limite acompanha a Furia e a heranca permitida da plataforma.
         float limitePulo = forcaDoPulo;
         if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
             limitePulo *= Mathf.Max(1f, sistemaFuria.multPulo);
         limitePulo += impulsoVerticalExtraPlataforma;
-        if (velocidadeY > limitePulo && estaSubindoPulo)
+
+        // Aplica tambem fora do salto: um contato lateral nao pode lancar a
+        // Kaya acima da velocidade que o proprio pulo permitiria.
+        if (velocidadeY > limitePulo)
             velocidadeY = limitePulo;
 
         float velocidadeX = inputHorizontal * velocidadeEfetiva + velocidadePlataforma.x;
@@ -194,6 +204,10 @@ public class PlayerController : MonoBehaviour
 
     void Pular()
     {
+        // Mesmo com o coyote time ativo, um salto sem cargas restantes
+        // nunca deve aplicar outro impulso.
+        if (pulosRestantes <= 0) return;
+
         bool puloDoChao = contadorCoyote > 0f && pulosRestantes == maxPulos;
 
         if (puloDoChao)
@@ -213,22 +227,23 @@ public class PlayerController : MonoBehaviour
 
         if (audioKaya != null) audioKaya.TocarPulo();
 
-        // Ao pular de uma plataforma que sobe, herda seu movimento vertical.
-        // Sem isso, a plataforma rapida alcanca a Kaya e cancela o salto.
-        impulsoVerticalExtraPlataforma = plataformaSuporte != null
+        float puloEfetivo = forcaDoPulo;
+        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
+            puloEfetivo *= Mathf.Max(1f, sistemaFuria.multPulo);
+
+        // Preserva o pulo de plataformas moveis, mas limita o adicional:
+        // uma plataforma muito rapida jamais deve arremessar a Kaya.
+        float velocidadeSuporte = plataformaSuporte != null
             ? Mathf.Max(0f, plataformaSuporte.VelocidadeAtual.y) : 0f;
+        impulsoVerticalExtraPlataforma = Mathf.Min(
+            velocidadeSuporte, puloEfetivo * maxHerancaVerticalPlataforma);
+
         plataformaSuporte = null;
         contadorCoyote = 0f;
         estaSubindoPulo = true;
         estaNoChao = false;
 
-        float puloEfetivo = forcaDoPulo;
-        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
-        {
-            puloEfetivo *= sistemaFuria.multPulo;
-        }
-
-        float gravidadeG = Mathf.Abs(Physics2D.gravity.y) * rb.gravityScale;
+        float gravidadeG = Mathf.Max(0.01f, Mathf.Abs(Physics2D.gravity.y) * rb.gravityScale);
         float tempoTotalNoAr = (2f * puloEfetivo) / gravidadeG;
 
         float duracaoOriginalSprite = 2.0f;
@@ -245,34 +260,48 @@ public class PlayerController : MonoBehaviour
 
     private bool VerificarChao()
     {
-        Vector2 ponto;
+        if (colliderJogador == null) return false;
 
+        // Durante a subida, o GroundCheck ainda pode estar encostado no
+        // chao por alguns frames; isso NAO deve recarregar o pulo duplo.
+        if (estaSubindoPulo && rb.linearVelocity.y > 0.1f)
+            return false;
+
+        Bounds corpo = colliderJogador.bounds;
+        float yOrigem = corpo.min.y + Mathf.Max(0.35f, groundCheckRaio * 0.5f);
+        float xCentro = corpo.center.x;
         if (groundCheck != null)
         {
-            ponto = groundCheck.position;
-        }
-        else if (colliderJogador != null)
-        {
-            // Fallback se a cena ainda não tiver o Transform GroundCheck atribuído.
-            Bounds limites = colliderJogador.bounds;
-            ponto = new Vector2(limites.center.x, limites.min.y + groundCheckRaio * 0.5f);
-        }
-        else
-        {
-            return false;
+            yOrigem = Mathf.Max(yOrigem, groundCheck.position.y);
+            xCentro = groundCheck.position.x;
         }
 
-        Collider2D[] contatos = Physics2D.OverlapCircleAll(ponto, groundCheckRaio);
-        foreach (Collider2D chao in contatos)
-        {
-            if (chao == null || chao.isTrigger || chao == colliderJogador ||
-                chao.transform.IsChildOf(transform)) continue;
+        // Procura apenas um pouco abaixo dos pes, nao nas laterais da Kaya.
+        float distancia = yOrigem - corpo.min.y + Mathf.Max(0.25f, groundCheckRaio * 0.2f);
+        float lateral = corpo.extents.x * 0.6f;
 
-            bool camadaChao = (chaoLayers.value & (1 << chao.gameObject.layer)) != 0;
-            bool plataforma = chao.GetComponentInParent<PlataformaMovel>() != null ||
-                              chao.GetComponentInParent<PlataformaDeQueda>() != null;
-            if (camadaChao || plataforma) return true;
+        // Tres raios mantem o pulo responsivo nas bordas das plataformas.
+        // Apenas superficies com normal voltada para CIMA valem como chao.
+        for (int i = -1; i <= 1; i++)
+        {
+            Vector2 origem = new Vector2(xCentro + i * lateral, yOrigem);
+            RaycastHit2D[] acertos = Physics2D.RaycastAll(origem, Vector2.down, distancia);
+            foreach (RaycastHit2D acerto in acertos)
+            {
+                Collider2D chao = acerto.collider;
+                if (chao == null || chao.isTrigger || chao == colliderJogador ||
+                    chao.transform.IsChildOf(transform) || acerto.fraction <= 0f ||
+                    acerto.normal.y < 0.7f)
+                    continue;
+
+                bool camadaChao = (chaoLayers.value & (1 << chao.gameObject.layer)) != 0;
+                bool plataforma = chao.GetComponentInParent<PlataformaMovel>() != null ||
+                                  chao.GetComponentInParent<PlataformaDeQueda>() != null;
+                if (camadaChao || plataforma)
+                    return true;
+            }
         }
+
         return false;
     }
 
@@ -308,9 +337,15 @@ public class PlayerController : MonoBehaviour
     {
         if (estaSubindoPulo && rb.linearVelocity.y > 0.1f) return;
 
+        float limiteDosPes = colliderJogador != null
+            ? colliderJogador.bounds.min.y + Mathf.Max(1f, groundCheckRaio * 0.6f)
+            : transform.position.y;
+
         foreach (ContactPoint2D contato in collision.contacts)
         {
-            if (contato.normal.y > 0.5f)
+            // A quina/lateral da plataforma nao deve contar como aterrissagem.
+            // Exige normal principalmente vertical E contato na sola dos pes.
+            if (contato.normal.y >= 0.7f && contato.point.y <= limiteDosPes)
             {
                 if (!estaNoChao && !estaDandoDash && audioKaya != null)
                     audioKaya.TocarAterrissagem();
