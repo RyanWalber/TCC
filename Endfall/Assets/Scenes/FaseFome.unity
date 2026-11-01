@@ -1030,7 +1030,7 @@ Transform:
   m_GameObject: {fileID: 342559843}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10101, y: 255, z: 0}
+  m_LocalPosition: {x: -665, y: -16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8211,7 +8211,7 @@ GameObject:
   - component: {fileID: 1174186880}
   m_Layer: 0
   m_Name: BossFome
-  m_TagString: Untagged
+  m_TagString: Inimigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8328,7 +8328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossVida
-  vidaMaxima: 150
+  vidaMaxima: 800
   barraDeVida: {fileID: 153774914}
   conteinerBarraDeVida: {fileID: 153774913}
   corDano: {r: 1, g: 0, b: 0, a: 1}
