@@ -46,11 +46,25 @@ public class TiroPlayer : MonoBehaviour
 
     private void Update()
     {
-        float cadenciaEfetiva = cadenciaTiro;
-        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
-            cadenciaEfetiva *= sistemaFuria.multCadencia;
+        // Nao cria tiros enquanto o jogo esta pausado.
+        if (Time.timeScale <= 0f) return;
 
-        if ((Input.GetKeyDown(teclaTiro) || Input.GetMouseButtonDown(0)) && Time.time >= tempoProximoTiro)
+        bool furiaAtiva = sistemaFuria != null && sistemaFuria.EstaEmFuria;
+        float cadenciaEfetiva = Mathf.Max(0.01f, cadenciaTiro);
+        if (furiaAtiva)
+        {
+            // MultCadencia e um MULTIPLICADOR DO INTERVALO, nao tiros/segundo.
+            // Valores menores que 1 significam disparos mais rapidos.
+            cadenciaEfetiva *= Mathf.Clamp(sistemaFuria.multCadencia, 0.1f, 1f);
+        }
+
+        // Na Furia pode manter o botao pressionado e disparar rapidamente.
+        // Fora dela permanece o comportamento original: um tiro por clique.
+        bool pediuTiro = furiaAtiva
+            ? (Input.GetKey(teclaTiro) || Input.GetMouseButton(0))
+            : (Input.GetKeyDown(teclaTiro) || Input.GetMouseButtonDown(0));
+
+        if (pediuTiro && Time.time >= tempoProximoTiro)
         {
             if (Atirar())
                 tempoProximoTiro = Time.time + cadenciaEfetiva;

@@ -162,7 +162,10 @@ public class PlayerController : MonoBehaviour
             velocidadeY = Mathf.Max(0f, velocidadePlataforma.y);
 
         // Nao limita o impulso herdado da plataforma no instante do pulo.
-        float limitePulo = forcaDoPulo + impulsoVerticalExtraPlataforma;
+        float limitePulo = forcaDoPulo;
+        if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
+            limitePulo *= Mathf.Max(1f, sistemaFuria.multPulo);
+        limitePulo += impulsoVerticalExtraPlataforma;
         if (velocidadeY > limitePulo && estaSubindoPulo)
             velocidadeY = limitePulo;
 

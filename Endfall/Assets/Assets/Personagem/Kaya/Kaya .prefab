@@ -202,8 +202,8 @@ MonoBehaviour:
   consumoPorSegundo: 20
   furiaAtual: 0
   multVelocidade: 2
-  multPulo: 4
-  multCadencia: 10
+  multPulo: 1.35
+  multCadencia: 0.5
   multDano: 2
   fillFuria: {fileID: 0}
   luzNeonFuria: {fileID: 0}

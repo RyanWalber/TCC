@@ -34,12 +34,16 @@ public class SistemaFuria : MonoBehaviour
 
     private bool estaEmFuria = false;
     private KayaAudioManager audioKaya;
+    private PlayerHealth saudeKaya;
+    private HUDJuice retratoHUD;
 
     public bool EstaEmFuria => estaEmFuria;
 
     private void Start()
     {
         audioKaya = GetComponent<KayaAudioManager>();
+        saudeKaya = GetComponent<PlayerHealth>();
+        ConfigurarPainelDecorativo();
         // Carrega a Fúria escolhida no slot ou preservada pelo renascimento.
         if (SaveManager.Instance != null)
             furiaAtual = Mathf.Clamp(SaveManager.Instance.GetFuriaKaya(), 0f, furiaMaxima);
@@ -49,6 +53,9 @@ public class SistemaFuria : MonoBehaviour
 
     private void Update()
     {
+        // Nao alterna Furia com o menu de pausa aberto.
+        if (Time.timeScale <= 0f) return;
+
         if (Input.GetKeyDown(teclaFuria))
         {
             if (estaEmFuria)
@@ -97,6 +104,7 @@ public class SistemaFuria : MonoBehaviour
         estaEmFuria = true;
         if (audioKaya != null) audioKaya.TocarAtivarFuria();
         AtualizarEfeitosVisuais();
+        AtualizarRetratoHUD();
         Debug.Log(">>> MODO FÚRIA ATIVADO! <<<");
     }
 
@@ -105,6 +113,7 @@ public class SistemaFuria : MonoBehaviour
         estaEmFuria = false;
         if (audioKaya != null) audioKaya.TocarDesativarFuria();
         AtualizarEfeitosVisuais();
+        AtualizarRetratoHUD();
         Debug.Log("Fúria Desativada.");
     }
 
@@ -112,7 +121,36 @@ public class SistemaFuria : MonoBehaviour
     {
         if (fillFuria != null)
         {
-            fillFuria.fillAmount = furiaAtual / furiaMaxima;
+            fillFuria.fillAmount = furiaAtual / Mathf.Max(1f, furiaMaxima);
+        }
+    }
+
+    // A vinheta da Furia ocupa a tela inteira, mas e puramente visual.
+    // Desativa raycasts para que ela nunca capture interacoes do mouse.
+    private void ConfigurarPainelDecorativo()
+    {
+        if (vinhetaTelaFuria == null) return;
+
+        foreach (Graphic grafico in vinhetaTelaFuria.GetComponentsInChildren<Graphic>(true))
+            grafico.raycastTarget = false;
+
+        foreach (CanvasGroup grupo in vinhetaTelaFuria.GetComponentsInChildren<CanvasGroup>(true))
+        {
+            grupo.blocksRaycasts = false;
+            grupo.interactable = false;
+        }
+    }
+
+    private void AtualizarRetratoHUD()
+    {
+        if (retratoHUD == null)
+            retratoHUD = FindFirstObjectByType<HUDJuice>();
+
+        if (saudeKaya != null && retratoHUD != null)
+        {
+            float porcentagemVida = saudeKaya.VidaAtual /
+                Mathf.Max(1f, saudeKaya.VidaMaxima);
+            retratoHUD.AtualizarRetrato(porcentagemVida);
         }
     }
 
