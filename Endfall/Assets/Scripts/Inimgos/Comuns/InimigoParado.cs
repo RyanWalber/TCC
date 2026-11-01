@@ -238,6 +238,7 @@ public class InimigoParado : MonoBehaviour
 
     private void Morrer()
     {
+        EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         Destroy(gameObject);
     }
 

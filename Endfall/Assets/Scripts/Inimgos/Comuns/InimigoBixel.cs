@@ -341,6 +341,7 @@ public class InimigoBixel : MonoBehaviour
 
     private void Morrer()
     {
+        EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         if (estaMorto) return;
         estaMorto = true;
 

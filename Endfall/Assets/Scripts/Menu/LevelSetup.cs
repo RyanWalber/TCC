@@ -9,8 +9,22 @@ public class LevelSetup : MonoBehaviour
     [Tooltip("Marque verdadeiro apenas se quiser que os checkpoints persistam nesta cena")]
     [SerializeField] private bool usarCheckpointSalvo = true;
 
+    [Header("Seguranca do renascimento")]
+    [SerializeField, Min(0f)] private float margemInimigosCheckpoint = 4f;
+
+    private void Awake()
+    {
+        SaveData dados = SaveManager.Instance != null ? SaveManager.Instance.GetDadosAtuais() : null;
+        EstadoMundoCheckpoint.PrepararCena(dados, margemInimigosCheckpoint);
+    }
+
     void Start()
     {
+        // Garante a leitura do save mesmo se o SaveManager tiver inicializado
+        // depois do LevelSetup no Awake desta cena.
+        SaveData saveInicial = SaveManager.Instance != null ? SaveManager.Instance.GetDadosAtuais() : null;
+        EstadoMundoCheckpoint.PrepararCena(saveInicial, margemInimigosCheckpoint);
+
         if (jogador == null)
         {
             jogador = GameObject.FindGameObjectWithTag("Player");

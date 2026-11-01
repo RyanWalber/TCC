@@ -155,6 +155,7 @@ public class InimigoBixao : MonoBehaviour
 
     private void Morrer()
     {
+        EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         rb.linearVelocity = Vector2.zero;
         if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject, 0.15f);

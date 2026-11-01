@@ -19,6 +19,8 @@ public class SaveData
     public List<string> moedasColetadasIDsCheckpoint = new List<string>();
     public List<string> elixiresVidaColetadosIDsCheckpoint = new List<string>();
     public List<string> elixiresVidaColetadosIDs = new List<string>();
+    public List<string> inimigosEliminadosIDs = new List<string>();
+    public List<string> inimigosEliminadosIDsCheckpoint = new List<string>();
 
     public float vidaKaya = 100f;
     public float furiaKaya = 0f;
@@ -44,6 +46,8 @@ public class SaveData
         moedasColetadasIDsCheckpoint = new List<string>();
         elixiresVidaColetadosIDsCheckpoint = new List<string>();
         elixiresVidaColetadosIDs = new List<string>();
+        inimigosEliminadosIDs = new List<string>();
+        inimigosEliminadosIDsCheckpoint = new List<string>();
 
         vidaKaya = 100f;
         furiaKaya = 0f;

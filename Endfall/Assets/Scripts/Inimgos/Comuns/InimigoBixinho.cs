@@ -179,6 +179,7 @@ public class InimigoBixinho : MonoBehaviour
 
     private void Morrer()
     {
+        EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         if (estaMorto) return;
         estaMorto = true;
 

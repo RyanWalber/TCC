@@ -113,6 +113,8 @@ public class SaveManager : MonoBehaviour
         if (dadosAtuais.elixiresVidaColetadosIDs == null) dadosAtuais.elixiresVidaColetadosIDs = new List<string>();
         if (dadosAtuais.moedasColetadasIDsCheckpoint == null) dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>();
         if (dadosAtuais.elixiresVidaColetadosIDsCheckpoint == null) dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>();
+        if (dadosAtuais.inimigosEliminadosIDs == null) dadosAtuais.inimigosEliminadosIDs = new List<string>();
+        if (dadosAtuais.inimigosEliminadosIDsCheckpoint == null) dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
 
         // Tanto saves antigos quanto novos retornam ao ultimo checkpoint.
         // Nunca utiliza a posicao ou os coletaveis obtidos depois dele.
@@ -167,6 +169,7 @@ public class SaveManager : MonoBehaviour
             ? new List<string>(origem.elixiresVidaColetadosIDsCheckpoint)
             : new List<string>();
 
+        List<string> inimigosConfirmados = origem.inimigosEliminadosIDsCheckpoint != null ? new List<string>(origem.inimigosEliminadosIDsCheckpoint) : new List<string>();
         bool checkpointAtivo = origem.passouCheckpoint;
         // Saves antigos podem nao ter capturado vida/furia do checkpoint.
         bool temStatusCheckpoint = origem.checkpointStatusRegistrado;
@@ -195,6 +198,8 @@ public class SaveManager : MonoBehaviour
             moedasColetadasIDs = new List<string>(moedasConfirmadas),
             elixiresVidaColetadosIDsCheckpoint = elixiresConfirmados,
             elixiresVidaColetadosIDs = new List<string>(elixiresConfirmados),
+            inimigosEliminadosIDs = new List<string>(inimigosConfirmados),
+            inimigosEliminadosIDsCheckpoint = inimigosConfirmados,
 
             // Em cenas sem checkpoint usa a linha de base da fase,
             // atualizada nas transicoes. Em saves antigos com checkpoint
@@ -213,6 +218,7 @@ public class SaveManager : MonoBehaviour
         if (dadosAtuais == null) dadosAtuais = new SaveData();
         if (LevelManager.Instance != null)
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
+        EstadoMundoCheckpoint.ConsolidarCheckpoint(dadosAtuais, posicao);
         SincronizarStatusKayaDoJogador();
 
         string cenaAtual = SceneManager.GetActiveScene().name;
@@ -232,6 +238,7 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.checkpointStatusRegistrado = true;
         dadosAtuais.moedasColetadasIDsCheckpoint = new List<string>(dadosAtuais.moedasColetadasIDs);
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
+        dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>(dadosAtuais.inimigosEliminadosIDs);
         aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
     }
@@ -346,6 +353,8 @@ public class SaveManager : MonoBehaviour
         // Cada cena inicia seu proprio conjunto de moedas; IDs e contagem
         // da fase anterior jamais devem desativar moedas na fase seguinte.
         ReiniciarMoedasParaNovaFase();
+        dadosAtuais.inimigosEliminadosIDs = new List<string>();
+        dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
         aplicarPosicaoSalvaAoCarregar = false;
         fileDataHandler.Save(dadosAtuais, 0);
@@ -362,6 +371,13 @@ public class SaveManager : MonoBehaviour
     }
 
     public float GetVidaKaya() => vidaKayaAtual;
+
+    public void RegistrarInimigoDerrotado(string id)
+    {
+        if (dadosAtuais == null || string.IsNullOrEmpty(id)) return;
+        if (dadosAtuais.inimigosEliminadosIDs == null) dadosAtuais.inimigosEliminadosIDs = new List<string>();
+        if (!dadosAtuais.inimigosEliminadosIDs.Contains(id)) dadosAtuais.inimigosEliminadosIDs.Add(id);
+    }
     public float GetFuriaKaya() => furiaKayaAtual;
 
     // Usado quando a Kaya morre: restaura o snapshot do checkpoint e recarrega
@@ -419,6 +435,7 @@ public class SaveManager : MonoBehaviour
             dadosAtuais.moedasColetadasIDs = new List<string>(dadosAtuais.moedasColetadasIDsCheckpoint);
         if (dadosAtuais.elixiresVidaColetadosIDsCheckpoint != null)
             dadosAtuais.elixiresVidaColetadosIDs = new List<string>(dadosAtuais.elixiresVidaColetadosIDsCheckpoint);
+        dadosAtuais.inimigosEliminadosIDs = dadosAtuais.inimigosEliminadosIDsCheckpoint != null ? new List<string>(dadosAtuais.inimigosEliminadosIDsCheckpoint) : new List<string>();
 
         dadosAtuais.versaoDados = 2;
         dadosAtuais.vidaKaya = vidaKayaAtual;
@@ -470,6 +487,8 @@ public class SaveManager : MonoBehaviour
         // Ao entrar na proxima fase, contador e IDs das moedas iniciam zerados.
         // Assim uma moeda com ID repetido em outra cena nao desaparece por engano.
         ReiniciarMoedasParaNovaFase();
+        dadosAtuais.inimigosEliminadosIDs = new List<string>();
+        dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
 
         // Preserva os demais dados da Kaya, como vida e Furia.
