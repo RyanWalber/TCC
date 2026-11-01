@@ -176342,7 +176342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossVida
-  vidaMaxima: 1200
+  vidaMaxima: 2200
   barraDeVida: {fileID: 421269863}
   conteinerBarraDeVida: {fileID: 421269861}
   corDano: {r: 1, g: 0, b: 0, a: 1}
