@@ -3164,7 +3164,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: multPulo
-      value: 100
+      value: 1.35
       objectReference: {fileID: 0}
     - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: fillFuria
