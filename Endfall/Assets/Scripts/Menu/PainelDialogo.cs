@@ -20,8 +20,8 @@ public class FalaDialogo
 
 /// <summary>
 /// Controle reutilizavel do painel de dialogo. Nao tem escolhas.
-/// Pode ser anexado ao proprio painel: a visibilidade e controlada
-/// com CanvasGroup, sem desativar o GameObject que executa o script.
+/// Pode ser anexado ao proprio painel, mesmo que esteja desativado
+/// na Hierarchy: o gatilho o ativa quando a conversa comeca.
 /// </summary>
 [DisallowMultipleComponent]
 public class PainelDialogo : MonoBehaviour
@@ -97,8 +97,24 @@ public class PainelDialogo : MonoBehaviour
     /// </summary>
     public void IniciarDialogo(FalaDialogo[] falasDoGatilho)
     {
-        if (dialogoAberto || !isActiveAndEnabled)
+        if (dialogoAberto)
             return;
+
+        // O gatilho consegue chamar este metodo mesmo que o componente
+        // esteja em um GameObject desativado. Reativa antes de iniciar a
+        // coroutine, pois Unity nao executa coroutines em objetos inativos.
+        GameObject objetoPainel = painel != null ? painel : gameObject;
+        if (!objetoPainel.activeSelf)
+            objetoPainel.SetActive(true);
+
+        // O Canvas pai deve continuar ativo, e o componente habilitado.
+        if (!isActiveAndEnabled)
+        {
+            Debug.LogWarning(
+                "[PainelDialogo] Nao foi possivel abrir. Verifique se o Canvas pai " +
+                "esta ativo e se o componente PainelDialogo esta habilitado.", this);
+            return;
+        }
 
         if (textoFala == null || textoNome == null || imagemRetrato == null)
         {
@@ -245,6 +261,14 @@ public class PainelDialogo : MonoBehaviour
         falasAtuais = null;
         AjustarVisibilidade(false);
         RestaurarTempo();
+
+        // O usuario pode deixar o painel desmarcado na Hierarchy. Ao final,
+        // ele volta exatamente a esse estado, sem precisar de CanvasGroup
+        // permanentemente visivel nem de um segundo script de controle.
+        GameObject objetoPainel = painel != null ? painel : gameObject;
+        if (objetoPainel.activeSelf)
+            objetoPainel.SetActive(false);
+
         aoTerminarDialogo?.Invoke();
     }
 
