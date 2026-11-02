@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: c128edf0f0220844ba4c26d40404f6ec
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7820616096380793404
+    second: paraandar_0
+  - first:
+      213: -2511007328283872399
+    second: paraandar_1
+  - first:
+      213: 7855603010534509879
+    second: paraandar_2
+  - first:
+      213: -5822090163923144848
+    second: paraandar_3
+  - first:
+      213: -81705816673979032
+    second: paraandar_4
+  - first:
+      213: -4215872329096863510
+    second: paraandar_5
+  - first:
+      213: 136862686741722717
+    second: paraandar_6
+  - first:
+      213: -952882189004281908
+    second: paraandar_7
+  - first:
+      213: -1159955683170859910
+    second: paraandar_8
+  - first:
+      213: 6625910910244228608
+    second: paraandar_9
+  - first:
+      213: 7451328692937907595
+    second: paraandar_10
+  - first:
+      213: -1905018680622801543
+    second: paraandar_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: paraandar_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 148
+        width: 476
+        height: 765
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cd45828817977390800000000000000
+      internalID: -7820616096380793404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_1
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 223
+        width: 545
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 173bc39832c172dd0800000000000000
+      internalID: -2511007328283872399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_2
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 0
+        width: 908
+        height: 828
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73d066b3155b40d60800000000000000
+      internalID: 7855603010534509879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_3
+      rect:
+        serializedVersion: 2
+        x: 1505
+        y: 223
+        width: 546
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07fa019b7d7c33fa0800000000000000
+      internalID: -5822090163923144848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_4
+      rect:
+        serializedVersion: 2
+        x: 2377
+        y: 223
+        width: 546
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 865701d1ef8bddef0800000000000000
+      internalID: -81705816673979032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_5
+      rect:
+        serializedVersion: 2
+        x: 2932
+        y: 188
+        width: 545
+        height: 645
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae068cd04763e75c0800000000000000
+      internalID: -4215872329096863510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_6
+      rect:
+        serializedVersion: 2
+        x: 3479
+        y: 228
+        width: 527
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d56fe3273eb36e100800000000000000
+      internalID: 136862686741722717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_7
+      rect:
+        serializedVersion: 2
+        x: 4012
+        y: 223
+        width: 546
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc76a9b92bea6c2f0800000000000000
+      internalID: -952882189004281908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_8
+      rect:
+        serializedVersion: 2
+        x: 4567
+        y: 0
+        width: 907
+        height: 828
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a74c76da37207efe0800000000000000
+      internalID: -1159955683170859910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_9
+      rect:
+        serializedVersion: 2
+        x: 5341
+        y: 231
+        width: 592
+        height: 591
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00e0e760ed6f3fb50800000000000000
+      internalID: 6625910910244228608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_10
+      rect:
+        serializedVersion: 2
+        x: 5941
+        y: 184
+        width: 431
+        height: 703
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8d5d37a7ff686760800000000000000
+      internalID: 7451328692937907595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paraandar_11
+      rect:
+        serializedVersion: 2
+        x: 6373
+        y: 179
+        width: 419
+        height: 718
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97d9efa6a930095e0800000000000000
+      internalID: -1905018680622801543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      paraandar_0: -7820616096380793404
+      paraandar_1: -2511007328283872399
+      paraandar_10: 7451328692937907595
+      paraandar_11: -1905018680622801543
+      paraandar_2: 7855603010534509879
+      paraandar_3: -5822090163923144848
+      paraandar_4: -81705816673979032
+      paraandar_5: -4215872329096863510
+      paraandar_6: 136862686741722717
+      paraandar_7: -952882189004281908
+      paraandar_8: -1159955683170859910
+      paraandar_9: 6625910910244228608
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
