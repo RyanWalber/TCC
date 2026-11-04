@@ -8653,7 +8653,7 @@ MonoBehaviour:
     retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
     texto: Esteja atenta a sua vida e a sua Furia. Lute com cuidado para seguir adiante.
   iniciarAutomaticamente: 0
-  pausarJogoDuranteDialogo: 1
+  bloquearControlesDaKaya: 1
   segundosPorCaractere: 0.035
   aoTerminarDialogo:
     m_PersistentCalls:
