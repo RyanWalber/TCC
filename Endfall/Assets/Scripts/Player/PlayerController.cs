@@ -74,8 +74,12 @@ public class PlayerController : MonoBehaviour
                     playerAnimation.DefinirDash(false);
             }
 
-            // Detem apenas o deslocamento horizontal. Uma Kaya no ar cai normalmente.
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            // Ao comecar a conversa, encerra uma eventual subida de pulo:
+            // a gravidade continua ativa e Kaya pode cair ate a plataforma.
+            // Nao altera a movimentacao normal fora do dialogo.
+            float velocidadeVertical = Mathf.Min(0f, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(0f, velocidadeVertical);
+            rb.WakeUp();
         }
 
         if (isActiveAndEnabled)
