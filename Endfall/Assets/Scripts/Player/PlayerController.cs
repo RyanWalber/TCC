@@ -50,6 +50,37 @@ public class PlayerController : MonoBehaviour
     public bool EstaDandoDash => estaDandoDash;
     public bool EstaMovendoNoChao => estaNoChao && !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.1f;
     private KayaAudioManager audioKaya;
+    private bool controlesBloqueadosPorDialogo;
+
+    public bool ControlesBloqueadosPorDialogo => controlesBloqueadosPorDialogo;
+
+    // Desativa somente os comandos: o PlayerController e o Animator continuam ativos.
+    public void DefinirBloqueioDialogo(bool bloquear)
+    {
+        if (controlesBloqueadosPorDialogo == bloquear) return;
+        controlesBloqueadosPorDialogo = bloquear;
+        inputHorizontal = 0f;
+
+        if (bloquear && rb != null)
+        {
+            if (estaDandoDash)
+            {
+                StopAllCoroutines();
+                estaDandoDash = false;
+                podeDarDash = true;
+                direcaoDash = 0f;
+                rb.gravityScale = gravidadeOriginal;
+                if (playerAnimation != null)
+                    playerAnimation.DefinirDash(false);
+            }
+
+            // Detem apenas o deslocamento horizontal. Uma Kaya no ar cai normalmente.
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
+
+        if (isActiveAndEnabled)
+            AtualizarAnimacoes();
+    }
 
     // Chamado apenas quando os pes estao em contato com o topo da plataforma.
     public void DefinirPlataformaMovel(PlataformaMovel plataforma)
@@ -121,6 +152,13 @@ public class PlayerController : MonoBehaviour
             contadorCoyote -= Time.deltaTime;
         }
 
+        if (controlesBloqueadosPorDialogo)
+        {
+            inputHorizontal = 0f;
+            AtualizarAnimacoes();
+            return;
+        }
+
         if (!estaDandoDash)
         {
             inputHorizontal = Input.GetAxisRaw("Horizontal");
@@ -146,6 +184,15 @@ public class PlayerController : MonoBehaviour
     {
         // Detecção contínua abaixo dos pés: mais estável nas junções entre plataformas.
         estaNoChao = VerificarChao() || (plataformaSuporte != null && !estaSubindoPulo);
+
+        if (controlesBloqueadosPorDialogo)
+        {
+            // Sem input, mas preservando gravidade e movimento das plataformas.
+            float movimentoPlataforma = plataformaSuporte != null && estaNoChao
+                ? plataformaSuporte.VelocidadeAtual.x : 0f;
+            rb.linearVelocity = new Vector2(movimentoPlataforma, rb.linearVelocity.y);
+            return;
+        }
 
         if (estaDandoDash)
         {

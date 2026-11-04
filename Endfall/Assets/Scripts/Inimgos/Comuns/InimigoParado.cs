@@ -20,6 +20,12 @@ public class InimigoParado : MonoBehaviour
     [Min(0f)] public float tempoAvisoPoeira = 0.8f;
     [Tooltip("Quantidade de partículas de poeira emitidas no aviso.")]
     [Min(1)] public int quantidadeParticulasPoeira = 18;
+    [Header("Aparencia da Poeira")]
+    [Tooltip("Cor e transparencia usadas pelas particulas criadas por codigo.")]
+    public Color corPoeira = new Color(0.07f, 0.07f, 0.07f, 0.85f);
+    [Tooltip("Opcional. Se vazio, um material Unlit compativel sera criado em tempo de execucao.")]
+    public Material materialPoeira;
+
     [Tooltip("Opcional: atribua um Particle System próprio. Se ficar vazio, o efeito será criado automaticamente.")]
     public ParticleSystem efeitoPoeira;
     [Tooltip("Deslocamento da poeira em relação ao ponto onde o inimigo estava escondido. Aumente Y para colocar a poeira mais acima da plataforma.")]
@@ -27,6 +33,7 @@ public class InimigoParado : MonoBehaviour
 
     private bool preparandoEmergencia;
     private ParticleSystemRenderer renderizadorPoeira;
+    private Material materialPoeiraCriado;
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -61,48 +68,96 @@ public class InimigoParado : MonoBehaviour
 
     private void PrepararEfeitoPoeira()
     {
-        if (efeitoPoeira != null) return;
-
-        GameObject objetoPoeira = new GameObject("AvisoPoeiraEmergencia");
-        objetoPoeira.transform.position = posicaoOculta + offsetPoeira;
-        efeitoPoeira = objetoPoeira.AddComponent<ParticleSystem>();
-        efeitoPoeira.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        bool criarPoeira = efeitoPoeira == null;
+        if (criarPoeira)
+        {
+            GameObject objeto = new GameObject("AvisoPoeiraEmergencia");
+            // Emissor como filho: sera eliminado quando o inimigo morrer.
+            objeto.transform.SetParent(transform, true);
+            objeto.transform.position = posicaoOculta + offsetPoeira;
+            efeitoPoeira = objeto.AddComponent<ParticleSystem>();
+            efeitoPoeira.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
 
         var main = efeitoPoeira.main;
-        main.playOnAwake = false;
-        main.loop = false;
-        main.duration = 0.7f;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
-        main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.8f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(
-            Mathf.Max(0.5f, alturaEmergir * 0.15f),
-            Mathf.Max(1f, alturaEmergir * 0.4f));
-        main.startSize = new ParticleSystem.MinMaxCurve(
-            Mathf.Max(0.08f, alturaEmergir * 0.025f),
-            Mathf.Max(0.15f, alturaEmergir * 0.06f));
-        main.startColor = new ParticleSystem.MinMaxGradient(
-            new Color(0f, 0f, 0f, 0.75f),
-            new Color(0f, 0f, 0f, 1f));
-        main.maxParticles = Mathf.Max(quantidadeParticulasPoeira, 30);
+        // Funciona tambem com um ParticleSystem colocado manualmente no Inspector.
+        main.startColor = new ParticleSystem.MinMaxGradient(corPoeira);
 
-        var emission = efeitoPoeira.emission;
-        emission.enabled = false;
+        if (criarPoeira)
+        {
+            main.playOnAwake = false;
+            main.loop = false;
+            main.duration = 0.7f;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.8f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(
+                Mathf.Max(0.5f, alturaEmergir * 0.15f),
+                Mathf.Max(1f, alturaEmergir * 0.4f));
+            main.startSize = new ParticleSystem.MinMaxCurve(
+                Mathf.Max(0.08f, alturaEmergir * 0.025f),
+                Mathf.Max(0.15f, alturaEmergir * 0.06f));
+            main.maxParticles = Mathf.Max(quantidadeParticulasPoeira, 30);
 
-        var shape = efeitoPoeira.shape;
-        shape.enabled = true;
-        shape.shapeType = ParticleSystemShapeType.Cone;
-        shape.angle = 55f;
-        shape.radius = Mathf.Max(0.1f, alturaEmergir * 0.08f);
+            var emission = efeitoPoeira.emission;
+            emission.enabled = false;
+            var shape = efeitoPoeira.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 55f;
+            shape.radius = Mathf.Max(0.1f, alturaEmergir * 0.08f);
+            var velocity = efeitoPoeira.velocityOverLifetime;
+            velocity.enabled = false;
+        }
 
-        var velocity = efeitoPoeira.velocityOverLifetime;
-        velocity.enabled = false;
+        renderizadorPoeira = efeitoPoeira.GetComponent<ParticleSystemRenderer>();
+        if (renderizadorPoeira == null) return;
 
-        renderizadorPoeira = objetoPoeira.GetComponent<ParticleSystemRenderer>();
-        if (renderizadorPoeira != null)
+        if (criarPoeira)
         {
             renderizadorPoeira.renderMode = ParticleSystemRenderMode.Billboard;
             renderizadorPoeira.sortingOrder = 5;
         }
+
+        if (materialPoeira != null && materialPoeira.shader != null &&
+            materialPoeira.shader.isSupported)
+        {
+            renderizadorPoeira.sharedMaterial = materialPoeira;
+            return;
+        }
+
+        // Um efeito externo com material valido pode manter sua aparencia.
+        Material atual = renderizadorPoeira.sharedMaterial;
+        if (!criarPoeira && materialPoeira == null && atual != null &&
+            atual.shader != null && atual.shader.isSupported)
+            return;
+
+        // Sem material, o renderizador pode ficar magenta/roxo.
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (shader == null || !shader.isSupported)
+            shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+        if (shader == null || !shader.isSupported)
+            shader = Shader.Find("Sprites/Default");
+
+        if (shader == null || !shader.isSupported)
+        {
+            Debug.LogError("[InimigoParado] Shader de particulas indisponivel. " +
+                "Arraste um Material Unlit compativel ao campo 'Material Poeira'.", this);
+            return;
+        }
+
+        materialPoeiraCriado = new Material(shader)
+        {
+            name = "MaterialPoeiraAutomatico",
+            hideFlags = HideFlags.DontSave
+        };
+        renderizadorPoeira.sharedMaterial = materialPoeiraCriado;
+    }
+
+    private void OnDestroy()
+    {
+        // Material criado pelo codigo nao deve acumular na memoria.
+        if (materialPoeiraCriado != null)
+            Destroy(materialPoeiraCriado);
     }
 
     private IEnumerator AvisarEEmergir()
@@ -115,6 +170,8 @@ public class InimigoParado : MonoBehaviour
         if (efeitoPoeira != null)
         {
             efeitoPoeira.transform.position = posicaoOculta + offsetPoeira;
+            var mainPoeira = efeitoPoeira.main;
+            mainPoeira.startColor = new ParticleSystem.MinMaxGradient(corPoeira);
             efeitoPoeira.Clear(true);
             efeitoPoeira.Play(true);
             efeitoPoeira.Emit(Mathf.Max(1, quantidadeParticulasPoeira));

@@ -34,6 +34,7 @@ public class SistemaFuria : MonoBehaviour
 
     private bool estaEmFuria = false;
     private KayaAudioManager audioKaya;
+    private PlayerController controleKaya;
     private PlayerHealth saudeKaya;
     private HUDJuice retratoHUD;
 
@@ -42,6 +43,7 @@ public class SistemaFuria : MonoBehaviour
     private void Start()
     {
         audioKaya = GetComponent<KayaAudioManager>();
+        controleKaya = GetComponent<PlayerController>();
         saudeKaya = GetComponent<PlayerHealth>();
         ConfigurarPainelDecorativo();
         // Carrega a Fúria escolhida no slot ou preservada pelo renascimento.
@@ -56,7 +58,8 @@ public class SistemaFuria : MonoBehaviour
         // Nao alterna Furia com o menu de pausa aberto.
         if (Time.timeScale <= 0f) return;
 
-        if (Input.GetKeyDown(teclaFuria))
+        if ((controleKaya == null || !controleKaya.ControlesBloqueadosPorDialogo) &&
+            Input.GetKeyDown(teclaFuria))
         {
             if (estaEmFuria)
             {

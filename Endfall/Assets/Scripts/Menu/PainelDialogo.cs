@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class FalaDialogo
@@ -45,7 +46,9 @@ public class PainelDialogo : MonoBehaviour
 
     [Header("Comportamento")]
     [SerializeField] private bool iniciarAutomaticamente = false;
-    [SerializeField] private bool pausarJogoDuranteDialogo = true;
+    [Tooltip("Bloqueia os comandos da Kaya, mas mantem animacoes e fisica. Nao pausa o jogo.")]
+    [FormerlySerializedAs("pausarJogoDuranteDialogo")]
+    [SerializeField] private bool bloquearControlesDaKaya = true;
     [Min(0.005f)]
     [SerializeField] private float segundosPorCaractere = 0.035f;
 
@@ -59,8 +62,8 @@ public class PainelDialogo : MonoBehaviour
     private int ultimoFrameDeAvanco = -1;
     private bool dialogoAberto;
     private bool digitando;
-    private bool alterouTempo;
-    private float tempoAnterior;
+    private PlayerController controleKaya;
+    private bool bloqueioAplicado;
 
     public bool EstaAberto => dialogoAberto;
 
@@ -135,11 +138,18 @@ public class PainelDialogo : MonoBehaviour
         indiceFala = 0;
         ultimoFrameDeAvanco = Time.frameCount;
 
-        if (pausarJogoDuranteDialogo)
+        if (bloquearControlesDaKaya)
         {
-            tempoAnterior = Time.timeScale;
-            Time.timeScale = 0f;
-            alterouTempo = true;
+            controleKaya = FindFirstObjectByType<PlayerController>();
+            if (controleKaya != null)
+            {
+                controleKaya.DefinirBloqueioDialogo(true);
+                bloqueioAplicado = true;
+            }
+            else
+            {
+                Debug.LogWarning("[PainelDialogo] PlayerController da Kaya nao encontrado.", this);
+            }
         }
 
         AjustarVisibilidade(true);
@@ -260,7 +270,7 @@ public class PainelDialogo : MonoBehaviour
         dialogoAberto = false;
         falasAtuais = null;
         AjustarVisibilidade(false);
-        RestaurarTempo();
+        LiberarControlesKaya();
 
         // O usuario pode deixar o painel desmarcado na Hierarchy. Ao final,
         // ele volta exatamente a esse estado, sem precisar de CanvasGroup
@@ -282,13 +292,14 @@ public class PainelDialogo : MonoBehaviour
         grupoPainel.blocksRaycasts = mostrar;
     }
 
-    private void RestaurarTempo()
+    private void LiberarControlesKaya()
     {
-        if (!alterouTempo)
-            return;
+        if (!bloqueioAplicado) return;
 
-        Time.timeScale = tempoAnterior;
-        alterouTempo = false;
+        if (controleKaya != null)
+            controleKaya.DefinirBloqueioDialogo(false);
+        controleKaya = null;
+        bloqueioAplicado = false;
     }
 
     private void OnDisable()
@@ -302,6 +313,6 @@ public class PainelDialogo : MonoBehaviour
         dialogoAberto = false;
         digitando = false;
         AjustarVisibilidade(false);
-        RestaurarTempo();
+        LiberarControlesKaya();
     }
 }

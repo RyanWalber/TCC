@@ -12,6 +12,7 @@ public class MiraMouse : MonoBehaviour
 
     private Camera cameraPrincipal;
     private PlayerHealth vidaKaya;
+    private PlayerController controleKaya;
     private bool orientacaoCongeladaNaMorte;
     private Vector3 posicaoOriginalKaya;
     private Transform centroDoPersonagem;
@@ -25,6 +26,7 @@ public class MiraMouse : MonoBehaviour
     {
         cameraPrincipal = Camera.main;
         vidaKaya = GetComponentInParent<PlayerHealth>();
+        controleKaya = GetComponentInParent<PlayerController>();
         centroDoPersonagem = transform.root;
 
         if (aniKaya == null && transform.parent != null)
@@ -52,6 +54,15 @@ public class MiraMouse : MonoBehaviour
                 estavaMirando = false;
                 orientacaoCongeladaNaMorte = true;
             }
+            return;
+        }
+
+        if (controleKaya != null && controleKaya.ControlesBloqueadosPorDialogo)
+        {
+            // Cliques no dialogo nao viram a Kaya nem movimentam sua arma.
+            timerTiro = 0f;
+            pesoMira = 0f;
+            estavaMirando = false;
             return;
         }
 

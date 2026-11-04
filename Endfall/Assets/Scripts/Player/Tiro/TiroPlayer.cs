@@ -29,10 +29,12 @@ public class TiroPlayer : MonoBehaviour
     private bool recuperandoFolego;
     private float inicioRecuperacao;
     private SistemaFuria sistemaFuria;
+    private PlayerController controleKaya;
 
     private void Start()
     {
         sistemaFuria = GetComponentInParent<SistemaFuria>();
+        controleKaya = GetComponentInParent<PlayerController>();
         audioKaya = GetComponentInParent<KayaAudioManager>();
 
         if (audioKaya == null && audioRespiracao != null)
@@ -48,6 +50,11 @@ public class TiroPlayer : MonoBehaviour
     {
         // Nao cria tiros enquanto o jogo esta pausado.
         if (Time.timeScale <= 0f) return;
+        if (controleKaya != null && controleKaya.ControlesBloqueadosPorDialogo)
+        {
+            if (audioKaya == null) AtualizarRespiracao();
+            return;
+        }
 
         bool furiaAtiva = sistemaFuria != null && sistemaFuria.EstaEmFuria;
         float cadenciaEfetiva = Mathf.Max(0.01f, cadenciaTiro);
