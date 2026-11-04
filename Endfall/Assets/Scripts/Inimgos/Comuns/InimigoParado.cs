@@ -20,6 +20,18 @@ public class InimigoParado : MonoBehaviour
     [Min(0f)] public float tempoAvisoPoeira = 0.8f;
     [Tooltip("Quantidade de partículas de poeira emitidas no aviso.")]
     [Min(1)] public int quantidadeParticulasPoeira = 18;
+
+    [Header("Poeira - Terra Voando")]
+    [Tooltip("Multiplica a quantidade original. Por exemplo: 18 x 5 = 90 particulas.")]
+    [Range(1f, 10f)] public float densidadePoeira = 5f;
+    [Tooltip("Aumenta o tamanho dos pedacos de terra, facilitando a visualizacao.")]
+    [Range(0.5f, 5f)] public float tamanhoPoeira = 2.2f;
+    [Tooltip("Intensidade do movimento de baixo para cima.")]
+    [Range(0.25f, 5f)] public float forcaSubidaPoeira = 1.5f;
+    [Tooltip("Quanto maior, mais rapidamente a terra desacelera e cai.")]
+    [Range(0f, 2f)] public float gravidadePoeira = 0.55f;
+    [Tooltip("Largura da faixa do chao de onde as particulas saem.")]
+    [Min(0.05f)] public float larguraSaidaPoeira = 0.7f;
     [Header("Aparencia da Poeira")]
     [Tooltip("Cor e transparencia usadas pelas particulas criadas por codigo.")]
     public Color corPoeira = new Color(0.07f, 0.07f, 0.07f, 0.85f);
@@ -80,33 +92,30 @@ public class InimigoParado : MonoBehaviour
         }
 
         var main = efeitoPoeira.main;
-        // Funciona tambem com um ParticleSystem colocado manualmente no Inspector.
+        // Emissao manual em coordenadas 2D (X/Y): sempre de baixo para cima.
+        // O componente pode ter sido criado por codigo ou informado no Inspector.
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.startColor = new ParticleSystem.MinMaxGradient(corPoeira);
+        main.startSpeed = 0f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.7f, 1.25f);
+        main.gravityModifier = gravidadePoeira;
+        main.maxParticles = Mathf.Max(128,
+            Mathf.CeilToInt(quantidadeParticulasPoeira * densidadePoeira) * 2);
+
+        var emissao = efeitoPoeira.emission;
+        emissao.enabled = false; // Sem emissao automatica duplicada.
+        var formato = efeitoPoeira.shape;
+        formato.enabled = false; // Cada particula recebe posicao/velocidade proprias.
+        var velocidadeExtra = efeitoPoeira.velocityOverLifetime;
+        velocidadeExtra.enabled = false;
 
         if (criarPoeira)
         {
             main.playOnAwake = false;
             main.loop = false;
             main.duration = 0.7f;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.8f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(
-                Mathf.Max(0.5f, alturaEmergir * 0.15f),
-                Mathf.Max(1f, alturaEmergir * 0.4f));
-            main.startSize = new ParticleSystem.MinMaxCurve(
-                Mathf.Max(0.08f, alturaEmergir * 0.025f),
-                Mathf.Max(0.15f, alturaEmergir * 0.06f));
-            main.maxParticles = Mathf.Max(quantidadeParticulasPoeira, 30);
-
-            var emission = efeitoPoeira.emission;
-            emission.enabled = false;
-            var shape = efeitoPoeira.shape;
-            shape.enabled = true;
-            shape.shapeType = ParticleSystemShapeType.Cone;
-            shape.angle = 55f;
-            shape.radius = Mathf.Max(0.1f, alturaEmergir * 0.08f);
-            var velocity = efeitoPoeira.velocityOverLifetime;
-            velocity.enabled = false;
+            // A configuracao de direcao e tamanho e feita por EmitParams,
+            // para nao depender da rotacao do Particle System em 2D.
         }
 
         renderizadorPoeira = efeitoPoeira.GetComponent<ParticleSystemRenderer>();
@@ -160,6 +169,38 @@ public class InimigoParado : MonoBehaviour
             Destroy(materialPoeiraCriado);
     }
 
+    private void EmitirTerra(int quantidade)
+    {
+        if (efeitoPoeira == null || quantidade <= 0) return;
+
+        // As posicoes e velocidades estao em espaco WORLD, no plano XY.
+        Vector3 origem = posicaoOculta + offsetPoeira;
+        float metadeFaixa = Mathf.Max(0.05f, larguraSaidaPoeira);
+        float tamanhoMinimo = Mathf.Max(0.08f, alturaEmergir * 0.025f) * tamanhoPoeira;
+        float tamanhoMaximo = Mathf.Max(0.15f, alturaEmergir * 0.06f) * tamanhoPoeira;
+        float impulso = Mathf.Max(1.8f, alturaEmergir * 0.45f) * forcaSubidaPoeira;
+
+        for (int i = 0; i < quantidade; i++)
+        {
+            ParticleSystem.EmitParams terra = new ParticleSystem.EmitParams();
+            terra.position = origem + new Vector3(
+                Random.Range(-metadeFaixa, metadeFaixa),
+                Random.Range(-0.08f, 0.08f), 0f);
+
+            // A terra sobe principalmente em Y e se abre um pouco para os lados.
+            terra.velocity = new Vector3(
+                Random.Range(-impulso * 0.5f, impulso * 0.5f),
+                Random.Range(impulso * 0.85f, impulso * 1.5f),
+                0f);
+            terra.startSize = Random.Range(tamanhoMinimo, tamanhoMaximo);
+            terra.startLifetime = Random.Range(0.7f, 1.25f);
+            Color cor = corPoeira;
+            cor.a *= Random.Range(0.8f, 1f);
+            terra.startColor = cor;
+            efeitoPoeira.Emit(terra, 1);
+        }
+    }
+
     private IEnumerator AvisarEEmergir()
     {
         preparandoEmergencia = true;
@@ -172,13 +213,38 @@ public class InimigoParado : MonoBehaviour
             efeitoPoeira.transform.position = posicaoOculta + offsetPoeira;
             var mainPoeira = efeitoPoeira.main;
             mainPoeira.startColor = new ParticleSystem.MinMaxGradient(corPoeira);
+            mainPoeira.gravityModifier = gravidadePoeira;
+            mainPoeira.maxParticles = Mathf.Max(128,
+                Mathf.CeilToInt(quantidadeParticulasPoeira * densidadePoeira) * 2);
             efeitoPoeira.Clear(true);
             efeitoPoeira.Play(true);
-            efeitoPoeira.Emit(Mathf.Max(1, quantidadeParticulasPoeira));
-        }
 
-        if (tempoAvisoPoeira > 0f)
+            int total = Mathf.Max(1,
+                Mathf.RoundToInt(quantidadeParticulasPoeira * densidadePoeira));
+
+            if (tempoAvisoPoeira <= 0f)
+            {
+                EmitirTerra(total);
+            }
+            else
+            {
+                // Varias ondas durante o aviso criam um jato continuo de terra,
+                // em vez de poucas particulas em um unico frame.
+                int ondas = Mathf.Max(1, Mathf.CeilToInt(tempoAvisoPoeira / 0.08f));
+                int jaEmitidas = 0;
+                for (int onda = 0; onda < ondas; onda++)
+                {
+                    int alvo = Mathf.RoundToInt((onda + 1f) * total / ondas);
+                    EmitirTerra(alvo - jaEmitidas);
+                    jaEmitidas = alvo;
+                    yield return new WaitForSeconds(tempoAvisoPoeira / ondas);
+                }
+            }
+        }
+        else if (tempoAvisoPoeira > 0f)
+        {
             yield return new WaitForSeconds(tempoAvisoPoeira);
+        }
 
         jaEmergiu = true;
         preparandoEmergencia = false;
