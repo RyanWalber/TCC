@@ -371,7 +371,7 @@ MonoBehaviour:
   raioDeteccao: 120
   offsetDeteccao: {x: 40, y: 25}
   alturaEmergir: 67.8
-  velocidadeSubida: 20
+  velocidadeSubida: 70
   player: {fileID: 0}
   tempoAvisoPoeira: 0.8
   quantidadeParticulasPoeira: 18
