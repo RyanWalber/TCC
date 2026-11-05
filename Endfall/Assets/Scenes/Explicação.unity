@@ -203,8 +203,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -305.07373, y: -212.22522, z: -291.8098, w: -232.12134}
+  m_margin: {x: -305.07373, y: -234.07361, z: -291.8098, w: -232.12134}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -630,36 +630,81 @@ MonoBehaviour:
   somDigitacao: {fileID: 8300000, guid: 7de1b1da7dfeff349b4c888412e0b49e, type: 3}
   fonteDigitacao: {fileID: 0}
   volumeDigitacao: 0.67
-  textoApresentacao: "<size=60><color=#E8C994>\n                          Bem-vindo
-    a EndFall</color></size>\n\nEm um mundo marcado pela ru\xEDna, a jornada de Kaya
-    est\xE1 apenas come\xE7ando.\nReinos feridos por calamidades escondem perigos,
-    escolhas e segredos.\nSiga em frente. Nem tudo \xE9 o que parece.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
+  textoApresentacao: "<size=60><color=#E8C994>\n                         Bem-vindo
+    a EndFall</color></size>\n\nAntes dos Cavaleiros, antes dos dom\xEDnios, existia
+    um mundo governado pelo equil\xEDbrio. Teus, o deus criador do universo, deu
+    origem a tudo que existia. Ap\xF3s concluir sua criac\xE3o, decidiu descansar
+    e dividir seu poder em duas partes: o lado luminoso e o lado sombrio.\n\nAssim
+    nasceram Vida e Morte, duas entidades opostas, respons\xE1veis por manter o equil\xEDbrio
+    do universo. Uma n\xE3o poderia dominar a outra, pois ambas existiam para se
+    anular. Entretanto, Morte desejava mais.\n\nTraindo Vida e rompendo o acordo
+    estabelecido por Teus, Morte deu in\xEDcio a uma Guerra Santa que devastou o
+    universo. O conflito terminou com a derrota e a execuc\xE3o de Vida, cujo poder
+    foi tomado pela entidade vencedora. Com o equil\xEDbrio destru\xEDdo, os dem\xF4nios
+    passaram a dominar o mundo.\n\nMorte estabeleceu os quatro Cavaleiros do Apocalipse,
+    assumindo para si um dos t\xEDtulos e entregando os demais a seus escolhidos.
+    O territ\xF3rio de EndFall foi dividido em quatro dom\xEDnios: Fome, Peste, Guerra
+    e Morte. Durante eras, os Cavaleiros governaram essas terras. Mas, em meio \xE0
+    destruic\xE3o, uma jovem cacadora sobreviveu ao massacre de sua fam\xEDlia.\n\nSeu
+    nome era Kaya.\n\nBem-vindo ao EndFall.\n\n<size=15><color=#B8B6B1>ESPA\xC7O
     OU CLIQUE</color></size>"
-  fragmento1: "<size=50><color=#E8C994>\n         FRAGMENTO I - O \xDALTIMO LEGADO</color></size>\n\nAntes
-    que os reinos fossem consumidos pela Fome, Peste, Guerra e Morte, existiam aqueles
-    que enfrentavam as sombras: os ca\xE7adores.\n\nKaya cresceu entre eles, aprendendo
-    que coragem n\xE3o \xE9 aus\xEAncia de medo, mas a escolha de proteger.\n\nAos
-    dezoito anos, ela ainda n\xE3o sabia quanto custaria carregar esse legado.\n\n<size=18><color=#B8B6B1>ESPA\xC7O
+  fragmento1: "<size=35><color=#E8C994>I - Carta de desconhecido</color></size>\nMinha
+    querida cacadora,\n\nImagino que esteja se perguntando quem escreveu esta carta.
+    N\xE3o se preocupe, teremos tempo para apresentac\xF5es. Por enquanto, considere-me
+    uma admiradora de sua coragem... ou imprud\xEAncia.\n\nSoube que uma jovem cacadora
+    pretende atravessar os quatro dom\xEDnios em busca de vinganca. Que ambic\xE3o
+    interessante!\n\nSeu primeiro destino \xE9 o Dom\xEDnio da Fome, governado por
+    uma criatura de passado curioso. Antes de se tornar Cavaleiro, Fome era apenas
+    uma hiena que acompanhava um cacador. Durante uma expedic\xE3o, seu dono foi
+    morto por Guerra, que decidiu poupar a hiena, transform\xE1-la em dem\xF4nio
+    e indic\xE1-la ao cargo de Cavaleiro.\nApesar disso, Fome ainda guarda lembrancas
+    de seu antigo dono. Observe suas roupas e entender\xE1.\n\nMas n\xE3o se engane:
+    ele continua sendo uma criatura perigosa.\n\nEspero que sobreviva, seria uma
+    pena perder uma divers\xE3o t\xE3o promissora.\n\nAtt. Uma desconhecida\n\n<size=18><color=#B8B6B1>ESPA\xC7O
     OU CLIQUE</color></size>"
-  fragmento2: "<size=35><color=#E8C994>FRAGMENTO II - A NOITE DAS CINZAS</color></size>\n\nA
-    fam\xEDlia de Kaya n\xE3o desapareceu por acaso. Em uma \xFAnica noite, sua casa
-    foi destru\xEDda e uma linhagem inteira de ca\xE7adores foi exterminada.\n\nSeus
-    pais morreram tentando resistir. Kaya foi a \xFAnica a sobreviver.\n\nRestou-lhe
-    uma lembran\xE7a que n\xE3o se apaga... e uma pergunta: quem levou a morte at\xE9
-    sua porta?\n\n<size=20><color=#B8B6B1>ESPA\xC7O OU CLIQUE</color></size>"
-  fragmento3: "<size=50><color=#E8C994>\n         FRAGMENTO III - O RASTRO DA VERDADE</color></size>\n\nA
-    cada dom\xEDnio atravessado, Kaya encontrou sinais de que o massacre era parte
-    de algo maior. A mesma for\xE7a que espalhava a Fome e a Peste alimentava a Guerra.\n\nOs
-    fragmentos da Colt, uma arma lend\xE1ria, poderiam romper esse ciclo.\n\nEla
-    j\xE1 n\xE3o procurava apenas vingan\xE7a. Procurava uma verdade que o mundo
-    parecia temer.\n\n<size=20><color=#B8B6B1>ESPA\xC7O OU CLIQUE</color></size>"
-  fragmento4: "<size=50><color=#E8C994>\n         FRAGMENTO IV - DIANTE DA MORTE</color></size>\n\nDepois
-    da Guerra, resta um \xFAltimo dom\xEDnio. Nele espera a sombra por tr\xE1s do
-    massacre que levou os pais de Kaya: a Morte.\n\nAgora ela conhece o inimigo que
-    precisa enfrentar. Mas sua \xFAltima batalha ser\xE1 maior que a vingan\xE7a.\n\nSe
-    vencer, talvez consiga libertar os reinos do ciclo de destrui\xE7\xE3o \u2014
-    e dar ao legado de sua fam\xEDlia um destino al\xE9m da dor.\n\n<size=20><color=#B8B6B1>ESPA\xC7O
+  fragmento2: "<size=35><color=#E8C994>II - Carta de Cael</color></size>\nMinha querida
+    Kaya,\n\r\nOra, ora! Voc\xEA realmente conseguiu passar pelo Dom\xEDnio da Fome.
+    Confesso que estou comecando a gostar dessa hist\xF3ria.\n\r\nSoube tamb\xE9m
+    que seus pais eram cacadores de dem\xF4nios e que seu pai a treinou desde pequena.
+    Pelo visto, os ensinamentos dele n\xE3o foram desperdicados.\n\r\nMas vamos ao
+    que interessa. Seu pr\xF3ximo destino \xE9 o Dom\xEDnio da Peste, governado por
+    uma antiga experi\xEAncia minha.\n\r\nAntes de se tornar Cavaleira, Peste era
+    uma simples camponesa, escolhida para participar de experimentos que realizei
+    no Dom\xEDnio da Morte. Ap\xF3s alguns testes, consegui transform\xE1-la em uma
+    criatura h\xEDbrida, metade humana e metade mosca. Quando Morte executou o antigo
+    Cavaleiro da Peste, indiquei minha criac\xE3o para ocupar o cargo. E veja s\xF3
+    onde ela chegou!\n\r\nN\xE3o me olhe assim, querida. A ci\xEAncia exige alguns
+    sacrif\xEDcios.\n\r\nEspero que seus treinamentos sejam suficientes para sobreviver
+    a essa experi\xEAncia.\n\r\nAtt. Uma cientista qualquer\r\n\n\n<size=20><color=#B8B6B1>ESPA\xC7O
     OU CLIQUE</color></size>"
+  fragmento3: "<size=35><color=#E8C994>III - Carta de Cael</color></size>\nCacadora,\n\r\nMais
+    uma vit\xF3ria? Voc\xEA realmente est\xE1 superando minhas expectativas.\n\r\n\xC9
+    curioso como algu\xE9m que perdeu praticamente tudo ainda consegue seguir em
+    frente. Sua fam\xEDlia foi massacrada pela Morte, e agora voc\xEA pretende enfrentar
+    a respons\xE1vel. Quanta determinac\xE3o!\n\r\nSeu pr\xF3ximo advers\xE1rio \xE9
+    Guerra, um Cavaleiro bastante leal \xE0 Morte.\n\r\nAntes de assumir seu t\xEDtulo,
+    Guerra era apenas um lobo que se perdeu de sua alcateia. Ao encontrar Morte,
+    tentou atac\xE1-la, mas acabou sendo adotado, transformado em dem\xF4nio e treinado
+    at\xE9 se tornar um Cavaleiro.\n\r\nAh, lembra-se de Fome? Foi Guerra quem matou
+    seu antigo dono. Fome nunca o perdoou. Uma relac\xE3o familiar bastante complicada,
+    n\xE3o acha?\n\r\nDe qualquer forma, Guerra j\xE1 sabe de sua exist\xEAncia e
+    recebeu ordens para impedi-la.\n\r\nTente n\xE3o morrer. Seria uma pena interromper
+    sua vinganca justamente agora.\r\n\nAtt. Sua amiga Cael\n\n<size=20><color=#B8B6B1>ESPA\xC7O
+    OU CLIQUE</color></size>"
+  fragmento4: "<size=50><color=#E8C994>IV - Carta de Cael</color></size>\nMinha persistente
+    cacadora,\n\r\nFinalmente! Voc\xEA atravessou tr\xEAs dom\xEDnios e derrotou
+    os Cavaleiros que estavam em seu caminho. Tudo isso para vingar sua fam\xEDlia.
+    Admir\xE1vel. Ou talvez um pouco insano. Ainda n\xE3o decidi.\n\r\nAgora resta
+    apenas Morte, a entidade respons\xE1vel pela destruic\xE3o do equil\xEDbrio do
+    universo e pelo massacre de seus familiares.\n\r\nComo voc\xEA j\xE1 sabe, Morte
+    traiu Vida, tomou seu poder e estabeleceu os quatro dom\xEDnios. Mas, apesar
+    de toda essa grandeza, ela possui um temperamento bastante vingativo e uma curiosa
+    afeic\xE3o por seus corvos.\n\r\nAcredite, eu a conheco melhor do que voc\xEA
+    imagina.\n\r\nH\xE1 algo sobre a morte de sua fam\xEDlia que voc\xEA ainda desconhece.
+    Algo que talvez faca toda essa vinganca parecer ainda mais absurda.\n\r\nMas
+    n\xE3o seria divertido contar tudo por uma carta, n\xE3o \xE9?\n\r\nEncontre-me
+    no Dom\xEDnio da Morte. Acredito que j\xE1 esteja na hora de termos uma \xFAltima
+    conversa.\n\nAtt. Cael\r\n\n<size=20><color=#B8B6B1>ESPA\xC7O OU CLIQUE</color></size>"
   vozDominioFome: {fileID: 8300000, guid: e4921e594b0be7c4ead68dfebc16574d, type: 3}
   vozDominioPeste: {fileID: 8300000, guid: 8de0a3bdf0e3e5c458ff5235bfe5202c, type: 3}
   vozDominioGuerra: {fileID: 8300000, guid: 1ddb4929b7a6bc546a38529c69fcf165, type: 3}

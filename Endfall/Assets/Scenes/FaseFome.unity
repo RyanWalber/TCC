@@ -211,80 +211,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
---- !u!1001 &57686179
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 2046383955}
-    m_Modifications:
-    - target: {fileID: 900759722361673384, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 9137787154099114289}
-    - target: {fileID: 900759722361673384, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: danoNoJogador
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 1386914937234337464, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2522470750223395840, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_Name
-      value: BixoAlfa
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -577.0489
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -420.6832
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
---- !u!4 &57686180 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8859103063039120554, guid: d3566f73ae5002c479afa210454b4227, type: 3}
-  m_PrefabInstance: {fileID: 57686179}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &75553631
 GameObject:
   m_ObjectHideFlags: 0
@@ -1301,7 +1227,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -1352,7 +1279,7 @@ Transform:
   m_GameObject: {fileID: 342559843}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2302, y: -36, z: 0}
+  m_LocalPosition: {x: 4680, y: 52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2805,7 +2732,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -3078,7 +3006,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -8641,17 +8570,39 @@ MonoBehaviour:
   falasPadrao:
   - personagem: Cael
     retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
-    texto: Kaya, escute. Os reinos estao cheios de perigos. Primeiro, aprenda a se
-      mover.
-  - personagem: Cael
-    retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
-    texto: Use A e D ou as setas para caminhar. Pressione Espaco para pular.
+    texto: "Ora, ora... Ent\xE3o voc\xEA \xE9 a famosa ca\xE7adora. Vejo que encontrou
+      minha carta!"
   - personagem: Kaya
     retrato: {fileID: -9099357462280670973, guid: 644b300e7a1d1ad4495b2338fdae373c, type: 3}
-    texto: Entendi. Mas o que acontece se eu encontrar inimigos?
+    texto: "Voc\xEA escreveu aquilo? Quem \xE9 voc\xEA?"
   - personagem: Cael
     retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
-    texto: Esteja atenta a sua vida e a sua Furia. Lute com cuidado para seguir adiante.
+    texto: "Cael, minha querida. Uma antiga conhecedora destes dom\xEDnios."
+  - personagem: Kaya
+    retrato: {fileID: -9099357462280670973, guid: 644b300e7a1d1ad4495b2338fdae373c, type: 3}
+    texto: "E por que est\xE1 me ajudando?"
+  - personagem: Cael
+    retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
+    texto: "T\xE9dio! Faz s\xE9culos que n\xE3o acontece nada interessante por aqui."
+  - personagem: Kaya
+    retrato: {fileID: -9099357462280670973, guid: 644b300e7a1d1ad4495b2338fdae373c, type: 3}
+    texto: "Minha fam\xEDlia foi massacrada pela Morte. Isso n\xE3o \xE9 uma brincadeira!"
+  - personagem: Cael
+    retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
+    texto: "Para voc\xEA, n\xE3o. Para mim, \xE9 uma hist\xF3ria bastante promissora."
+  - personagem: Kaya
+    retrato: {fileID: -9099357462280670973, guid: 644b300e7a1d1ad4495b2338fdae373c, type: 3}
+    texto: "S\xF3 quero chegar at\xE9 a Morte."
+  - personagem: Cael
+    retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
+    texto: "Ent\xE3o continue viva. Deixarei outras cartas pelo caminho. Talvez sejam
+      \xFAteis."
+  - personagem: Kaya
+    retrato: {fileID: -9099357462280670973, guid: 644b300e7a1d1ad4495b2338fdae373c, type: 3}
+    texto: "N\xE3o confio em voc\xEA."
+  - personagem: Cael
+    retrato: {fileID: -2977574420608923027, guid: 7e98c0910539eac4e9dae28349c56b41, type: 3}
+    texto: "Inteligente da sua parte! At\xE9 mais, querida."
   iniciarAutomaticamente: 0
   bloquearControlesDaKaya: 1
   segundosPorCaractere: 0.035
@@ -8798,7 +8749,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -8872,7 +8824,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -9131,7 +9084,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -9716,7 +9670,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -34688,7 +34643,7 @@ Transform:
   m_GameObject: {fileID: 1379135874}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1430, y: 251, z: 0}
+  m_LocalPosition: {x: 1479, y: 246, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -46477,7 +46432,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1203484657107377873, guid: d3566f73ae5002c479afa210454b4227, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3566f73ae5002c479afa210454b4227, type: 3}
@@ -46789,8 +46745,7 @@ Transform:
   m_LocalPosition: {x: 1170, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 57686180}
+  m_Children: []
   m_Father: {fileID: 1206579777}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2069201279
@@ -46803,6 +46758,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2069201281}
   - component: {fileID: 2069201280}
+  - component: {fileID: 2069201282}
   m_Layer: 0
   m_Name: cael_0
   m_TagString: Untagged
@@ -46857,7 +46813,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 20
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4601512906078712968, guid: 8798876c52d8b0048b069f62461b3889, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -46879,12 +46835,34 @@ Transform:
   m_GameObject: {fileID: 2069201279}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3576, y: -209, z: 0}
+  m_LocalPosition: {x: 3576, y: -221.4, z: 0}
   m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1379135875}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &2069201282
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069201279}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e86eb5b3800442f4d8fd6be1a769aaf2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &2076221049 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 115757154687951847, guid: 391590aa003080b43b6fa944b0ec9edb, type: 3}
