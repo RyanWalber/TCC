@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DragonBones;
 using Transform = UnityEngine.Transform;
@@ -49,20 +48,11 @@ public class InimigoParado : MonoBehaviour
     private ParticleSystemRenderer renderizadorPoeira;
     private Material materialPoeiraCriado;
 
-    [Header("Ocultacao sob o chao")]
-    [Tooltip("Layers das plataformas cuja superficie deve ocultar o corpo enterrado.")]
-    [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
-    [Tooltip("Margem extra para nunca desenhar parte do corpo sob a plataforma.")]
-    [Min(0f)] [SerializeField] private float margemOcultacao = 0f;
-    [Tooltip("Material que referencia o shader de recorte (configurado no prefab).")]
-    [SerializeField] private Material materialModeloRecorte;
-
-    private float superficieDoChaoY;
-    private bool shaderIndisponivelAvisado;
-    private readonly Dictionary<Material, Material> materiaisRecortados = new Dictionary<Material, Material>();
-    private readonly HashSet<Material> materiaisGerados = new HashSet<Material>();
-    private MaterialPropertyBlock parametrosRecorte;
-    private static readonly int alturaDeRecorteId = Shader.PropertyToID("_GroundY");
+    [Header("Desenho atras da plataforma")]
+    [Tooltip("Default permite desenhar acima do ceu e atras do piso.")]
+    [SerializeField] private string camadaRenderCorpo = "Default";
+    [Tooltip("Entre o ceu (-1000) e as plataformas (normalmente 0 ou layer plat).")]
+    [SerializeField] private int ordemRenderCorpo = -500;
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -92,150 +82,45 @@ public class InimigoParado : MonoBehaviour
         posicaoOculta = transform.position;
         posicaoExposta = transform.position + new Vector3(0, alturaEmergir, 0);
 
-        PrepararOcultacaoCorpo();
+        PrepararRenderizacaoDoCorpo();
         PrepararEfeitoPoeira();
     }
 
-    private void PrepararOcultacaoCorpo()
-    {
-        // Nao altera mais a Sprite Mask original do BixoAlfa. O recorte
-        // criado no codigo anterior tinha a borda abaixo do piso real.
-        // Para evitar qualquer flash, a verificacao usa o tamanho REAL
-        // das malhas DragonBones em coordenadas de mundo.
-        // A altura da poeira (74 no prefab) nao e a do chao (67.8).
-        // Desacopla o recorte do offset visual do efeito.
-        superficieDoChaoY = posicaoOculta.y + Mathf.Max(0f, alturaEmergir);
-
-        // A plataforma pode estar um pouco acima da posicao estimada.
-        // Procura seu topo pelo collider Ground, sem mover inimigo ou piso.
-        float alturaPesquisa = Mathf.Max(alturaEmergir, 20f);
-        Vector2 origem = new Vector2(
-            posicaoOculta.x + offsetPoeira.x,
-            superficieDoChaoY + alturaPesquisa);
-        // A primeira tentativa prefere o piso da layer Ground.
-        // Se a plataforma estiver em outra layer, aceita outro
-        // collider solido proximo da altura de subida.
-        RaycastHit2D[] impactos = Physics2D.RaycastAll(
-            origem, Vector2.down, alturaPesquisa * 2.5f);
-        float alturaEstimada = superficieDoChaoY;
-        float tolerancia = Mathf.Max(4f, Mathf.Max(0f, alturaEmergir) * 0.2f);
-
-        for (int tentativa = 0; tentativa < 2; tentativa++)
-        {
-            float menorDiferenca = float.PositiveInfinity;
-            float alturaEncontrada = alturaEstimada;
-            bool achou = false;
-
-            foreach (RaycastHit2D impacto in impactos)
-            {
-                if (impacto.collider == null || impacto.collider.isTrigger ||
-                    impacto.normal.y < 0.7f ||
-                    impacto.collider.transform.IsChildOf(transform.root))
-                    continue;
-
-                bool layerDeChao = (camadasDaSuperficie.value &
-                    (1 << impacto.collider.gameObject.layer)) != 0;
-                if (tentativa == 0 && !layerDeChao)
-                    continue;
-
-                float diferenca = Mathf.Abs(impacto.point.y - alturaEstimada);
-                if (diferenca > tolerancia || diferenca >= menorDiferenca)
-                    continue;
-
-                menorDiferenca = diferenca;
-                alturaEncontrada = impacto.point.y;
-                achou = true;
-            }
-
-            if (achou)
-            {
-                superficieDoChaoY = alturaEncontrada;
-                break;
-            }
-        }
-
-        AtualizarVisibilidadeCorpo();
-    }
-
-    private void AtualizarVisibilidadeCorpo()
+    private void PrepararRenderizacaoDoCorpo()
     {
         if (armatureComponent == null) return;
 
-        // SpriteMask nao recorta de forma confiavel as MeshRenderers do
-        // DragonBones neste projeto Built-in. O shader descarta APENAS os
-        // pixels sob a plataforma, sem ocultar a malha inteira.
-        Shader shader = materialModeloRecorte != null ? materialModeloRecorte.shader
-                                                       : Shader.Find("EndFall/InimigoParadoRecorte");
-        bool shaderDisponivel = shader != null && shader.isSupported;
-        if (!shaderDisponivel && !shaderIndisponivelAvisado)
+        // Sem SpriteMask ou shader de corte: o piso desenhado POR CIMA
+        // encobre naturalmente a parte do inimigo que ainda esta enterrada.
+        Transform raiz = transform.parent != null ? transform.parent : transform;
+        foreach (SpriteMask mascara in raiz.GetComponentsInChildren<SpriteMask>(true))
         {
-            Debug.LogError("[InimigoParado] Shader EndFall/InimigoParadoRecorte indisponivel. " +
-                "Verifique o campo Material Modelo Recorte do prefab BixoAlfa.", this);
-            shaderIndisponivelAvisado = true;
+            if (mascara != null)
+                mascara.enabled = false;
         }
 
-        if (parametrosRecorte == null)
-            parametrosRecorte = new MaterialPropertyBlock();
+        AtualizarRenderizacaoDoCorpo();
+    }
 
+    private void AtualizarRenderizacaoDoCorpo()
+    {
+        if (armatureComponent == null) return;
+
+        // O DragonBones pode reconstruir meshes. Aplica a ordem apos ele.
         foreach (MeshRenderer malha in
                  armatureComponent.GetComponentsInChildren<MeshRenderer>(true))
         {
             if (malha == null) continue;
-
-            // Uma malha pode ter sido recomposta pelo UnityCombineMeshs.
-            // Para nao alterar o material compartilhado por outros inimigos,
-            // faz um clone apenas uma vez para cada material original.
-            if (shaderDisponivel)
-            {
-                Material[] materiais = malha.sharedMaterials;
-                bool houveTroca = false;
-
-                for (int i = 0; i < materiais.Length; i++)
-                {
-                    Material original = materiais[i];
-                    if (original == null || materiaisGerados.Contains(original))
-                        continue;
-
-                    if (!materiaisRecortados.TryGetValue(original, out Material recortado))
-                    {
-                        recortado = new Material(original);
-                        recortado.shader = shader;
-                        recortado.name = original.name + " (Recorte EndFall)";
-                        recortado.hideFlags = HideFlags.DontSave;
-                        materiaisRecortados.Add(original, recortado);
-                        materiaisGerados.Add(recortado);
-                    }
-
-                    materiais[i] = recortado;
-                    houveTroca = true;
-                }
-
-                if (houveTroca)
-                    malha.sharedMaterials = materiais;
-
-                malha.GetPropertyBlock(parametrosRecorte);
-                parametrosRecorte.SetFloat(alturaDeRecorteId,
-                    superficieDoChaoY + Mathf.Clamp(margemOcultacao, 0f, 0.15f));
-                malha.SetPropertyBlock(parametrosRecorte);
-            }
-
-            // Durante o aviso so a POEIRA fica visivel. Ao comecar a subir,
-            // habilita as malhas, mas o shader impede revelar partes enterradas.
-            // Fallback seguro: sem shader, so mostra ao concluir a subida.
-            bool mostrar = shaderDisponivel
-                ? jaEmergiu
-                : jaEmergiu && Vector3.Distance(transform.position, posicaoExposta) < 0.05f;
-
-            if (malha.enabled != mostrar)
-                malha.enabled = mostrar;
+            malha.sortingLayerName = camadaRenderCorpo;
+            malha.sortingOrder = ordemRenderCorpo;
+            if (malha.enabled != jaEmergiu)
+                malha.enabled = jaEmergiu;
         }
     }
 
     private void LateUpdate()
     {
-        // Depois do DragonBones reconstruir as meshes, inclusive no primeiro
-        // frame de emergencia. Nao mexe nos ParticleSystemRenderers.
-        AtualizarVisibilidadeCorpo();
+        AtualizarRenderizacaoDoCorpo();
     }
 
     private void PrepararEfeitoPoeira()
@@ -327,12 +212,6 @@ public class InimigoParado : MonoBehaviour
         if (materialPoeiraCriado != null)
             Destroy(materialPoeiraCriado);
 
-        // Apenas materiais clonados pelo proprio inimigo.
-        foreach (Material material in materiaisGerados)
-            if (material != null)
-                Destroy(material);
-        materiaisGerados.Clear();
-        materiaisRecortados.Clear();
     }
 
     private void EmitirTerra(int quantidade)
