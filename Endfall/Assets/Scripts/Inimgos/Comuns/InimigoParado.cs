@@ -54,6 +54,10 @@ public class InimigoParado : MonoBehaviour
     [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
     [Tooltip("Margem extra para nunca desenhar parte do corpo sob a plataforma.")]
     [Min(0f)] [SerializeField] private float margemOcultacao = 0.5f;
+    [Tooltip("Altura, em unidades do mundo, da faixa de transparencia ao sair do chao.")]
+    [Range(0.1f, 20f)] [SerializeField] private float suavidadeRecorte = 5f;
+    [Tooltip("Pequena irregularidade horizontal na borda, como terra solta.")]
+    [Range(0f, 6f)] [SerializeField] private float irregularidadeRecorte = 1.5f;
     [Tooltip("Material que referencia o shader de recorte (configurado no prefab).")]
     [SerializeField] private Material materialModeloRecorte;
 
@@ -63,6 +67,8 @@ public class InimigoParado : MonoBehaviour
     private readonly HashSet<Material> materiaisGerados = new HashSet<Material>();
     private MaterialPropertyBlock parametrosRecorte;
     private static readonly int alturaDeRecorteId = Shader.PropertyToID("_GroundY");
+    private static readonly int suavidadeRecorteId = Shader.PropertyToID("_FadeHeight");
+    private static readonly int irregularidadeRecorteId = Shader.PropertyToID("_EdgeIrregularity");
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -191,6 +197,10 @@ public class InimigoParado : MonoBehaviour
                 malha.GetPropertyBlock(parametrosRecorte);
                 parametrosRecorte.SetFloat(alturaDeRecorteId,
                     superficieDoChaoY + margemOcultacao);
+                parametrosRecorte.SetFloat(suavidadeRecorteId,
+                    Mathf.Max(0.1f, suavidadeRecorte));
+                parametrosRecorte.SetFloat(irregularidadeRecorteId,
+                    Mathf.Max(0f, irregularidadeRecorte));
                 malha.SetPropertyBlock(parametrosRecorte);
             }
 
