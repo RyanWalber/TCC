@@ -80,7 +80,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_MaskInteraction: 1
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1386914937234337464
 MeshFilter:
@@ -382,6 +382,7 @@ MonoBehaviour:
   larguraSaidaPoeira: 3
   corPoeira: {r: 0.6886792, g: 0.5861445, b: 0.26962438, a: 1}
   materialPoeira: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  materialModeloRecorte: {fileID: 2100000, guid: 5f4d43197f1a4ae59f26b3cb95c9221a, type: 2}
   efeitoPoeira: {fileID: 0}
   offsetPoeira: {x: 32, y: 74, z: 0}
   vidaMaxima: 20

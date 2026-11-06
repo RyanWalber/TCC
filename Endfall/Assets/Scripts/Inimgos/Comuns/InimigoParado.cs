@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DragonBones;
 using Transform = UnityEngine.Transform;
@@ -53,8 +54,15 @@ public class InimigoParado : MonoBehaviour
     [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
     [Tooltip("Margem extra para nunca desenhar parte do corpo sob a plataforma.")]
     [Min(0f)] [SerializeField] private float margemOcultacao = 0.5f;
+    [Tooltip("Material que referencia o shader de recorte (configurado no prefab).")]
+    [SerializeField] private Material materialModeloRecorte;
 
     private float superficieDoChaoY;
+    private bool shaderIndisponivelAvisado;
+    private readonly Dictionary<Material, Material> materiaisRecortados = new Dictionary<Material, Material>();
+    private readonly HashSet<Material> materiaisGerados = new HashSet<Material>();
+    private MaterialPropertyBlock parametrosRecorte;
+    private static readonly int alturaDeRecorteId = Shader.PropertyToID("_GroundY");
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -128,28 +136,80 @@ public class InimigoParado : MonoBehaviour
     {
         if (armatureComponent == null) return;
 
-        // Nunca usa jaEmergiu isoladamente para mostrar o corpo:
-        // ele fica true ANTES do primeiro movimento de subida.
-        // SpriteMask nao garante corte das MeshRenderers do DragonBones.
+        // SpriteMask nao recorta de forma confiavel as MeshRenderers do
+        // DragonBones neste projeto Built-in. O shader descarta APENAS os
+        // pixels sob a plataforma, sem ocultar a malha inteira.
+        Shader shader = materialModeloRecorte != null ? materialModeloRecorte.shader
+                                                       : Shader.Find("EndFall/InimigoParadoRecorte");
+        bool shaderDisponivel = shader != null && shader.isSupported;
+        if (!shaderDisponivel && !shaderIndisponivelAvisado)
+        {
+            Debug.LogError("[InimigoParado] Shader EndFall/InimigoParadoRecorte indisponivel. " +
+                "Verifique o campo Material Modelo Recorte do prefab BixoAlfa.", this);
+            shaderIndisponivelAvisado = true;
+        }
+
+        if (parametrosRecorte == null)
+            parametrosRecorte = new MaterialPropertyBlock();
+
         foreach (MeshRenderer malha in
                  armatureComponent.GetComponentsInChildren<MeshRenderer>(true))
         {
             if (malha == null) continue;
 
-            Bounds limites = malha.bounds;
-            bool saiuCompletamenteDoChao = limites.size.y > 0.01f &&
-                limites.min.y >= superficieDoChaoY + margemOcultacao;
+            // Uma malha pode ter sido recomposta pelo UnityCombineMeshs.
+            // Para nao alterar o material compartilhado por outros inimigos,
+            // faz um clone apenas uma vez para cada material original.
+            if (shaderDisponivel)
+            {
+                Material[] materiais = malha.sharedMaterials;
+                bool houveTroca = false;
 
-            bool podeMostrar = jaEmergiu && saiuCompletamenteDoChao;
-            if (malha.enabled != podeMostrar)
-                malha.enabled = podeMostrar;
+                for (int i = 0; i < materiais.Length; i++)
+                {
+                    Material original = materiais[i];
+                    if (original == null || materiaisGerados.Contains(original))
+                        continue;
+
+                    if (!materiaisRecortados.TryGetValue(original, out Material recortado))
+                    {
+                        recortado = new Material(original);
+                        recortado.shader = shader;
+                        recortado.name = original.name + " (Recorte EndFall)";
+                        recortado.hideFlags = HideFlags.DontSave;
+                        materiaisRecortados.Add(original, recortado);
+                        materiaisGerados.Add(recortado);
+                    }
+
+                    materiais[i] = recortado;
+                    houveTroca = true;
+                }
+
+                if (houveTroca)
+                    malha.sharedMaterials = materiais;
+
+                malha.GetPropertyBlock(parametrosRecorte);
+                parametrosRecorte.SetFloat(alturaDeRecorteId,
+                    superficieDoChaoY + margemOcultacao);
+                malha.SetPropertyBlock(parametrosRecorte);
+            }
+
+            // Durante o aviso so a POEIRA fica visivel. Ao comecar a subir,
+            // habilita as malhas, mas o shader impede revelar partes enterradas.
+            // Fallback seguro: sem shader, so mostra ao concluir a subida.
+            bool mostrar = shaderDisponivel
+                ? jaEmergiu
+                : jaEmergiu && Vector3.Distance(transform.position, posicaoExposta) < 0.05f;
+
+            if (malha.enabled != mostrar)
+                malha.enabled = mostrar;
         }
     }
 
     private void LateUpdate()
     {
-        // Ordem tardia: aplica APOS o DragonBones atualizar/compor as malhas,
-        // evitando a piscada de um unico frame embaixo das plataformas.
+        // Depois do DragonBones reconstruir as meshes, inclusive no primeiro
+        // frame de emergencia. Nao mexe nos ParticleSystemRenderers.
         AtualizarVisibilidadeCorpo();
     }
 
@@ -239,9 +299,15 @@ public class InimigoParado : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Material criado pelo codigo nao deve acumular na memoria.
         if (materialPoeiraCriado != null)
             Destroy(materialPoeiraCriado);
+
+        // Apenas materiais clonados pelo proprio inimigo.
+        foreach (Material material in materiaisGerados)
+            if (material != null)
+                Destroy(material);
+        materiaisGerados.Clear();
+        materiaisRecortados.Clear();
     }
 
     private void EmitirTerra(int quantidade)
@@ -342,7 +408,11 @@ public class InimigoParado : MonoBehaviour
 
         if (jaEmergiu)
         {
-            transform.position = Vector3.Lerp(transform.position, posicaoExposta, Time.deltaTime * velocidadeSubida);
+            // Lerp com velocidadeSubida=70 completava tudo em um frame.
+            // MoveTowards usa unidades por segundo e revela a subida gradualmente.
+            transform.position = Vector3.MoveTowards(
+                transform.position, posicaoExposta,
+                Mathf.Max(0f, velocidadeSubida) * Time.deltaTime);
         }
     }
 
