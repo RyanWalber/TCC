@@ -375,6 +375,11 @@ MonoBehaviour:
   player: {fileID: 0}
   camadaRenderCorpo: Default
   ordemRenderCorpo: -500
+  ajusteNivelSuperficie: 0
+  camadasDaSuperficie:
+    serializedVersion: 2
+    m_Bits: 8
+  materialModeloRecorte: {fileID: 2100000, guid: 5f4d43197f1a4ae59f26b3cb95c9221a, type: 2}
   tempoAvisoPoeira: 0.8
   quantidadeParticulasPoeira: 18
   densidadePoeira: 3

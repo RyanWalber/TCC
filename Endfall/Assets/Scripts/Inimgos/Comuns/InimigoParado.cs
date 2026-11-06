@@ -48,11 +48,28 @@ public class InimigoParado : MonoBehaviour
     private ParticleSystemRenderer renderizadorPoeira;
     private Material materialPoeiraCriado;
 
+    [Header("Ocultacao da parte enterrada")]
+    [Tooltip("Opcional: marque um Transform exatamente na superficie da plataforma. Se vazio, procura o piso pelo Collider2D.")]
+    [SerializeField] private Transform pontoSuperficie;
+    [Tooltip("Ajuste fino do nivel real do piso. Valor negativo abaixa o recorte.")]
+    [SerializeField] private float ajusteNivelSuperficie = 0f;
+    [Tooltip("Layers preferenciais das plataformas. Busca outras layers se necessario.")]
+    [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
+    [Tooltip("Material ja configurado para o shader EndFall/InimigoParadoRecorte.")]
+    [SerializeField] private Material materialModeloRecorte;
+
     [Header("Desenho atras da plataforma")]
-    [Tooltip("Default permite desenhar acima do ceu e atras do piso.")]
     [SerializeField] private string camadaRenderCorpo = "Default";
-    [Tooltip("Entre o ceu (-1000) e as plataformas (normalmente 0 ou layer plat).")]
     [SerializeField] private int ordemRenderCorpo = -500;
+
+    private float superficieChaoY;
+    private bool avisoSemCollider;
+    private readonly System.Collections.Generic.Dictionary<Material, Material> materiaisRecortados =
+        new System.Collections.Generic.Dictionary<Material, Material>();
+    private readonly System.Collections.Generic.HashSet<Material> clonesCriados =
+        new System.Collections.Generic.HashSet<Material>();
+    private MaterialPropertyBlock parametrosRecorte;
+    private static readonly int groundId = Shader.PropertyToID("_GroundY");
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -90,36 +107,163 @@ public class InimigoParado : MonoBehaviour
     {
         if (armatureComponent == null) return;
 
-        // Sem SpriteMask ou shader de corte: o piso desenhado POR CIMA
-        // encobre naturalmente a parte do inimigo que ainda esta enterrada.
-        Transform raiz = transform.parent != null ? transform.parent : transform;
-        foreach (SpriteMask mascara in raiz.GetComponentsInChildren<SpriteMask>(true))
+        // O SpriteMask nao recorta corretamente as malhas DragonBones.
+        // Evita duas solucoes de recorte disputando pelo mesmo renderer.
+        Transform raizPrefab = transform.parent != null ? transform.parent : transform;
+        foreach (SpriteMask mascara in raizPrefab.GetComponentsInChildren<SpriteMask>(true))
+            if (mascara != null) mascara.enabled = false;
+
+        LocalizarNivelDaPlataforma();
+        AtualizarRenderizacaoDoCorpo();
+    }
+
+    private void LocalizarNivelDaPlataforma()
+    {
+        if (pontoSuperficie != null)
         {
-            if (mascara != null)
-                mascara.enabled = false;
+            superficieChaoY = pontoSuperficie.position.y;
+            return;
         }
 
-        AtualizarRenderizacaoDoCorpo();
+        // O offset da poeira e o ponto visual de onde a terra sai.
+        // Nao deve se tornar diretamente o nivel de recorte:
+        // o emissor pode estar alguns metros acima da superficie.
+        float estimativa = posicaoOculta.y + Mathf.Max(0f, alturaEmergir);
+        float origemPesquisaY = Mathf.Max(
+            estimativa, posicaoOculta.y + offsetPoeira.y) +
+            Mathf.Max(20f, alturaEmergir * 0.6f);
+        float comprimento = Mathf.Max(80f, alturaEmergir * 2.5f);
+        float tolerancia = Mathf.Max(12f, alturaEmergir * 0.65f);
+
+        // O prefab desloca visualmente o DragonBones em X. Procura o piso
+        // sob o ponto da poeira, sob a armadura e sob o transform do inimigo.
+        float[] pontosX = {
+            posicaoOculta.x + offsetPoeira.x,
+            armatureComponent.transform.position.x,
+            posicaoOculta.x
+        };
+
+        Collider2D candidato = null;
+        float alturaCandidata = 0f;
+        float melhorPontuacao = float.PositiveInfinity;
+        Transform raizPrefab = transform.parent != null ? transform.parent : transform;
+
+        foreach (float x in pontosX)
+        {
+            RaycastHit2D[] acertos = Physics2D.RaycastAll(
+                new Vector2(x, origemPesquisaY), Vector2.down, comprimento);
+
+            foreach (RaycastHit2D acerto in acertos)
+            {
+                Collider2D col = acerto.collider;
+                if (col == null || col.isTrigger || acerto.normal.y < 0.6f ||
+                    col.transform.IsChildOf(raizPrefab) ||
+                    col.CompareTag("Player") || col.CompareTag("Inimigo"))
+                    continue;
+
+                float diferenca = Mathf.Abs(acerto.point.y - estimativa);
+                if (diferenca > tolerancia) continue;
+
+                bool ehGround = (camadasDaSuperficie.value &
+                    (1 << col.gameObject.layer)) != 0;
+                // Prefere o piso real, nao os colliders de decoracoes.
+                float pontuacao = diferenca + (ehGround ? 0f : 2f);
+                if (pontuacao >= melhorPontuacao) continue;
+
+                melhorPontuacao = pontuacao;
+                alturaCandidata = acerto.point.y;
+                candidato = col;
+            }
+        }
+
+        if (candidato != null)
+        {
+            superficieChaoY = alturaCandidata;
+        }
+        else
+        {
+            // Evita repetir o erro antigo de usar offsetPoeira.y (74)
+            // como topo do piso. Um recorte MUITO alto comia o corpo.
+            superficieChaoY = estimativa - Mathf.Max(2f, alturaEmergir * 0.15f);
+            if (!avisoSemCollider)
+            {
+                Debug.LogWarning(
+                    "[InimigoParado] Nenhuma plataforma encontrada abaixo do BixoAlfa. " +
+                    "Use Ponto Superficie no Inspector para definir o topo exato do piso.", this);
+                avisoSemCollider = true;
+            }
+        }
     }
 
     private void AtualizarRenderizacaoDoCorpo()
     {
         if (armatureComponent == null) return;
 
-        // O DragonBones pode reconstruir meshes. Aplica a ordem apos ele.
+        Shader shaderCorte = materialModeloRecorte != null ?
+            materialModeloRecorte.shader : Shader.Find("EndFall/InimigoParadoRecorte");
+        bool shaderValido = shaderCorte != null && shaderCorte.isSupported;
+        if (parametrosRecorte == null)
+            parametrosRecorte = new MaterialPropertyBlock();
+
+        float nivel = (pontoSuperficie != null ?
+            pontoSuperficie.position.y : superficieChaoY) + ajusteNivelSuperficie;
+
         foreach (MeshRenderer malha in
                  armatureComponent.GetComponentsInChildren<MeshRenderer>(true))
         {
             if (malha == null) continue;
+
             malha.sortingLayerName = camadaRenderCorpo;
             malha.sortingOrder = ordemRenderCorpo;
-            if (malha.enabled != jaEmergiu)
-                malha.enabled = jaEmergiu;
+
+            if (shaderValido)
+            {
+                // A textura ORIGINAL do DragonBones e preservada.
+                // O corte atua somente abaixo da superficie detectada.
+                Material[] materias = malha.sharedMaterials;
+                bool atualizar = false;
+                for (int i = 0; i < materias.Length; i++)
+                {
+                    Material original = materias[i];
+                    if (original == null || clonesCriados.Contains(original))
+                        continue;
+
+                    if (!materiaisRecortados.TryGetValue(original, out Material recortado))
+                    {
+                        recortado = new Material(original);
+                        recortado.shader = shaderCorte;
+                        recortado.name = original.name + " (Ocultacao EndFall)";
+                        recortado.hideFlags = HideFlags.DontSave;
+                        materiaisRecortados.Add(original, recortado);
+                        clonesCriados.Add(recortado);
+                    }
+
+                    materias[i] = recortado;
+                    atualizar = true;
+                }
+                if (atualizar)
+                    malha.sharedMaterials = materias;
+
+                malha.GetPropertyBlock(parametrosRecorte);
+                parametrosRecorte.SetFloat(groundId, nivel);
+                malha.SetPropertyBlock(parametrosRecorte);
+            }
+
+            // Se faltar shader, nunca mostra o inimigo sob o piso.
+            // Quando disponivel, cada pixel abaixo do piso e descartado.
+            bool podeMostrar = shaderValido
+                ? jaEmergiu
+                : jaEmergiu &&
+                  Vector3.Distance(transform.position, posicaoExposta) < 0.05f;
+
+            if (malha.enabled != podeMostrar)
+                malha.enabled = podeMostrar;
         }
     }
 
     private void LateUpdate()
     {
+        // O DragonBones pode recompor as malhas a qualquer momento.
         AtualizarRenderizacaoDoCorpo();
     }
 
@@ -212,6 +356,10 @@ public class InimigoParado : MonoBehaviour
         if (materialPoeiraCriado != null)
             Destroy(materialPoeiraCriado);
 
+        foreach (Material clone in clonesCriados)
+            if (clone != null) Destroy(clone);
+        clonesCriados.Clear();
+        materiaisRecortados.Clear();
     }
 
     private void EmitirTerra(int quantidade)
@@ -419,5 +567,13 @@ public class InimigoParado : MonoBehaviour
         Gizmos.color = Color.yellow;
         Vector3 centroDeteccao = transform.position + (Vector3)offsetDeteccao;
         Gizmos.DrawWireSphere(centroDeteccao, raioDeteccao);
+
+        // Linha ciano na altura em que a malha e recortada.
+        float y = Application.isPlaying ? superficieChaoY + ajusteNivelSuperficie :
+            pontoSuperficie != null ? pontoSuperficie.position.y + ajusteNivelSuperficie :
+            transform.position.y + alturaEmergir + ajusteNivelSuperficie;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(new Vector3(transform.position.x - 45f, y, 0f),
+                        new Vector3(transform.position.x + 45f, y, 0f));
     }
 }
