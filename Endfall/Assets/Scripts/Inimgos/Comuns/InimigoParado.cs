@@ -53,11 +53,7 @@ public class InimigoParado : MonoBehaviour
     [Tooltip("Layers das plataformas cuja superficie deve ocultar o corpo enterrado.")]
     [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
     [Tooltip("Margem extra para nunca desenhar parte do corpo sob a plataforma.")]
-    [Min(0f)] [SerializeField] private float margemOcultacao = 0.5f;
-    [Tooltip("Altura, em unidades do mundo, da faixa de transparencia ao sair do chao.")]
-    [Range(0.1f, 20f)] [SerializeField] private float suavidadeRecorte = 5f;
-    [Tooltip("Pequena irregularidade horizontal na borda, como terra solta.")]
-    [Range(0f, 6f)] [SerializeField] private float irregularidadeRecorte = 1.5f;
+    [Min(0f)] [SerializeField] private float margemOcultacao = 0f;
     [Tooltip("Material que referencia o shader de recorte (configurado no prefab).")]
     [SerializeField] private Material materialModeloRecorte;
 
@@ -67,8 +63,6 @@ public class InimigoParado : MonoBehaviour
     private readonly HashSet<Material> materiaisGerados = new HashSet<Material>();
     private MaterialPropertyBlock parametrosRecorte;
     private static readonly int alturaDeRecorteId = Shader.PropertyToID("_GroundY");
-    private static readonly int suavidadeRecorteId = Shader.PropertyToID("_FadeHeight");
-    private static readonly int irregularidadeRecorteId = Shader.PropertyToID("_EdgeIrregularity");
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -108,7 +102,9 @@ public class InimigoParado : MonoBehaviour
         // criado no codigo anterior tinha a borda abaixo do piso real.
         // Para evitar qualquer flash, a verificacao usa o tamanho REAL
         // das malhas DragonBones em coordenadas de mundo.
-        superficieDoChaoY = posicaoOculta.y + Mathf.Max(alturaEmergir, offsetPoeira.y);
+        // A altura da poeira (74 no prefab) nao e a do chao (67.8).
+        // Desacopla o recorte do offset visual do efeito.
+        superficieDoChaoY = posicaoOculta.y + Mathf.Max(0f, alturaEmergir);
 
         // A plataforma pode estar um pouco acima da posicao estimada.
         // Procura seu topo pelo collider Ground, sem mover inimigo ou piso.
@@ -116,22 +112,45 @@ public class InimigoParado : MonoBehaviour
         Vector2 origem = new Vector2(
             posicaoOculta.x + offsetPoeira.x,
             superficieDoChaoY + alturaPesquisa);
+        // A primeira tentativa prefere o piso da layer Ground.
+        // Se a plataforma estiver em outra layer, aceita outro
+        // collider solido proximo da altura de subida.
         RaycastHit2D[] impactos = Physics2D.RaycastAll(
-            origem, Vector2.down, alturaPesquisa * 2.5f, camadasDaSuperficie);
+            origem, Vector2.down, alturaPesquisa * 2.5f);
+        float alturaEstimada = superficieDoChaoY;
+        float tolerancia = Mathf.Max(4f, Mathf.Max(0f, alturaEmergir) * 0.2f);
 
-        float menorDiferenca = float.PositiveInfinity;
-        foreach (RaycastHit2D impacto in impactos)
+        for (int tentativa = 0; tentativa < 2; tentativa++)
         {
-            if (impacto.collider == null || impacto.collider.isTrigger ||
-                impacto.normal.y < 0.7f ||
-                impacto.collider.transform.IsChildOf(transform.root))
-                continue;
+            float menorDiferenca = float.PositiveInfinity;
+            float alturaEncontrada = alturaEstimada;
+            bool achou = false;
 
-            float diferenca = Mathf.Abs(impacto.point.y - superficieDoChaoY);
-            if (diferenca < menorDiferenca)
+            foreach (RaycastHit2D impacto in impactos)
             {
+                if (impacto.collider == null || impacto.collider.isTrigger ||
+                    impacto.normal.y < 0.7f ||
+                    impacto.collider.transform.IsChildOf(transform.root))
+                    continue;
+
+                bool layerDeChao = (camadasDaSuperficie.value &
+                    (1 << impacto.collider.gameObject.layer)) != 0;
+                if (tentativa == 0 && !layerDeChao)
+                    continue;
+
+                float diferenca = Mathf.Abs(impacto.point.y - alturaEstimada);
+                if (diferenca > tolerancia || diferenca >= menorDiferenca)
+                    continue;
+
                 menorDiferenca = diferenca;
-                superficieDoChaoY = impacto.point.y;
+                alturaEncontrada = impacto.point.y;
+                achou = true;
+            }
+
+            if (achou)
+            {
+                superficieDoChaoY = alturaEncontrada;
+                break;
             }
         }
 
@@ -196,11 +215,7 @@ public class InimigoParado : MonoBehaviour
 
                 malha.GetPropertyBlock(parametrosRecorte);
                 parametrosRecorte.SetFloat(alturaDeRecorteId,
-                    superficieDoChaoY + margemOcultacao);
-                parametrosRecorte.SetFloat(suavidadeRecorteId,
-                    Mathf.Max(0.1f, suavidadeRecorte));
-                parametrosRecorte.SetFloat(irregularidadeRecorteId,
-                    Mathf.Max(0f, irregularidadeRecorte));
+                    superficieDoChaoY + Mathf.Clamp(margemOcultacao, 0f, 0.15f));
                 malha.SetPropertyBlock(parametrosRecorte);
             }
 

@@ -5,8 +5,6 @@ Shader "EndFall/InimigoParadoRecorte"
         [PerRendererData] _MainTex ("Textura DragonBones", 2D) = "white" {}
         _Color ("Cor", Color) = (1,1,1,1)
         _GroundY ("Altura do chao", Float) = -100000
-        _FadeHeight ("Suavidade da borda", Float) = 5
-        _EdgeIrregularity ("Irregularidade da terra", Float) = 1.5
     }
     SubShader
     {
@@ -47,8 +45,6 @@ Shader "EndFall/InimigoParadoRecorte"
             sampler2D _MainTex;
             fixed4 _Color;
             float _GroundY;
-            float _FadeHeight;
-            float _EdgeIrregularity;
 
             v2f vert (appdata v)
             {
@@ -64,20 +60,15 @@ Shader "EndFall/InimigoParadoRecorte"
             {
                 fixed4 col = tex2D(_MainTex, i.uv) * i.color;
 
-                // Pequena ondulacao deterministica da linha de terra.
-                // Sempre desloca a borda para CIMA, nunca revela pixels
-                // que ainda estao abaixo do topo da plataforma.
-                float ondulacao = 0.5
-                    + 0.32 * sin(i.worldPos.x * 0.27)
-                    + 0.18 * sin(i.worldPos.x * 0.69 + 1.7);
-                float inicioFade = _GroundY + max(0.0, _EdgeIrregularity) * ondulacao;
-                float alturaFade = max(0.05, _FadeHeight);
-                float aparicao = smoothstep(inicioFade, inicioFade + alturaFade, i.worldPos.y);
+                // Mantem opacidade total acima do chao: sem faixa de
+                // transparencia de varios metros ou borda irregular.
+                float distChao = i.worldPos.y - _GroundY;
+                clip(distChao);
 
-                // Transparencia gradual ao emergir, sem uma borda
-                // reta e dura entre o corpo e a plataforma.
-                col.a *= aparicao;
-                clip(col.a - 0.01);
+                // Suaviza apenas a borda de um pixel, sem apagar o corpo.
+                float pixel = max(fwidth(i.worldPos.y), 0.0001);
+                col.a *= saturate(distChao / pixel);
+                clip(col.a - 0.001);
                 return col;
             }
             ENDCG
