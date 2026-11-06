@@ -3,6 +3,7 @@ using UnityEngine;
 using DragonBones;
 using Transform = UnityEngine.Transform;
 
+[DefaultExecutionOrder(10000)]
 public class InimigoParado : MonoBehaviour
 {
     [Header("CONFIGURAÇÃO VISUAL")]
@@ -47,11 +48,13 @@ public class InimigoParado : MonoBehaviour
     private ParticleSystemRenderer renderizadorPoeira;
     private Material materialPoeiraCriado;
 
-    // A Sprite Mask do BixoAlfa e irma do corpo, por isso permanece
-    // parada na plataforma enquanto a malha DragonBones sobe.
-    private SpriteMask mascaraSuperficie;
-    private static Texture2D texturaRecorte;
-    private static Sprite spriteRecorte;
+    [Header("Ocultacao sob o chao")]
+    [Tooltip("Layers das plataformas cuja superficie deve ocultar o corpo enterrado.")]
+    [SerializeField] private LayerMask camadasDaSuperficie = 1 << 3;
+    [Tooltip("Margem extra para nunca desenhar parte do corpo sob a plataforma.")]
+    [Min(0f)] [SerializeField] private float margemOcultacao = 0.5f;
+
+    private float superficieDoChaoY;
 
     [Header("Vida do Inimigo")]
     public int vidaMaxima = 3;
@@ -87,75 +90,67 @@ public class InimigoParado : MonoBehaviour
 
     private void PrepararOcultacaoCorpo()
     {
-        if (armatureComponent == null) return;
+        // Nao altera mais a Sprite Mask original do BixoAlfa. O recorte
+        // criado no codigo anterior tinha a borda abaixo do piso real.
+        // Para evitar qualquer flash, a verificacao usa o tamanho REAL
+        // das malhas DragonBones em coordenadas de mundo.
+        superficieDoChaoY = posicaoOculta.y + Mathf.Max(alturaEmergir, offsetPoeira.y);
 
-        // O prefab BixoAlfa ja possui uma Sprite Mask: nao criamos
-        // componentes no player, na plataforma ou no sistema de particulas.
-        Transform raizDoPrefab = transform.parent != null ? transform.parent : transform;
-        mascaraSuperficie = raizDoPrefab.GetComponentInChildren<SpriteMask>(true);
+        // A plataforma pode estar um pouco acima da posicao estimada.
+        // Procura seu topo pelo collider Ground, sem mover inimigo ou piso.
+        float alturaPesquisa = Mathf.Max(alturaEmergir, 20f);
+        Vector2 origem = new Vector2(
+            posicaoOculta.x + offsetPoeira.x,
+            superficieDoChaoY + alturaPesquisa);
+        RaycastHit2D[] impactos = Physics2D.RaycastAll(
+            origem, Vector2.down, alturaPesquisa * 2.5f, camadasDaSuperficie);
 
-        if (mascaraSuperficie != null)
+        float menorDiferenca = float.PositiveInfinity;
+        foreach (RaycastHit2D impacto in impactos)
         {
-            // Mascara branca retangular: somente o que estiver ACIMA da
-            // superficie recebe pixels visiveis. A mascara nao segue o
-            // corpo: ela e irma do inimigo que se move verticalmente.
-            if (spriteRecorte == null)
-            {
-                texturaRecorte = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                texturaRecorte.name = "RecorteInimigoParado";
-                texturaRecorte.hideFlags = HideFlags.HideAndDontSave;
-                texturaRecorte.SetPixels(new[]
-                {
-                    Color.white, Color.white, Color.white, Color.white
-                });
-                texturaRecorte.Apply(false, true);
-                spriteRecorte = Sprite.Create(texturaRecorte,
-                    new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f);
-                spriteRecorte.name = "RecorteSuperficie";
-                spriteRecorte.hideFlags = HideFlags.HideAndDontSave;
-            }
+            if (impacto.collider == null || impacto.collider.isTrigger ||
+                impacto.normal.y < 0.7f ||
+                impacto.collider.transform.IsChildOf(transform.root))
+                continue;
 
-            float superficieY = posicaoOculta.y + offsetPoeira.y;
-            // 500 unidades acima do chao, jamais abaixo dele.
-            const float alturaRecorte = 1000f;
-            mascaraSuperficie.sprite = spriteRecorte;
-            mascaraSuperficie.transform.position = new Vector3(
-                posicaoOculta.x, superficieY + alturaRecorte * 0.5f,
-                mascaraSuperficie.transform.position.z);
-            mascaraSuperficie.transform.localScale =
-                new Vector3(400f, alturaRecorte, 1f);
-            mascaraSuperficie.enabled = true;
+            float diferenca = Mathf.Abs(impacto.point.y - superficieDoChaoY);
+            if (diferenca < menorDiferenca)
+            {
+                menorDiferenca = diferenca;
+                superficieDoChaoY = impacto.point.y;
+            }
         }
 
-        // Antes do aviso e durante a poeira, a malha nao deve aparecer
-        // atras/embaixo da plataforma, mesmo que a mascara falhe.
-        AtualizarVisibilidadeCorpo(false);
+        AtualizarVisibilidadeCorpo();
     }
 
-    private void AtualizarVisibilidadeCorpo(bool subindo)
+    private void AtualizarVisibilidadeCorpo()
     {
         if (armatureComponent == null) return;
 
-        // Se nao existir Sprite Mask, a opcao segura e mostrar o inimigo
-        // apenas quando ele terminar de sair do chao.
-        bool mostrar = subindo &&
-            (mascaraSuperficie != null ||
-             transform.position.y >= posicaoExposta.y - 0.01f);
-
-        // DragonBones pode reconstruir MeshRenderers ao combinar as malhas.
-        foreach (MeshRenderer mesh in
+        // Nunca usa jaEmergiu isoladamente para mostrar o corpo:
+        // ele fica true ANTES do primeiro movimento de subida.
+        // SpriteMask nao garante corte das MeshRenderers do DragonBones.
+        foreach (MeshRenderer malha in
                  armatureComponent.GetComponentsInChildren<MeshRenderer>(true))
         {
-            if (mesh != null && mesh.enabled != mostrar)
-                mesh.enabled = mostrar;
+            if (malha == null) continue;
+
+            Bounds limites = malha.bounds;
+            bool saiuCompletamenteDoChao = limites.size.y > 0.01f &&
+                limites.min.y >= superficieDoChaoY + margemOcultacao;
+
+            bool podeMostrar = jaEmergiu && saiuCompletamenteDoChao;
+            if (malha.enabled != podeMostrar)
+                malha.enabled = podeMostrar;
         }
     }
 
     private void LateUpdate()
     {
-        // Reaplica apos a atualizacao de malhas do DragonBones.
-        // A poeira e ParticleSystemRenderer e nunca e escondida aqui.
-        AtualizarVisibilidadeCorpo(jaEmergiu);
+        // Ordem tardia: aplica APOS o DragonBones atualizar/compor as malhas,
+        // evitando a piscada de um unico frame embaixo das plataformas.
+        AtualizarVisibilidadeCorpo();
     }
 
     private void PrepararEfeitoPoeira()

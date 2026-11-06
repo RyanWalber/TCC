@@ -21,6 +21,7 @@ public class MiraMouse : MonoBehaviour
     private float pesoMira = 0f;
     private float anguloMiraSuavizado;
     private bool estavaMirando;
+    private bool olhandoEsquerdaAntesDoDialogo;
 
     void Start()
     {
@@ -37,6 +38,8 @@ public class MiraMouse : MonoBehaviour
         if (aniKaya != null)
         {
             posicaoOriginalKaya = aniKaya.localPosition;
+            olhandoEsquerdaAntesDoDialogo =
+                Mathf.Abs(Mathf.DeltaAngle(aniKaya.localEulerAngles.y, 180f)) < 90f;
         }
     }
 
@@ -59,7 +62,22 @@ public class MiraMouse : MonoBehaviour
 
         if (controleKaya != null && controleKaya.ControlesBloqueadosPorDialogo)
         {
-            // Cliques no dialogo nao viram a Kaya nem movimentam sua arma.
+            // O Animator pode alterar a POSICAO do objeto Ani Kaya durante
+            // a conversa. Antes, o retorno antecipado pulava a correcao
+            // visual feita normalmente abaixo; por isso o desenho subia
+            // ou se deslocava e voltava ao lugar no final do dialogo.
+            // Corrige so o visual, sem mover o Rigidbody2D nem o player.
+            if (aniKaya != null)
+            {
+                aniKaya.localRotation = Quaternion.Euler(
+                    0f, olhandoEsquerdaAntesDoDialogo ? 180f : 0f, 0f);
+                aniKaya.localPosition = olhandoEsquerdaAntesDoDialogo
+                    ? new Vector3(posicaoOriginalKaya.x + ajusteCentroX,
+                        posicaoOriginalKaya.y, posicaoOriginalKaya.z)
+                    : posicaoOriginalKaya;
+            }
+
+            // Continua bloqueando mira/tiro, permitindo animacao ociosa.
             timerTiro = 0f;
             pesoMira = 0f;
             estavaMirando = false;
@@ -78,6 +96,7 @@ public class MiraMouse : MonoBehaviour
         ));
 
         bool olhandoEsquerda = posicaoMouseMundo.x < centroDoPersonagem.position.x;
+        olhandoEsquerdaAntesDoDialogo = olhandoEsquerda;
 
         if (olhandoEsquerda)
         {
