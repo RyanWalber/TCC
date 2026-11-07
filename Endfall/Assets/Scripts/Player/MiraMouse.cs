@@ -16,6 +16,15 @@ public class MiraMouse : MonoBehaviour
     [Tooltip("Evita que a Kaya troque de lado repetidamente com o cursor perto do centro.")]
     [Min(0f)] [SerializeField] private float margemTrocaDirecao = 3f;
 
+    [Header("Pose visual dos bracos")]
+    [Tooltip("Ajuste estetico dos bracos nos angulos extremos. Nao altera o disparo. Desmarque para voltar ao visual anterior.")]
+    [SerializeField] private bool corrigirPoseExtrema = true;
+    [Tooltip("Zero desliga a correcao; um usa a intensidade maxima configurada.")]
+    [Range(0f, 1f)] [SerializeField] private float intensidadePoseExtrema = 0.8f;
+    [Range(20f, 80f)] [SerializeField] private float anguloInicioCorrecao = 48f;
+    [Range(0f, 25f)] [SerializeField] private float correcaoBracoFrente = 16f;
+    [Range(0f, 25f)] [SerializeField] private float correcaoBracoTras = 11f;
+
     private Camera cameraPrincipal;
     private PlayerHealth vidaKaya;
     private PlayerController controleKaya;
@@ -33,6 +42,29 @@ public class MiraMouse : MonoBehaviour
     private Quaternion ultimaRotacaoAplicada;
     private bool rotacaoAplicadaNoFrameAnterior;
 
+    // Hierarquias de bracos independentes do Ponto De Disparo.
+    private EstadoBraco bracoFrente;
+    private EstadoBraco bracoTras;
+
+    private sealed class EstadoBraco
+    {
+        public Transform alvo;
+        public Vector3 basePosicao;
+        public Quaternion baseRotacao;
+        public Vector3 ultimaPosicao;
+        public Quaternion ultimaRotacao;
+        public bool alterado;
+
+        public EstadoBraco(Transform transformBraco)
+        {
+            alvo = transformBraco;
+            basePosicao = alvo.localPosition;
+            baseRotacao = alvo.localRotation;
+            ultimaPosicao = basePosicao;
+            ultimaRotacao = baseRotacao;
+        }
+    }
+
     void Start()
     {
         cameraPrincipal = Camera.main;
@@ -41,6 +73,20 @@ public class MiraMouse : MonoBehaviour
         centroDoPersonagem = transform.root;
         rotacaoNeutraBraco = transform.localRotation;
         ultimaRotacaoAplicada = rotacaoNeutraBraco;
+
+        // Caminhos confirmados no prefab usado pela Kaya.
+        Transform frente = transform.Find("kayaseparada_4");
+        Transform tras = transform.Find("kayaseparada_3");
+        if (frente != null && tras != null)
+        {
+            bracoFrente = new EstadoBraco(frente);
+            bracoTras = new EstadoBraco(tras);
+        }
+        else
+        {
+            // Prefabs alternativos nao recebem nenhuma modificacao.
+            corrigirPoseExtrema = false;
+        }
 
         if (aniKaya == null && transform.parent != null)
         {
@@ -70,6 +116,7 @@ public class MiraMouse : MonoBehaviour
                 orientacaoCongeladaNaMorte = true;
                 rotacaoAplicadaNoFrameAnterior = false;
             }
+            RestaurarBracos();
             return;
         }
 
@@ -99,6 +146,7 @@ public class MiraMouse : MonoBehaviour
                 Quaternion.Angle(transform.localRotation, ultimaRotacaoAplicada) < 0.1f)
                 transform.localRotation = rotacaoNeutraBraco;
             rotacaoAplicadaNoFrameAnterior = false;
+            CorrigirBracos(0f, 0f);
             return;
         }
 
@@ -172,6 +220,7 @@ public class MiraMouse : MonoBehaviour
             transform.localRotation = rotacaoAnimacao;
             ultimaRotacaoAplicada = transform.localRotation;
             rotacaoAplicadaNoFrameAnterior = estabilizarPoseBraco;
+            CorrigirBracos(0f, 0f);
             return;
         }
 
@@ -193,5 +242,80 @@ public class MiraMouse : MonoBehaviour
         transform.localRotation = Quaternion.Slerp(rotacaoAnimacao, rotacaoMira, pesoMira);
         ultimaRotacaoAplicada = transform.localRotation;
         rotacaoAplicadaNoFrameAnterior = estabilizarPoseBraco;
+        CorrigirBracos(anguloMiraSuavizado, pesoMira);
+    }
+
+    private void CorrigirBracos(float angulo, float peso)
+    {
+        if (bracoFrente == null || bracoTras == null)
+            return;
+
+        float intensidade = 0f;
+        if (corrigirPoseExtrema && intensidadePoseExtrema > 0f)
+        {
+            float inclinacao = Mathf.Abs(Mathf.DeltaAngle(0f, angulo));
+            float t = Mathf.InverseLerp(anguloInicioCorrecao, 90f, inclinacao);
+            t = t * t * (3f - 2f * t); // Smoothstep sem animacoes novas.
+            intensidade = t * Mathf.Clamp01(peso) * intensidadePoseExtrema;
+        }
+
+        // Counter-rotation moderada do braco nos angulos acentuados.
+        // O Ponto De Disparo e irmao dos bracos; sua rotacao nao muda.
+        float sinal = Mathf.Sign(Mathf.DeltaAngle(0f, angulo));
+        AplicarPose(bracoFrente, -sinal * correcaoBracoFrente * intensidade,
+            new Vector3(1.2f * intensidade, 0.2f * intensidade, 0f));
+        AplicarPose(bracoTras, -sinal * correcaoBracoTras * intensidade,
+            new Vector3(0.65f * intensidade, 0.1f * intensidade, 0f));
+    }
+
+    private static void AplicarPose(EstadoBraco braco, float graus, Vector3 deslocamento)
+    {
+        if (braco == null || braco.alvo == null) return;
+
+        // Se o Animator nao escreveu uma nova pose no frame, removemos
+        // implicitamente nossa contribuicao anterior para nao acumular giro.
+        bool aindaEhNossoValor = braco.alterado &&
+            (braco.alvo.localPosition - braco.ultimaPosicao).sqrMagnitude < 0.0001f &&
+            Quaternion.Angle(braco.alvo.localRotation, braco.ultimaRotacao) < 0.1f;
+
+        if (!aindaEhNossoValor)
+        {
+            braco.basePosicao = braco.alvo.localPosition;
+            braco.baseRotacao = braco.alvo.localRotation;
+        }
+
+        braco.alvo.localPosition = braco.basePosicao + deslocamento;
+        braco.alvo.localRotation = braco.baseRotacao * Quaternion.Euler(0f, 0f, graus);
+        braco.ultimaPosicao = braco.alvo.localPosition;
+        braco.ultimaRotacao = braco.alvo.localRotation;
+        braco.alterado = true;
+    }
+
+    private void RestaurarBracos()
+    {
+        RestaurarBraco(bracoFrente);
+        RestaurarBraco(bracoTras);
+    }
+
+    private static void RestaurarBraco(EstadoBraco braco)
+    {
+        if (braco == null || braco.alvo == null || !braco.alterado)
+            return;
+
+        // Se a animacao de morte mudou o braco, nao sobrescreve a nova pose.
+        bool aindaEhNossoValor =
+            (braco.alvo.localPosition - braco.ultimaPosicao).sqrMagnitude < 0.0001f &&
+            Quaternion.Angle(braco.alvo.localRotation, braco.ultimaRotacao) < 0.1f;
+        if (aindaEhNossoValor)
+        {
+            braco.alvo.localPosition = braco.basePosicao;
+            braco.alvo.localRotation = braco.baseRotacao;
+        }
+        braco.alterado = false;
+    }
+
+    private void OnDisable()
+    {
+        RestaurarBracos();
     }
 }
