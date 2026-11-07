@@ -10,6 +10,12 @@ public class MiraMouse : MonoBehaviour
     [SerializeField] private float tempoManterMira = 0.4f;
     [SerializeField] private float velocidadeTransicao = 12f;
 
+    [Header("Estabilidade visual da mira")]
+    [Tooltip("Corrige o retorno do braco para a pose da animacao, sem limitar a mira em 360 graus. Desmarque para usar o comportamento anterior.")]
+    [SerializeField] private bool estabilizarPoseBraco = true;
+    [Tooltip("Evita que a Kaya troque de lado repetidamente com o cursor perto do centro.")]
+    [Min(0f)] [SerializeField] private float margemTrocaDirecao = 3f;
+
     private Camera cameraPrincipal;
     private PlayerHealth vidaKaya;
     private PlayerController controleKaya;
@@ -23,12 +29,18 @@ public class MiraMouse : MonoBehaviour
     private bool estavaMirando;
     private bool olhandoEsquerdaAntesDoDialogo;
 
+    private Quaternion rotacaoNeutraBraco;
+    private Quaternion ultimaRotacaoAplicada;
+    private bool rotacaoAplicadaNoFrameAnterior;
+
     void Start()
     {
         cameraPrincipal = Camera.main;
         vidaKaya = GetComponentInParent<PlayerHealth>();
         controleKaya = GetComponentInParent<PlayerController>();
         centroDoPersonagem = transform.root;
+        rotacaoNeutraBraco = transform.localRotation;
+        ultimaRotacaoAplicada = rotacaoNeutraBraco;
 
         if (aniKaya == null && transform.parent != null)
         {
@@ -56,6 +68,7 @@ public class MiraMouse : MonoBehaviour
                 pesoMira = 0f;
                 estavaMirando = false;
                 orientacaoCongeladaNaMorte = true;
+                rotacaoAplicadaNoFrameAnterior = false;
             }
             return;
         }
@@ -77,16 +90,35 @@ public class MiraMouse : MonoBehaviour
                     : posicaoOriginalKaya;
             }
 
-            // Continua bloqueando mira/tiro, permitindo animacao ociosa.
+            // Continua bloqueando mira/tiro e evita manter uma pose
+            // aplicada pela mira quando a conversa comeca.
             timerTiro = 0f;
             pesoMira = 0f;
             estavaMirando = false;
+            if (estabilizarPoseBraco && rotacaoAplicadaNoFrameAnterior &&
+                Quaternion.Angle(transform.localRotation, ultimaRotacaoAplicada) < 0.1f)
+                transform.localRotation = rotacaoNeutraBraco;
+            rotacaoAplicadaNoFrameAnterior = false;
             return;
         }
 
         if (cameraPrincipal == null || aniKaya == null) return;
 
         Quaternion rotacaoAnimacao = transform.localRotation;
+
+        if (estabilizarPoseBraco)
+        {
+            // No frame anterior a mira pode ter escrito no mesmo Transform.
+            // Se o Animator nao o modificou, nao reutiliza esse angulo
+            // artificial como a pose base do proximo frame.
+            bool aindaEhRotacaoDaMira = rotacaoAplicadaNoFrameAnterior &&
+                Quaternion.Angle(rotacaoAnimacao, ultimaRotacaoAplicada) < 0.1f;
+
+            if (aindaEhRotacaoDaMira)
+                rotacaoAnimacao = rotacaoNeutraBraco;
+            else
+                rotacaoNeutraBraco = rotacaoAnimacao;
+        }
 
         Vector3 posicaoMouseTela = Input.mousePosition;
         Vector3 posicaoMouseMundo = cameraPrincipal.ScreenToWorldPoint(new Vector3(
@@ -96,6 +128,14 @@ public class MiraMouse : MonoBehaviour
         ));
 
         bool olhandoEsquerda = posicaoMouseMundo.x < centroDoPersonagem.position.x;
+        if (estabilizarPoseBraco)
+        {
+            // Pequena histerese apenas na VIRADA do corpo. A direcao
+            // de mira e de disparo continua livre nos 360 graus.
+            float distanciaHorizontal = posicaoMouseMundo.x - centroDoPersonagem.position.x;
+            if (Mathf.Abs(distanciaHorizontal) <= margemTrocaDirecao)
+                olhandoEsquerda = olhandoEsquerdaAntesDoDialogo;
+        }
         olhandoEsquerdaAntesDoDialogo = olhandoEsquerda;
 
         if (olhandoEsquerda)
@@ -130,6 +170,8 @@ public class MiraMouse : MonoBehaviour
         {
             estavaMirando = false;
             transform.localRotation = rotacaoAnimacao;
+            ultimaRotacaoAplicada = transform.localRotation;
+            rotacaoAplicadaNoFrameAnterior = estabilizarPoseBraco;
             return;
         }
 
@@ -149,5 +191,7 @@ public class MiraMouse : MonoBehaviour
         Quaternion rotacaoMira = Quaternion.Euler(0f, 0f, anguloMiraSuavizado);
 
         transform.localRotation = Quaternion.Slerp(rotacaoAnimacao, rotacaoMira, pesoMira);
+        ultimaRotacaoAplicada = transform.localRotation;
+        rotacaoAplicadaNoFrameAnterior = estabilizarPoseBraco;
     }
 }
