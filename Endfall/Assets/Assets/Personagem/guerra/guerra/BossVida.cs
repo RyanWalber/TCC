@@ -28,6 +28,16 @@ public class BossVida : MonoBehaviour
 
     public bool EstaMorto => estaMorto;
 
+    // Usado pela Morte final sem alterar a vida de outros chefes.
+    // Chamado em Start pelo controlador e refletido na barra de HP.
+    public void ConfigurarVidaMaxima(float valor)
+    {
+        if (estaMorto) return;
+        vidaMaxima = Mathf.Max(1f, valor);
+        vidaAtual = vidaMaxima;
+        AtualizarBarraUI();
+    }
+
     private void Start()
     {
         vidaAtual = vidaMaxima;

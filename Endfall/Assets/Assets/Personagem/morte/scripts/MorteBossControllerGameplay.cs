@@ -1,64 +1,155 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Controla somente os ataques da Morte. Vida e barra são gerenciadas pelos componentes
-/// universais BossVida e BossHealthBarController.
+/// Cavaleira da Morte: State Pattern (vida alta, media e baixa).
+/// Cada estado decide seus proprios comportamentos de forma ciclica,
+/// independente da maquina visual do Animator.
 /// </summary>
 [DisallowMultipleComponent]
 public class MorteBossControllerGameplay : MonoBehaviour
 {
-    [Header("Referências")]
+    [Header("Referencias")]
     [SerializeField] private Transform jogador;
     [SerializeField] private Animator animator;
     [SerializeField] private Transform raizVisual;
     [SerializeField] private GameObject prefabCorvo;
     [SerializeField] private Transform pontoLancamentoCorvos;
+    [Tooltip("Arraste o prefab REAL do Lamentus aqui. Nao ha esse prefab no repositorio atual.")]
+    [SerializeField] private GameObject prefabLamentus;
 
-    [Header("Detecção")]
-    [Min(1f)][SerializeField] private float distanciaDeteccao = 500f;
-    [Min(0.1f)][SerializeField] private float intervaloAtaques = 2.4f;
+    [Header("State Pattern - vida da Morte")]
+    [Tooltip("Vida elevada para aproximar a luta de um minuto. Ajuste apos testar o dano real.")]
+    [Min(1f)] [SerializeField] private float vidaMaximaMorte = 1800f;
+    [Tooltip("Vida alta acima de 50%, media ate 20%, baixa abaixo de 20%.")]
+    [Range(0.25f, 0.9f)] [SerializeField] private float limiteVidaAlta = 0.5f;
+    [Range(0.05f, 0.4f)] [SerializeField] private float limiteVidaBaixa = 0.2f;
+    [Min(0.1f)] [SerializeField] private float intervaloAtaques = 2.4f;
 
-    [Header("Horda de corvos")]
-    [Min(1)][SerializeField] private int quantidadeCorvos = 6;
-    [Min(0.05f)][SerializeField] private float intervaloCorvos = 0.16f;
-    [Tooltip("Velocidade de voo dos corvos. Pode ser ajustada durante o balanceamento.")]
-    [Min(1f)][SerializeField] private float velocidadeCorvo = 520f;
+    [Header("Deteccao e aproximacao")]
+    [Min(1f)] [SerializeField] private float distanciaDeteccao = 500f;
+    [Min(1f)] [SerializeField] private float velocidadeInvestida = 900f;
+    [Min(0f)] [SerializeField] private float distanciaParadaAntesDaKaya = 70f;
+    [Min(0.1f)] [SerializeField] private float tempoMaximoAproximacao = 2.1f;
 
-    [Header("Investida")]
-    [Min(1f)][SerializeField] private float velocidadeInvestida = 900f;
-    [Tooltip("Distância que a Morte mantém da Kaya ao terminar a investida. Ajuste no Inspector.")]
-    [Min(0f)][SerializeField] private float distanciaParadaAntesDaKaya = 70f;
-    [Tooltip("Dano causado por um acerto da foice. Com 150 de vida, 75 de dano equivale a dois golpes.")]
-    [Min(0f)][SerializeField] private float danoFoice = 75f;
+    [Header("Corvos")]
+    [Tooltip("O State altera a quantidade automaticamente: 4, 6 ou 10.")]
+    [Min(1)] [SerializeField] private int quantidadeCorvos = 6;
+    [Min(0.05f)] [SerializeField] private float intervaloCorvos = 0.16f;
+    [Min(1f)] [SerializeField] private float velocidadeCorvo = 520f;
+    [Min(0)] [SerializeField] private int danoCorvo = 5;
 
-    private const int DanoCorvo = 5;
-    private const float TempoVidaCorvo = 4f;
-    private const float TempoPreparacaoInvestida = 0.22f;
-    private const float AtrasoLancamentoCorvos = 0.65f;
-    private const float EspacamentoVerticalCorvos = 35f;
-    private const float DuracaoJanelaFoice = 0.8f;
-    private const float InicioJanelaFoice = 0.30f;
-    private const float FimJanelaFoice = 0.62f;
+    [Header("Lamentus - invocacao ao subir")]
+    [SerializeField] private LayerMask camadasChao = 1 << 3;
+    [Min(10f)] [SerializeField] private float distanciaLateralLamentus = 85f;
+    [Min(1)] [SerializeField] private int maximoLamentusVivos = 2;
+    [Range(0f, 1.75f)] [SerializeField] private float instanteInvocacao = 0.9f;
+
+    [Header("Foice e golpe")]
+    [Min(0f)] [SerializeField] private float danoFoice = 75f;
+    [Min(0f)] [SerializeField] private float danoFoiceArremessada = 45f;
+    [Min(1f)] [SerializeField] private float raioAcertoFoiceArremessada = 24f;
+    [Range(0.2f, 1.7f)] [SerializeField] private float inicioColisaoFoice = 1.06f;
+    [Range(1f, 2.15f)] [SerializeField] private float fimColisaoFoice = 1.75f;
+
+    private const float DuracaoCorvos = 1.95f;
+    private const float DuracaoSubindo = 1.75f;
+    private const float DuracaoFoiceArremessada = 2.1667f;
+    private const float DuracaoAtaqueFoice = 1.15f;
+    private const float InicioGolpe = 0.28f;
+    private const float FimGolpe = 0.62f;
 
     private Rigidbody2D corpoFisico;
+    private BossVida vidaBoss;
     private MorteFoiceHitbox hitboxFoice;
+    private Transform foiceAnimada;
+    private Collider2D colliderKaya;
+    private Coroutine rotinaAtaque;
+    private readonly List<GameObject> lamentusInvocados = new List<GameObject>();
     private Vector3 escalaVisualOriginal = Vector3.one;
-    private float proximoAtaque;
-    private float destinoInvestidaX;
-    private bool movimentoAtivo;
-    private bool atacando;
     private bool escalaCapturada;
-    private bool proximoAtaqueSeraCorvos = true;
+    private bool atacando;
+    private bool movimentoAtivo;
+    private float destinoX;
+    private float proximoAtaque;
+    private int indiceAtaque;
+    private EstadoVida estadoAtual;
 
-    private static readonly int TriggerCorvos = Animator.StringToHash("AtaqueCorvos");
-    private static readonly int TriggerInvestida = Animator.StringToHash("Investida");
-    private static readonly int EstadoInvestidaLonga = Animator.StringToHash("Base Layer.morteindolonge");
-    private static readonly int EstadoAtaqueFoice = Animator.StringToHash("Base Layer.morteindoataque");
+    private enum Acao
+    {
+        CorvosDiretos,
+        CorvosLeque,
+        InvocarLamentus,
+        LancarFoice,
+        InvestidaComGolpe
+    }
+
+    // Padrao State propriamente dito: cada classe encapsula a politica
+    // de selecao dos comportamentos para uma faixa de HP.
+    private abstract class EstadoVida
+    {
+        public abstract string Nome { get; }
+        public abstract int QuantidadeComportamentos { get; }
+        public abstract Acao Selecionar(int indice);
+    }
+
+    private sealed class VidaAlta : EstadoVida
+    {
+        public override string Nome => "Vida Alta (>50%)";
+        public override int QuantidadeComportamentos => 3;
+        public override Acao Selecionar(int indice)
+        {
+            switch (indice % 3)
+            {
+                case 0: return Acao.CorvosDiretos;    // 4 corvos focados
+                case 1: return Acao.InvocarLamentus;  // mortesubindo
+                default: return Acao.CorvosLeque;     // 4 corvos espalhados
+            }
+        }
+    }
+
+    private sealed class VidaMedia : EstadoVida
+    {
+        public override string Nome => "Vida Media (20%-50%)";
+        public override int QuantidadeComportamentos => 3;
+        public override Acao Selecionar(int indice)
+        {
+            switch (indice % 3)
+            {
+                case 0: return Acao.CorvosDiretos;    // 6 corvos
+                case 1: return Acao.InvocarLamentus;
+                default: return Acao.LancarFoice;
+            }
+        }
+    }
+
+    private sealed class VidaBaixa : EstadoVida
+    {
+        public override string Nome => "Vida Baixa (<=20%)";
+        public override int QuantidadeComportamentos => 4;
+        public override Acao Selecionar(int indice)
+        {
+            switch (indice % 4)
+            {
+                case 0: return Acao.CorvosDiretos;    // 10 corvos
+                case 1: return Acao.InvocarLamentus;
+                case 2: return Acao.LancarFoice;
+                default: return Acao.InvestidaComGolpe;
+            }
+        }
+    }
+
+    private readonly EstadoVida alta = new VidaAlta();
+    private readonly EstadoVida media = new VidaMedia();
+    private readonly EstadoVida baixa = new VidaBaixa();
 
     private void Awake()
     {
         corpoFisico = GetComponent<Rigidbody2D>();
+        vidaBoss = GetComponent<BossVida>();
+        if (vidaBoss == null) vidaBoss = GetComponentInParent<BossVida>();
+
         if (corpoFisico != null)
         {
             corpoFisico.bodyType = RigidbodyType2D.Kinematic;
@@ -68,22 +159,19 @@ public class MorteBossControllerGameplay : MonoBehaviour
             corpoFisico.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         }
 
-        if (jogador == null)
-        {
-            GameObject objetoJogador = GameObject.FindGameObjectWithTag("Player");
-            if (objetoJogador != null) jogador = objetoJogador.transform;
-        }
-
-        if (animator == null)
-            animator = GetComponentInChildren<Animator>(true);
-
-        if (raizVisual == null && animator != null)
-            raizVisual = animator.transform;
-
+        EncontrarJogador();
+        if (animator == null) animator = GetComponentInChildren<Animator>(true);
+        if (raizVisual == null && animator != null) raizVisual = animator.transform;
         if (raizVisual != null)
         {
             escalaVisualOriginal = raizVisual.localScale;
             escalaCapturada = true;
+        }
+
+        if (animator != null)
+        {
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            foiceAnimada = animator.transform.Find("foice_0");
         }
 
         PrepararHitboxFoice();
@@ -91,245 +179,396 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private void Start()
     {
+        if (vidaBoss != null)
+            vidaBoss.ConfigurarVidaMaxima(vidaMaximaMorte);
+        else
+            Debug.LogError("[Morte] BossVida nao encontrado.", this);
+
         if (animator == null)
-            Debug.LogError("[Morte] Não encontrei o Animator nos filhos de BossMorte.", this);
+            Debug.LogError("[Morte] Animator nao encontrado.", this);
         if (prefabCorvo == null)
-            Debug.LogWarning("[Morte] Arraste o prefab Corvo para o campo Prefab Corvo.", this);
+            Debug.LogWarning("[Morte] Prefab Corvo nao configurado.", this);
+        if (prefabLamentus == null)
+            Debug.LogWarning("[Morte] Lamentus: arraste o prefab no Inspector. As outras habilidades continuam funcionando.", this);
+
+        AtualizarEstadoVida();
+    }
+
+    private void EncontrarJogador()
+    {
+        if (jogador != null) return;
+        GameObject objeto = GameObject.FindGameObjectWithTag("Player");
+        if (objeto != null) jogador = objeto.transform;
     }
 
     private void Update()
     {
-        if (jogador == null)
-        {
-            GameObject objetoJogador = GameObject.FindGameObjectWithTag("Player");
-            if (objetoJogador == null) return;
-            jogador = objetoJogador.transform;
-        }
+        if (vidaBoss != null && vidaBoss.EstaMorto) return;
+
+        EncontrarJogador();
+        if (jogador == null) return;
 
         AtualizarOrientacao();
+        AtualizarEstadoVida();
 
         if (atacando || Time.time < proximoAtaque) return;
-
-        // O círculo do Gizmo corresponde a esta mesma detecção por distância.
         if (Vector2.Distance(transform.position, jogador.position) > distanciaDeteccao)
             return;
 
-        PlayerHealth vidaJogador = jogador.GetComponentInParent<PlayerHealth>();
-        if (vidaJogador == null)
-            vidaJogador = jogador.GetComponentInChildren<PlayerHealth>(true);
-        if (vidaJogador != null && vidaJogador.VidaAtual <= 0f) return;
+        PlayerHealth vidaKaya = jogador.GetComponentInParent<PlayerHealth>();
+        if (vidaKaya == null)
+            vidaKaya = jogador.GetComponentInChildren<PlayerHealth>(true);
+        if (vidaKaya != null && vidaKaya.VidaAtual <= 0f)
+            return;
 
+        if (estadoAtual == null) return;
+        Acao acao = estadoAtual.Selecionar(indiceAtaque);
+        indiceAtaque = (indiceAtaque + 1) % estadoAtual.QuantidadeComportamentos;
         atacando = true;
+        rotinaAtaque = StartCoroutine(ExecutarAcao(acao));
+    }
 
-        // Padrão fixo: horda de corvos -> investida -> horda -> investida.
-        if (proximoAtaqueSeraCorvos && prefabCorvo != null)
-            StartCoroutine(AtaqueCorvos());
-        else
-            StartCoroutine(AtaqueInvestida());
+    private void AtualizarEstadoVida()
+    {
+        float percentual = vidaBoss != null ? vidaBoss.ObterPercentualVida() : 1f;
+        EstadoVida novo = percentual > limiteVidaAlta ? alta :
+            percentual > limiteVidaBaixa ? media : baixa;
+
+        if (novo == estadoAtual) return;
+        estadoAtual = novo;
+        indiceAtaque = 0;
+        Debug.Log("[Morte / State] Entrou em " + estadoAtual.Nome, this);
+    }
+
+    private IEnumerator ExecutarAcao(Acao acao)
+    {
+        // Aproximacao serve SOMENTE para posicionar antes de invocar/lançar.
+        // O ataque real da investida pertence exclusivamente a Vida Baixa.
+        if (acao == Acao.InvocarLamentus || acao == Acao.LancarFoice)
+            yield return AproximarDaKaya();
+
+        switch (acao)
+        {
+            case Acao.CorvosDiretos:
+                yield return AtaqueCorvos(false);
+                break;
+            case Acao.CorvosLeque:
+                yield return AtaqueCorvos(true);
+                break;
+            case Acao.InvocarLamentus:
+                yield return AtaqueInvocacao();
+                break;
+            case Acao.LancarFoice:
+                yield return AtaqueFoiceArremessada();
+                break;
+            case Acao.InvestidaComGolpe:
+                yield return AproximarDaKaya();
+                yield return AtaqueInvestidaFinal();
+                break;
+        }
+
+        movimentoAtivo = false;
+        if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
+        Reproduzir("morteociosa");
+
+        atacando = false;
+        rotinaAtaque = null;
+        proximoAtaque = Time.time + Mathf.Max(0.1f, intervaloAtaques);
     }
 
     private void FixedUpdate()
     {
-        if (!movimentoAtivo) return;
+        if (!movimentoAtivo || (vidaBoss != null && vidaBoss.EstaMorto)) return;
 
-        float xAtual = corpoFisico != null ? corpoFisico.position.x : transform.position.x;
-        float novoX = Mathf.MoveTowards(xAtual, destinoInvestidaX, velocidadeInvestida * Time.fixedDeltaTime);
-
+        float atual = corpoFisico != null ? corpoFisico.position.x : transform.position.x;
+        float x = Mathf.MoveTowards(atual, destinoX, velocidadeInvestida * Time.fixedDeltaTime);
         if (corpoFisico != null)
-            corpoFisico.MovePosition(new Vector2(novoX, corpoFisico.position.y));
+            corpoFisico.MovePosition(new Vector2(x, corpoFisico.position.y));
         else
-            transform.position = new Vector3(novoX, transform.position.y, transform.position.z);
+            transform.position = new Vector3(x, transform.position.y, transform.position.z);
 
-        if (Mathf.Abs(novoX - destinoInvestidaX) <= 0.1f)
+        if (Mathf.Abs(x - destinoX) <= 0.25f)
             movimentoAtivo = false;
+    }
+
+    private IEnumerator AproximarDaKaya()
+    {
+        EncontrarJogador();
+        if (jogador == null) yield break;
+
+        float distancia = jogador.position.x - transform.position.x;
+        float avancar = Mathf.Max(0f, Mathf.Abs(distancia) - distanciaParadaAntesDaKaya);
+        if (avancar <= 1f) yield break;
+
+        destinoX = transform.position.x + Mathf.Sign(distancia) * avancar;
+        movimentoAtivo = true;
+        string animacao = Mathf.Abs(distancia) > distanciaDeteccao * 0.45f ?
+            "morteindolonge" : "morteindo";
+        Reproduzir(animacao);
+
+        float espera = 0f;
+        float limite = Mathf.Max(0.2f, tempoMaximoAproximacao);
+        while (movimentoAtivo && espera < limite)
+        {
+            espera += Time.deltaTime;
+            yield return null;
+        }
+        movimentoAtivo = false;
+        if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
+    }
+
+    private IEnumerator AtaqueCorvos(bool emLeque)
+    {
+        Reproduzir("mortelançando");
+        yield return new WaitForSeconds(0.65f);
+
+        int quantidade = estadoAtual == alta ? 4 :
+            estadoAtual == media ? 6 : 10;
+        // A segunda horda da fase alta espalha os mesmos 4 corvos
+        // em angulos distintos: terceira habilidade sem nova animacao.
+        for (int i = 0; i < quantidade; i++)
+        {
+            LancarCorvo(i, quantidade, emLeque);
+            if (i + 1 < quantidade)
+                yield return new WaitForSeconds(Mathf.Max(0.05f, intervaloCorvos));
+        }
+
+        float usado = 0.65f + Mathf.Max(0f, quantidade - 1) * intervaloCorvos;
+        if (DuracaoCorvos > usado)
+            yield return new WaitForSeconds(DuracaoCorvos - usado);
+    }
+
+    private void LancarCorvo(int indice, int total, bool emLeque)
+    {
+        if (prefabCorvo == null || jogador == null) return;
+
+        float lado = jogador.position.x >= transform.position.x ? 1f : -1f;
+        Vector3 origemBase = pontoLancamentoCorvos != null ?
+            pontoLancamentoCorvos.position :
+            transform.position + new Vector3(lado * 25f, 80f, 0f);
+
+        float centro = (total - 1) * 0.5f;
+        float altura = (indice - centro) * 35f;
+        float afastamento = (indice % 2 == 0 ? -1f : 1f) * (8f + indice / 2 * 12f);
+        Vector3 origem = origemBase + new Vector3(afastamento, altura, 0f);
+
+        Vector2 direcao = (Vector2)(jogador.position - origem);
+        if (direcao.sqrMagnitude < 0.001f) direcao = Vector2.right * lado;
+        direcao.Normalize();
+        if (emLeque)
+        {
+            float angulo = Mathf.Lerp(-24f, 24f, indice / Mathf.Max(1f, total - 1f));
+            direcao = Quaternion.Euler(0f, 0f, angulo) * direcao;
+        }
+
+        GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
+        CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
+        if (projetil == null) projetil = corvo.AddComponent<CorvoBossProjectile>();
+        projetil.Configurar(direcao, velocidadeCorvo, Mathf.Max(1, danoCorvo), 4f,
+            GetComponentsInChildren<Collider2D>(true), true);
+    }
+
+    private IEnumerator AtaqueInvocacao()
+    {
+        Reproduzir("mortesubindo");
+        float tempoSpawn = Mathf.Clamp(instanteInvocacao, 0f, DuracaoSubindo);
+        if (tempoSpawn > 0f)
+            yield return new WaitForSeconds(tempoSpawn);
+        InvocarLamentus();
+        if (DuracaoSubindo > tempoSpawn)
+            yield return new WaitForSeconds(DuracaoSubindo - tempoSpawn);
+    }
+
+    private void InvocarLamentus()
+    {
+        if (prefabLamentus == null || jogador == null) return;
+
+        lamentusInvocados.RemoveAll(item => item == null);
+        if (lamentusInvocados.Count >= maximoLamentusVivos)
+            return;
+
+        Collider2D colKaya = jogador.GetComponent<Collider2D>();
+        float pesKaya = colKaya != null ? colKaya.bounds.min.y : jogador.position.y;
+        float lado = jogador.position.x >= transform.position.x ? 1f : -1f;
+        bool achou = false;
+        Vector2 superficie = Vector2.zero;
+        // Se nao houver plataforma de um lado, tenta o outro antes de desistir.
+        for (int tentativa = 0; tentativa < 2 && !achou; tentativa++)
+        {
+            float sinal = tentativa == 0 ? lado : -lado;
+            float x = jogador.position.x + sinal * distanciaLateralLamentus;
+            Vector2 origem = new Vector2(x, pesKaya + 65f);
+            RaycastHit2D[] impactos = Physics2D.RaycastAll(origem, Vector2.down,
+                650f, camadasChao);
+            foreach (RaycastHit2D impacto in impactos)
+            {
+                if (impacto.collider == null || impacto.collider.isTrigger ||
+                    impacto.normal.y < 0.55f) continue;
+                if (impacto.point.y > pesKaya + 10f) continue;
+                superficie = impacto.point;
+                achou = true;
+                break;
+            }
+        }
+
+        if (!achou)
+        {
+            Debug.LogWarning("[Morte] Nao achei o piso para invocar Lamentus perto da Kaya.", this);
+            return;
+        }
+
+        InimigoParado modeloParado = prefabLamentus.GetComponent<InimigoParado>();
+        Vector3 inicial = new Vector3(superficie.x,
+            superficie.y + 1f, prefabLamentus.transform.position.z);
+        if (modeloParado != null)
+            inicial.y = superficie.y - Mathf.Max(0f, modeloParado.alturaEmergir);
+
+        GameObject invocado = Instantiate(prefabLamentus, inicial, Quaternion.identity);
+        if (invocado == null) return;
+
+        if (modeloParado != null)
+        {
+            InimigoParado parado = invocado.GetComponent<InimigoParado>();
+            if (parado != null)
+            {
+                parado.player = jogador;
+                parado.raioDeteccao = Mathf.Max(parado.raioDeteccao,
+                    Vector2.Distance(jogador.position, inicial) + 15f);
+                Vector3 po = parado.offsetPoeira;
+                po.y = Mathf.Max(0f, modeloParado.alturaEmergir) + 0.5f;
+                parado.offsetPoeira = po;
+            }
+        }
+        else
+        {
+            Collider2D colisao = invocado.GetComponentInChildren<Collider2D>();
+            if (colisao != null)
+            {
+                float diferenca = superficie.y + 1f - colisao.bounds.min.y;
+                invocado.transform.position += Vector3.up * diferenca;
+            }
+        }
+
+        lamentusInvocados.Add(invocado);
+    }
+
+    private IEnumerator AtaqueFoiceArremessada()
+    {
+        Reproduzir("mortelancandofoice");
+        // O proprio clipe ja anima foice_0 indo e voltando.
+        // Nao duplicamos o desenho nem alteramos os keyframes.
+        bool acertou = false;
+        float decorrido = 0f;
+        Vector2 anterior = foiceAnimada != null ?
+            (Vector2)foiceAnimada.position : (Vector2)transform.position;
+
+        while (decorrido < DuracaoFoiceArremessada)
+        {
+            decorrido += Time.deltaTime;
+            if (foiceAnimada != null)
+            {
+                Vector2 atual = foiceAnimada.position;
+                if (!acertou && decorrido >= inicioColisaoFoice &&
+                    decorrido <= fimColisaoFoice)
+                    acertou = VerificarHitFoiceArremessada(anterior, atual);
+                anterior = atual;
+            }
+            yield return null;
+        }
+    }
+
+    private bool VerificarHitFoiceArremessada(Vector2 anterior, Vector2 atual)
+    {
+        if (jogador == null) return false;
+        if (colliderKaya == null)
+        {
+            colliderKaya = jogador.GetComponent<Collider2D>();
+            if (colliderKaya == null)
+                colliderKaya = jogador.GetComponentInChildren<Collider2D>();
+        }
+        if (colliderKaya == null || !colliderKaya.enabled) return false;
+
+        Vector2 centro = colliderKaya.bounds.center;
+        Vector2 percurso = atual - anterior;
+        float t = percurso.sqrMagnitude > 0.001f ?
+            Mathf.Clamp01(Vector2.Dot(centro - anterior, percurso) / percurso.sqrMagnitude) : 0f;
+        Vector2 pontoProximo = anterior + percurso * t;
+        Vector2 pontoNoJogador = colliderKaya.ClosestPoint(pontoProximo);
+
+        if (Vector2.Distance(pontoNoJogador, pontoProximo) >
+            raioAcertoFoiceArremessada)
+            return false;
+
+        PlayerHealth vidaKaya = jogador.GetComponentInParent<PlayerHealth>();
+        if (vidaKaya != null)
+            vidaKaya.TomarDanoDeInimigo(danoFoiceArremessada);
+        return true;
+    }
+
+    private IEnumerator AtaqueInvestidaFinal()
+    {
+        // O movimento "indo" ou "indolonge" so aproxima. Somente aqui
+        // a animacao indoataque habilita a hitbox com dano.
+        Reproduzir("morteindoataque");
+        float tempo = 0f;
+        while (tempo < DuracaoAtaqueFoice)
+        {
+            tempo += Time.deltaTime;
+            float progresso = tempo / DuracaoAtaqueFoice;
+            if (hitboxFoice != null)
+                hitboxFoice.DefinirAtiva(
+                    progresso >= InicioGolpe && progresso <= FimGolpe);
+            yield return null;
+        }
+        if (hitboxFoice != null)
+            hitboxFoice.DefinirAtiva(false);
+    }
+
+    private void Reproduzir(string nome)
+    {
+        if (animator == null) return;
+        int hash = Animator.StringToHash("Base Layer." + nome);
+        if (animator.HasState(0, hash))
+            animator.Play(hash, 0, 0f);
+        else
+            Debug.LogWarning("[Morte] Estado nao encontrado: " + nome, this);
     }
 
     private void AtualizarOrientacao()
     {
         if (jogador == null || raizVisual == null || !escalaCapturada) return;
-
-        // A arte original da Morte olha para a esquerda.
-        // Se Kaya estiver à esquerda, mantém a escala original; se estiver à direita, espelha.
-        const bool ArteOriginalOlhaParaEsquerda = true;
-        bool jogadorAEsquerda = jogador.position.x < transform.position.x;
-        bool precisaEspelhar = ArteOriginalOlhaParaEsquerda ? !jogadorAEsquerda : jogadorAEsquerda;
-        float sinal = precisaEspelhar ? -1f : 1f;
+        bool kayaEsquerda = jogador.position.x < transform.position.x;
+        float sinal = kayaEsquerda ? 1f : -1f;
         raizVisual.localScale = new Vector3(
             Mathf.Abs(escalaVisualOriginal.x) * sinal,
-            escalaVisualOriginal.y,
-            escalaVisualOriginal.z);
+            escalaVisualOriginal.y, escalaVisualOriginal.z);
     }
 
     private void PrepararHitboxFoice()
     {
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>(true))
         {
-            if (col == null || !col.gameObject.name.ToLowerInvariant().Contains("foice")) continue;
+            if (col == null || !col.gameObject.name.ToLowerInvariant().Contains("foice"))
+                continue;
 
             hitboxFoice = col.GetComponent<MorteFoiceHitbox>();
             if (hitboxFoice == null)
                 hitboxFoice = col.gameObject.AddComponent<MorteFoiceHitbox>();
-
             hitboxFoice.ConfigurarDano(danoFoice);
             hitboxFoice.DefinirAtiva(false);
-            return;
+            break;
         }
-
-        Debug.LogWarning("[Morte] Não encontrei Collider2D num objeto cujo nome contém 'foice'.", this);
-    }
-
-    private IEnumerator AtaqueCorvos()
-    {
-        if (animator != null)
-        {
-            animator.ResetTrigger(TriggerInvestida);
-            animator.SetTrigger(TriggerCorvos);
-        }
-
-        yield return new WaitForSeconds(AtrasoLancamentoCorvos);
-
-        for (int i = 0; i < quantidadeCorvos; i++)
-        {
-            if (jogador != null) LancarCorvo(i);
-            if (i < quantidadeCorvos - 1)
-                yield return new WaitForSeconds(intervaloCorvos);
-        }
-
-        FinalizarAtaque(foiHordaCorvos: true);
-    }
-
-    private void LancarCorvo(int indice)
-    {
-        if (prefabCorvo == null || jogador == null) return;
-
-        float lado = jogador.position.x >= transform.position.x ? 1f : -1f;
-        Vector3 origemBase = pontoLancamentoCorvos != null
-            ? pontoLancamentoCorvos.position
-            : transform.position + new Vector3(lado * 25f, 80f, 0f);
-
-        // Cada corvo sai de uma altura e deslocamento horizontal diferentes.
-        // A fileira se espalha para cima e para baixo, em vez de nascer empilhada.
-        float centro = (quantidadeCorvos - 1) * 0.5f;
-        float altura = (indice - centro) * EspacamentoVerticalCorvos;
-        float deslocamentoX = (indice % 2 == 0 ? -1f : 1f) * (8f + (indice / 2) * 12f);
-        Vector3 origem = origemBase + new Vector3(deslocamentoX, altura, 0f);
-
-        Vector2 direcao = ((Vector2)jogador.position - (Vector2)origem).normalized;
-        if (direcao.sqrMagnitude < 0.001f)
-            direcao = new Vector2(lado, 0f);
-
-        GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
-        CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
-        if (projetil == null)
-            projetil = corvo.AddComponent<CorvoBossProjectile>();
-
-        projetil.Configurar(
-            direcao,
-            velocidadeCorvo,
-            DanoCorvo,
-            TempoVidaCorvo,
-            GetComponentsInChildren<Collider2D>(true),
-            arteOriginalOlhaEsquerda: true);
-    }
-
-    private IEnumerator AtaqueInvestida()
-    {
-        if (animator != null)
-        {
-            animator.ResetTrigger(TriggerCorvos);
-            animator.SetTrigger(TriggerInvestida);
-        }
-
-        // Preparação da animação; o destino é capturado quando a investida começa de fato.
-        yield return new WaitForSeconds(TempoPreparacaoInvestida);
-        if (jogador == null)
-        {
-            FinalizarAtaque(foiHordaCorvos: false);
-            yield break;
-        }
-
-        float xJogadorNoInicio = jogador.position.x;
-        float diferencaX = xJogadorNoInicio - transform.position.x;
-        float distanciaInicial = Mathf.Abs(diferencaX);
-        bool longa = distanciaInicial > distanciaDeteccao * 0.45f;
-
-        // Destino fixo antes da Kaya, mantendo a distância definida no Inspector.
-        // Se a boss já estiver dentro dessa distância, ela não avança mais em direção ao jogador.
-        float direcao = Mathf.Sign(diferencaX);
-        float distanciaDeAvanco = Mathf.Max(0f, distanciaInicial - distanciaParadaAntesDaKaya);
-        destinoInvestidaX = transform.position.x + direcao * distanciaDeAvanco;
-        movimentoAtivo = distanciaDeAvanco > 0.5f;
-
-        if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
-
-        if (longa && animator != null && animator.HasState(0, EstadoInvestidaLonga))
-            animator.Play(EstadoInvestidaLonga, 0, 0f);
-
-        float tempo = 0f;
-        float distanciaPercorrer = Mathf.Abs(destinoInvestidaX - transform.position.x);
-        float limiteTempo = Mathf.Max(1.4f, distanciaPercorrer / Mathf.Max(1f, velocidadeInvestida) + 0.5f);
-
-        while (movimentoAtivo && tempo < limiteTempo)
-        {
-            tempo += Time.deltaTime;
-            yield return null;
-        }
-
-        movimentoAtivo = false;
-
-        if (animator != null && animator.HasState(0, EstadoAtaqueFoice))
-            animator.Play(EstadoAtaqueFoice, 0, 0f);
-
-        yield return null;
-        yield return StartCoroutine(JanelaFoice());
-        FinalizarAtaque(foiHordaCorvos: false);
-    }
-
-    private IEnumerator JanelaFoice()
-    {
         if (hitboxFoice == null)
-        {
-            yield return new WaitForSeconds(DuracaoJanelaFoice);
-            yield break;
-        }
-
-        float tempo = 0f;
-        while (tempo < DuracaoJanelaFoice)
-        {
-            float progresso = tempo / DuracaoJanelaFoice;
-            hitboxFoice.DefinirAtiva(
-                progresso >= InicioJanelaFoice && progresso <= FimJanelaFoice);
-            tempo += Time.deltaTime;
-            yield return null;
-        }
-
-        hitboxFoice.DefinirAtiva(false);
+            Debug.LogWarning("[Morte] Nenhum Collider2D de foice encontrado para o golpe da investida.", this);
     }
 
-    private void FinalizarAtaque(bool foiHordaCorvos)
-    {
-        if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
-
-        movimentoAtivo = false;
-        atacando = false;
-        proximoAtaque = Time.time + intervaloAtaques;
-        proximoAtaqueSeraCorvos = !foiHordaCorvos;
-    }
-
-    // O projétil da Kaya envia dano inteiro pelo SendMessageUpwards.
-    // A vida e a barra continuam centralizadas no componente universal BossVida.
     public void TomarDano(int quantidadeDano)
     {
         if (quantidadeDano <= 0) return;
-
-        BossVida vidaUniversal = GetComponent<BossVida>();
-        if (vidaUniversal == null)
-            vidaUniversal = GetComponentInChildren<BossVida>(true);
-
-        if (vidaUniversal != null)
-            vidaUniversal.TomarDano(quantidadeDano);
+        if (vidaBoss == null) vidaBoss = GetComponent<BossVida>();
+        if (vidaBoss != null)
+            vidaBoss.TomarDano(quantidadeDano);
     }
-
     public void ReceberDano(int quantidadeDano) => TomarDano(quantidadeDano);
 
     private void OnDrawGizmosSelected()
@@ -341,7 +580,16 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
+        atacando = false;
         movimentoAtivo = false;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
+
+        // Nao deixa Lamentus vivos atacando Kaya na cinematica de morte.
+        if (vidaBoss != null && vidaBoss.EstaMorto)
+        {
+            foreach (GameObject invocado in lamentusInvocados)
+                if (invocado != null) Destroy(invocado);
+            lamentusInvocados.Clear();
+        }
     }
 }
