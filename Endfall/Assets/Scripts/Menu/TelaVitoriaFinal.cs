@@ -18,6 +18,8 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
     [Range(0f, 1f)] [SerializeField] private float volumeVoz = 0.85f;
 
     [Header("Ultima carta de Cael")]
+    [Tooltip("Fonte usada SOMENTE no corpo da carta. Se vazio, usa a fonte geral dos textos.")]
+    [SerializeField] private TMP_FontAsset fonteCarta;
     [TextArea(9, 17)]
     [SerializeField] private string cartaFinal =
         "Kaya,\n\n" +
@@ -109,10 +111,13 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
 
         if (musica != null && musica.clip != null) musica.Play();
 
-        yield return AnimarAlpha(grupoCarta, 0f, 1f, duracaoFade);
-        etapa = Etapa.Carta;
+        // Antes de QUALQUER Fade In, a carta ja esta com zero caracteres
+        // visiveis. Evita o flash de texto completo na entrada da cena.
         corpoCarta.maxVisibleCharacters = 0;
         corpoCarta.ForceMeshUpdate();
+        rodapeCarta.text = "";
+        yield return AnimarAlpha(grupoCarta, 0f, 1f, duracaoFade);
+        etapa = Etapa.Carta;
 
         int total = corpoCarta.textInfo.characterCount;
         rodapeCarta.text = "CLIQUE OU ESPAÇO  •  REVELAR CARTA";
@@ -184,28 +189,29 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
         RectTransform fundo = Retangulo("FundoEscuro", objetoCanvas.transform,
             new Vector2(1920f, 1080f), Vector2.zero);
         Image imagemFundo = fundo.gameObject.AddComponent<Image>();
-        imagemFundo.color = new Color(0.027f, 0.024f, 0.025f, 1f);
+        imagemFundo.color = Color.black;
         imagemFundo.raycastTarget = false;
 
+        // Carta diretamente no fundo preto, sem painel, moldura ou filetes.
         grupoCarta = Grupo("CartaFinalDeCael", objetoCanvas.transform);
-        RectTransform papel = Retangulo("Carta", grupoCarta.transform,
-            new Vector2(1480f, 855f), Vector2.zero);
-        Image fundoCarta = papel.gameObject.AddComponent<Image>();
-        fundoCarta.color = new Color(0.09f, 0.079f, 0.072f, 1f);
-        fundoCarta.raycastTarget = false;
-
-        CriarFaixa(papel, 1470f, 3f, 405f, new Color(0.63f, 0.46f, 0.25f, 1f));
-        CriarFaixa(papel, 1470f, 3f, -403f, new Color(0.63f, 0.46f, 0.25f, 1f));
-        Texto(papel, "Cabecalho", "UMA ÚLTIMA CARTA",
+        Texto(grupoCarta.transform, "Cabecalho", "UMA ÚLTIMA CARTA",
             49f, new Color(0.88f, 0.74f, 0.53f), new Vector2(1250f, 70f),
             new Vector2(0f, 325f), TextAlignmentOptions.Center, true);
-        corpoCarta = Texto(papel, "TextoCarta", cartaFinal,
+        corpoCarta = Texto(grupoCarta.transform, "TextoCarta", cartaFinal,
             37f, new Color(0.94f, 0.92f, 0.88f), new Vector2(1250f, 630f),
             new Vector2(0f, -25f), TextAlignmentOptions.TopLeft, false);
+        if (fonteCarta != null)
+            corpoCarta.font = fonteCarta;
         corpoCarta.enableAutoSizing = true;
         corpoCarta.fontSizeMin = 25f;
         corpoCarta.fontSizeMax = 37f;
-        rodapeCarta = Texto(papel, "InstrucaoCarta", "",
+
+        // Esconde as letras AGORA, antes do primeiro frame renderizado.
+        // Na versao anterior elas apareciam completas durante o Fade In.
+        corpoCarta.maxVisibleCharacters = 0;
+        corpoCarta.ForceMeshUpdate();
+
+        rodapeCarta = Texto(grupoCarta.transform, "InstrucaoCarta", "",
             22f, new Color(0.65f, 0.61f, 0.57f), new Vector2(1200f, 45f),
             new Vector2(0f, -355f), TextAlignmentOptions.Center, false);
 
@@ -258,15 +264,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
         grupo.interactable = false;
         grupo.blocksRaycasts = false;
         return grupo;
-    }
-
-    private void CriarFaixa(Transform pai, float largura, float altura, float y, Color cor)
-    {
-        RectTransform ret = Retangulo("LinhaDourada", pai,
-            new Vector2(largura, altura), new Vector2(0f, y));
-        Image image = ret.gameObject.AddComponent<Image>();
-        image.color = cor;
-        image.raycastTarget = false;
     }
 
     private TextMeshProUGUI Texto(Transform pai, string nome, string conteudo,
