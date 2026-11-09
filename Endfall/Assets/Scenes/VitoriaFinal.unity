@@ -146,16 +146,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d59fae0de124d1e9c6b75320188aa09, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TelaVitoriaFinal
   titulo: E N D F A L L
   fonteTitulo: {fileID: 11400000, guid: d3b228678bb6c0a4b9379379f75c4029, type: 2}
   fonteTexto: {fileID: 0}
-  fonteCarta: {fileID: 0}
   vozEndFall: {fileID: 8300000, guid: af19e6afc9d54ea4f8b1434c64c0895a, type: 3}
   musicaFinal: {fileID: 8300000, guid: b91b9951e8100484e893538be0aabab5, type: 3}
   volumeMusica: 0.16
   volumeVoz: 0.85
+  fonteCarta: {fileID: 11400000, guid: d3b228678bb6c0a4b9379379f75c4029, type: 2}
+  cartaFinal: "Kaya,\n\nEnt\xE3o voc\xEA conseguiu. Derrubou a pr\xF3pria Morte.
+    Confesso que n\xE3o esperava tanto de uma humana t\xE3o teimosa.\n\nSeus pais
+    n\xE3o voltar\xE3o, e nenhuma vit\xF3ria apagar\xE1 essa aus\xEAncia. Mas o caminho
+    que come\xE7ou com vingan\xE7a termina com algo maior: a liberdade de escolher
+    o pr\xF3prio destino.\n\nAgora v\xE1 viver. Afinal, seria um desperd\xEDcio sobreviver
+    a tudo isso s\xF3 para continuar me ouvindo falar.\n\nCom certo orgulho \u2014
+    n\xE3o se acostume,\nAtt. Cael."
+  textoCreditos: "E N D F A L L\n\nCARCAR\xC1 PRODU\xC7\xD5ES\n\n\nUM JOGO DE\nRYAN
+    WALBER SOUZA SILVA\n\n\nDESENVOLVIMENTO E PROGRAMA\xC7\xC3O\nRyan Walber Souza
+    Silva\n\nCRIA\xC7\xC3O E NARRATIVA\nRyan Walber Souza Silva\n\n\nPROJETO DE CONCLUS\xC3O
+    DE CURSO\nJOGOS DIGITAIS \u2014 IFRN\n\n\nAGRADECIMENTOS\n\nAos professores,
+    pelos ensinamentos.\nAos amigos e colegas, pela companhia.\n\xC0 minha fam\xEDlia,
+    pelo apoio.\nE a voc\xEA, por chegar at\xE9 o fim desta jornada.\n\n\nOBRIGADO
+    POR JOGAR."
   segundosPorLetra: 0.022
   duracaoFade: 1
   tempoTitulo: 3
