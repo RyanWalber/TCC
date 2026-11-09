@@ -49,7 +49,12 @@ public class VictoryZone : MonoBehaviour
             if (timerSeguranca >= 0.4f && Input.anyKeyDown)
             {
                 Time.timeScale = 1f; 
-                SaveManager.Instance.AvancarFase();
+                // FaseMorte termina na tela cinematografica, nao no
+                // AvancarFase que enviaria o jogador diretamente ao menu.
+                if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "FaseMorte")
+                    LevelLoader.CarregarComFade("VitoriaFinal");
+                else if (SaveManager.Instance != null)
+                    SaveManager.Instance.AvancarFase();
             }
         }
     }

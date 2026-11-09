@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class BossVida : MonoBehaviour
 {
-    [Header("Configurações de Vida")]
+    [Header("ConfiguraÃ§Ãµes de Vida")]
     [SerializeField] private float vidaMaxima = 100f;
     private float vidaAtual;
 
@@ -108,7 +108,7 @@ public class BossVida : MonoBehaviour
         if (estaMorto) return;
         estaMorto = true;
 
-        // Desativa física e colisões
+        // Desativa fÃ­sica e colisÃµes
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
         if (TryGetComponent<Rigidbody2D>(out var rb)) rb.simulated = false;
 
@@ -119,7 +119,7 @@ public class BossVida : MonoBehaviour
             if (script != this) script.enabled = false;
         }
 
-        // Destrói o objeto pai da barra de vida completa
+        // DestrÃ³i o objeto pai da barra de vida completa
         if (conteinerBarraDeVida != null)
         {
             Destroy(conteinerBarraDeVida);
@@ -129,6 +129,13 @@ public class BossVida : MonoBehaviour
             Transform pai = barraDeVida.transform.parent;
             Destroy(pai != null ? pai.gameObject : barraDeVida.gameObject);
         }
+
+        // Somente a Morte final encerra a campanha. Outros BossVida
+        // continuam com a mesma logica de morte e destruicao.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "FaseMorte" &&
+            (GetComponentInChildren<MorteBossControllerGameplay>(true) != null ||
+             GetComponentInParent<MorteBossControllerGameplay>() != null))
+            FinalizadorMorte.Agendar();
 
         Destroy(gameObject, tempoParaDestruir);
     }
