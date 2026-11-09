@@ -130,12 +130,21 @@ public class BossVida : MonoBehaviour
             Destroy(pai != null ? pai.gameObject : barraDeVida.gameObject);
         }
 
-        // Somente a Morte final encerra a campanha. Outros BossVida
-        // continuam com a mesma logica de morte e destruicao.
+        // Somente a Morte final permanece viva ate o ultimo frame
+        // de mortemorre.anim. Os demais BossVida continuam iguais.
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "FaseMorte" &&
             (GetComponentInChildren<MorteBossControllerGameplay>(true) != null ||
              GetComponentInParent<MorteBossControllerGameplay>() != null))
-            FinalizadorMorte.Agendar();
+        {
+            // Colisores da foice e dos filhos tambem devem parar de causar dano.
+            foreach (Collider2D colliderFinal in GetComponentsInChildren<Collider2D>(true))
+                colliderFinal.enabled = false;
+            foreach (Rigidbody2D corpoFinal in GetComponentsInChildren<Rigidbody2D>(true))
+                corpoFinal.simulated = false;
+
+            FinalizadorMorte.Agendar(this);
+            return;
+        }
 
         Destroy(gameObject, tempoParaDestruir);
     }

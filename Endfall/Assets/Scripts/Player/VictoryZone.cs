@@ -12,6 +12,9 @@ public class VictoryZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // O gatilho de vitoria nao pode interromper a animacao final.
+        if (FinalizadorMorte.EmAndamento) return;
+
         if (collision.CompareTag("Player") && !aguardandoEntrada)
         {
             aguardandoEntrada = true;
@@ -42,6 +45,9 @@ public class VictoryZone : MonoBehaviour
 
     private void Update()
     {
+        // O fim da Morte tem sua propria sequencia e controla o fade.
+        if (FinalizadorMorte.EmAndamento) return;
+
         if (aguardandoEntrada)
         {
             timerSeguranca += Time.unscaledDeltaTime;
