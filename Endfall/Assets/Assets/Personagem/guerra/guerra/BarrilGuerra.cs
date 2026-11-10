@@ -11,6 +11,8 @@ public class BarrilGuerra : MonoBehaviour
     public string tagDoPlayer = "Player";
     public string tagDoChao = "Chao";
 
+    private BossGuerraController donoAudio;
+    public void DefinirDonoAudio(BossGuerraController dono) { donoAudio = dono; }
     private Rigidbody2D rb;
     private bool jaExplodiu = false;
     private float tempoDesdeSpawn = 0f;
@@ -90,7 +92,10 @@ public class BarrilGuerra : MonoBehaviour
                 PlayerHealth hp = hit.GetComponent<PlayerHealth>() ?? hit.GetComponentInParent<PlayerHealth>();
                 if (hp != null)
                 {
+                    float antes = hp.VidaAtual;
                     hp.TomarDano(dano);
+                    if (hp.VidaAtual < antes && donoAudio != null)
+                        donoAudio.AudioAoCausarHit();
                 }
 
                 Rigidbody2D rbPlayer = hit.GetComponent<Rigidbody2D>() ?? hit.GetComponentInParent<Rigidbody2D>();
