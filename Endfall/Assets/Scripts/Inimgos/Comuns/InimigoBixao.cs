@@ -6,6 +6,11 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixao : MonoBehaviour
 {
+    [Header("Audio individual (opcional no prefab)")]
+    [SerializeField] private AudioInimigo audioInimigo;
+
+    private AudioInimigo Sons => audioInimigo != null ? audioInimigo : (audioInimigo = GetComponent<AudioInimigo>());
+
     public Transform player;
     public UnityArmatureComponent armatureComponent;
     public string animVoar = "fly";
@@ -119,6 +124,7 @@ public class InimigoBixao : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (Sons != null) Sons.TocarHitCausado();
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();
@@ -140,6 +146,7 @@ public class InimigoBixao : MonoBehaviour
     {
         if (vida <= 0) return;
 
+        if (Sons != null) Sons.TocarHitRecebido();
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -156,6 +163,7 @@ public class InimigoBixao : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        if (Sons != null) Sons.TocarMorte();
         rb.linearVelocity = Vector2.zero;
         if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject, 0.15f);
