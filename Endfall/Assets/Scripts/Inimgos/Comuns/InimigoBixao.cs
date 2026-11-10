@@ -6,6 +6,9 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixao : MonoBehaviour
 {
+    [Header("Audio deste inimigo")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+
     public Transform player;
     public UnityArmatureComponent armatureComponent;
     public string animVoar = "fly";
@@ -50,6 +53,7 @@ public class InimigoBixao : MonoBehaviour
 
     private void Update()
     {
+        audioInimigo.Atualizar(this);
         if (player == null) return;
         AtualizarInclinacao();
     }
@@ -118,7 +122,9 @@ public class InimigoBixao : MonoBehaviour
         PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>() ?? jogadorObj.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
         {
+            float vidaAntes = playerHealth.VidaAtual;
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (playerHealth.VidaAtual < vidaAntes) audioInimigo.TocarHitCausado(this);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();
@@ -140,7 +146,7 @@ public class InimigoBixao : MonoBehaviour
     {
         if (vida <= 0 || dano <= 0) return;
 
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        audioInimigo.TocarHitRecebido(this);
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -157,6 +163,7 @@ public class InimigoBixao : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        audioInimigo.TocarMorte(this);
         rb.linearVelocity = Vector2.zero;
         if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject, 0.15f);
