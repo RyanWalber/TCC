@@ -3,8 +3,16 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BossVida))]
-public class BossPeste : MonoBehaviour
+public class BossPeste : MonoBehaviour, IAudioBoss
 {
+    [Header("Audio da Peste")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+    [SerializeField] private AudioClip somCuspida;
+    [SerializeField, Range(0f, 1f)] private float volumeCuspida = 0.7f;
+
+    public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
+    public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public bool arteOriginalOlhaDireita = false;
 
@@ -70,6 +78,7 @@ public class BossPeste : MonoBehaviour
     {
         if (bossVida != null && bossVida.EstaMorto) return;
 
+        audioInimigo.Atualizar(this);
         PatrulharEVoar();
         ChecarEExecutarAtaque();
     }
@@ -106,7 +115,7 @@ public class BossPeste : MonoBehaviour
                 if (anim != null)
                 {
                     anim.SetTrigger("Ataque");
-                    KayaAudioManager.TocarPeste(transform.position);
+                    audioInimigo.TocarAtaque(this);
                 }
 
                 timerAtaque = 0f;
@@ -140,7 +149,7 @@ public class BossPeste : MonoBehaviour
         if (prefabGosma != null && pontoBoca != null)
         {
             Instantiate(prefabGosma, pontoBoca.position, prefabGosma.transform.rotation);
-            KayaAudioManager.TocarPesteCuspindo(pontoBoca.position);
+            audioInimigo.TocarEspecial(this, somCuspida, volumeCuspida, pontoBoca.position);
         }
     }
 
@@ -182,7 +191,9 @@ public class BossPeste : MonoBehaviour
             PlayerHealth playerHealth = obj.GetComponent<PlayerHealth>() ?? obj.GetComponentInParent<PlayerHealth>();
             if (playerHealth != null)
             {
+                float antes = playerHealth.VidaAtual;
                 playerHealth.TomarDano(danoNoPlayer);
+                if (playerHealth.VidaAtual < antes) audioInimigo.TocarHitCausado(this);
             }
 
             Rigidbody2D rbPlayer = obj.GetComponent<Rigidbody2D>() ?? obj.GetComponentInParent<Rigidbody2D>();
