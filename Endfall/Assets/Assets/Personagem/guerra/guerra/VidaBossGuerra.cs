@@ -75,7 +75,7 @@ public class VidaBossGuerra : MonoBehaviour
     public void TomarDano(float quantidadeDano)
     {
         if (estaMorto || quantidadeDano <= 0f) return;
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        AudioInimigo.NotificarVidaBoss(this, false);
         vidaAtual -= quantidadeDano;
         vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
@@ -219,6 +219,7 @@ public class VidaBossGuerra : MonoBehaviour
     private void Morrer()
     {
         estaMorto = true;
+        AudioInimigo.NotificarVidaBoss(this, true);
         EncerrarElixiresDaArena();
 
         BossGuerraController controller = GetComponent<BossGuerraController>();
