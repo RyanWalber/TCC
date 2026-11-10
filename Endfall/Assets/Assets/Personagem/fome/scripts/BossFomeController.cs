@@ -1,7 +1,12 @@
 using UnityEngine;
 
-public class BossFomeController : MonoBehaviour
+public class BossFomeController : MonoBehaviour, IAudioBoss
 {
+    [Header("Audio da Fome")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+    public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
+    public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
+
     [Header("Referências")]
     [SerializeField] private Transform player;
     [SerializeField] private Animator animator;
@@ -31,6 +36,7 @@ public class BossFomeController : MonoBehaviour
 
     private void Update()
     {
+        audioInimigo.Atualizar(this);
         if (player == null)
         {
             BuscarPlayer();
@@ -82,6 +88,7 @@ public class BossFomeController : MonoBehaviour
 
     private void Atacar()
     {
+        audioInimigo.TocarAtaque(this);
         if (flechaVisualNaMao != null)
         {
             flechaVisualNaMao.SetActive(true);
