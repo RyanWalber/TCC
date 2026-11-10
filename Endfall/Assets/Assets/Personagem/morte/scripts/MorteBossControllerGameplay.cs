@@ -41,6 +41,9 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private const float InicioJanelaFoice = 0.30f;
     private const float FimJanelaFoice = 0.62f;
 
+    [Header("Audio individual da Morte")]
+    [SerializeField] private AudioInimigo audioInimigo;
+    private AudioInimigo Sons => audioInimigo != null ? audioInimigo : (audioInimigo = GetComponent<AudioInimigo>());
     private Rigidbody2D corpoFisico;
     private MorteFoiceHitbox hitboxFoice;
     private Vector3 escalaVisualOriginal = Vector3.one;
@@ -186,6 +189,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.SetTrigger(TriggerCorvos);
         }
 
+        if (Sons != null) Sons.TocarCorvos();
         yield return new WaitForSeconds(AtrasoLancamentoCorvos);
 
         for (int i = 0; i < quantidadeCorvos; i++)
@@ -223,6 +227,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         if (projetil == null)
             projetil = corvo.AddComponent<CorvoBossProjectile>();
 
+        projetil.DefinirAudioDono(Sons);
         projetil.Configurar(
             direcao,
             velocidadeCorvo,
@@ -240,6 +245,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.SetTrigger(TriggerInvestida);
         }
 
+        if (Sons != null) Sons.TocarInvestida();
         // Preparação da animação; o destino é capturado quando a investida começa de fato.
         yield return new WaitForSeconds(TempoPreparacaoInvestida);
         if (jogador == null)
@@ -281,6 +287,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
             animator.Play(EstadoAtaqueFoice, 0, 0f);
 
         yield return null;
+        if (Sons != null) Sons.TocarFoice();
         yield return StartCoroutine(JanelaFoice());
         FinalizarAtaque(foiHordaCorvos: false);
     }

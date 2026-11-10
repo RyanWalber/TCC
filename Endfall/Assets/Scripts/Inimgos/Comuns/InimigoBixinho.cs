@@ -6,6 +6,11 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixinho : MonoBehaviour
 {
+    [Header("Audio individual (opcional no prefab)")]
+    [SerializeField] private AudioInimigo audioInimigo;
+
+    private AudioInimigo Sons => audioInimigo != null ? audioInimigo : (audioInimigo = GetComponent<AudioInimigo>());
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -128,6 +133,7 @@ public class InimigoBixinho : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (Sons != null) Sons.TocarHitCausado();
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
@@ -146,6 +152,7 @@ public class InimigoBixinho : MonoBehaviour
     {
         if (estaMorto) return;
 
+        if (Sons != null) Sons.TocarHitRecebido();
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -180,6 +187,7 @@ public class InimigoBixinho : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        if (Sons != null) Sons.TocarMorte();
         if (estaMorto) return;
         estaMorto = true;
 

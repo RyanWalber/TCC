@@ -7,6 +7,11 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixel : MonoBehaviour
 {
+    [Header("Audio individual (opcional no prefab)")]
+    [SerializeField] private AudioInimigo audioInimigo;
+
+    private AudioInimigo Sons => audioInimigo != null ? audioInimigo : (audioInimigo = GetComponent<AudioInimigo>());
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public Transform pivoVisual;
     public UnityArmatureComponent armatureComponent;
@@ -178,6 +183,7 @@ public class InimigoBixel : MonoBehaviour
         direcaoInvestida = jogador.position.x >= transform.position.x ? 1f : -1f;
         Virar(direcaoInvestida > 0f);
         tempoInvestidaRestante = duracaoInvestida;
+        if (Sons != null) Sons.TocarInvestida();
         tempoRecargaRestante = recargaInvestida;
 
         // Detecta uma parede mesmo no PRIMEIRO passo da investida.
@@ -316,6 +322,7 @@ public class InimigoBixel : MonoBehaviour
     {
         if (estaMorto) return;
 
+        if (Sons != null) Sons.TocarHitRecebido();
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -342,6 +349,7 @@ public class InimigoBixel : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        if (Sons != null) Sons.TocarMorte();
         if (estaMorto) return;
         estaMorto = true;
 
@@ -394,6 +402,7 @@ public class InimigoBixel : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TomarDanoDeInimigo(danoNoPlayer);
+            if (Sons != null) Sons.TocarHitCausado();
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();

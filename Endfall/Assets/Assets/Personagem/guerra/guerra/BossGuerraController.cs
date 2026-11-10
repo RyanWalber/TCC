@@ -20,6 +20,8 @@ public class BossGuerraController : MonoBehaviour
     [SerializeField] private float tempoEntreAtaques = 2.5f;
     private float tempoProximoAtaque;
 
+    [Header("Audio individual da Guerra")]
+    [SerializeField] private AudioInimigo audioInimigo;
     private bool emCombate = false;
 
     private void Start()
@@ -78,6 +80,8 @@ public class BossGuerraController : MonoBehaviour
 
     private void Atacar()
     {
+        AudioInimigo som = audioInimigo != null ? audioInimigo : GetComponent<AudioInimigo>();
+        if (som != null) som.TocarAtaque();
         if (bossAnimation != null)
         {
             bossAnimation.DispararAtaque();
