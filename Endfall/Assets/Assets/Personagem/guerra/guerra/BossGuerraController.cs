@@ -1,7 +1,12 @@
 using UnityEngine;
 
-public class BossGuerraController : MonoBehaviour
+public class BossGuerraController : MonoBehaviour, IAudioBoss
 {
+    [Header("Audio da Guerra")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+    public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
+    public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
+
     [Header("Referencias")]
     [SerializeField] private Transform jogador;
     [SerializeField] private BossAnimation bossAnimation;
@@ -41,6 +46,7 @@ public class BossGuerraController : MonoBehaviour
 
     private void Update()
     {
+        audioInimigo.Atualizar(this);
         if (jogador == null) return;
 
         float distancia = Vector2.Distance(transform.position, jogador.position);
@@ -78,6 +84,7 @@ public class BossGuerraController : MonoBehaviour
 
     private void Atacar()
     {
+        audioInimigo.TocarAtaque(this);
         if (bossAnimation != null)
         {
             bossAnimation.DispararAtaque();
