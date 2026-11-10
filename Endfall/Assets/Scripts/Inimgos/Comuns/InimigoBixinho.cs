@@ -6,6 +6,9 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixinho : MonoBehaviour
 {
+    [Header("Audio deste inimigo")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -52,6 +55,7 @@ public class InimigoBixinho : MonoBehaviour
 
     private void FixedUpdate()
     {
+        audioInimigo.Atualizar(this);
         if (estaMorto || player == null) return;
 
         Vector3 centroDeteccao = transform.position + (Vector3)offsetDeteccao;
@@ -127,7 +131,9 @@ public class InimigoBixinho : MonoBehaviour
 
         if (playerHealth != null)
         {
+            float vidaAntes = playerHealth.VidaAtual;
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (playerHealth.VidaAtual < vidaAntes) audioInimigo.TocarHitCausado(this);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
@@ -146,7 +152,7 @@ public class InimigoBixinho : MonoBehaviour
     {
         if (estaMorto || quantidadeDano <= 0) return;
 
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        audioInimigo.TocarHitRecebido(this);
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -181,6 +187,7 @@ public class InimigoBixinho : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        audioInimigo.TocarMorte(this);
         if (estaMorto) return;
         estaMorto = true;
 
