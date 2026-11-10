@@ -42,6 +42,8 @@ public class VidaBossGuerra : MonoBehaviour
     {
         if (estaMorto) return;
 
+        AudioInimigo som = GetComponent<AudioInimigo>();
+        if (som != null && quantidadeDano > 0f) som.TocarHitRecebido();
         vidaAtual -= quantidadeDano;
         vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
 
@@ -78,6 +80,8 @@ public class VidaBossGuerra : MonoBehaviour
     private void Morrer()
     {
         estaMorto = true;
+        AudioInimigo som = GetComponent<AudioInimigo>();
+        if (som != null) som.TocarMorte();
 
         BossGuerraController controller = GetComponent<BossGuerraController>();
         if (controller != null)
