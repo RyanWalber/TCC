@@ -7,6 +7,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CorvoBossProjectile : MonoBehaviour
 {
+    private MorteBossControllerGameplay donoAudio;
+    public void DefinirDonoAudio(MorteBossControllerGameplay dono) { donoAudio = dono; }
     private Rigidbody2D corpoFisico;
     private Collider2D[] collidersCorvo;
     private float tempoDeVida = 4f;
@@ -84,7 +86,11 @@ public class CorvoBossProjectile : MonoBehaviour
                 hp = outro.transform.root.GetComponentInChildren<PlayerHealth>();
 
             if (hp != null)
+            {
+                float antes = hp.VidaAtual;
                 hp.TomarDanoDeInimigo(dano);
+                if (hp.VidaAtual < antes && donoAudio != null) donoAudio.AudioAoCausarHit();
+            }
 
             DestruirCorvo();
             return;
@@ -107,7 +113,7 @@ public class CorvoBossProjectile : MonoBehaviour
     {
         if (quantidadeDano > 0 && !resolvido)
         {
-            KayaAudioManager.TocarHitCompartilhado(transform.position);
+            if (donoAudio != null) donoAudio.AudioAoReceberHit();
             DestruirCorvo();
         }
     }
