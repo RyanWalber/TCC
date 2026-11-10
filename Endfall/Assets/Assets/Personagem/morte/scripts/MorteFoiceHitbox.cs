@@ -64,6 +64,14 @@ public class MorteFoiceHitbox : MonoBehaviour
             hp = objetoJogador.GetComponentInChildren<PlayerHealth>();
 
         if (hp != null)
+        {
+            float antes = hp.VidaAtual;
             hp.TomarDanoDeInimigo(dano);
+            if (hp.VidaAtual < antes)
+            {
+                AudioInimigo som = GetComponentInParent<AudioInimigo>();
+                if (som != null) som.TocarHitCausado();
+            }
+        }
     }
 }
