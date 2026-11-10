@@ -144,8 +144,9 @@ public class InimigoBixinho : MonoBehaviour
 
     public void TomarDano(int quantidadeDano)
     {
-        if (estaMorto) return;
+        if (estaMorto || quantidadeDano <= 0) return;
 
+        KayaAudioManager.TocarHitCompartilhado(transform.position);
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 

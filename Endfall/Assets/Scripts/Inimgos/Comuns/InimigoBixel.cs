@@ -179,6 +179,7 @@ public class InimigoBixel : MonoBehaviour
         Virar(direcaoInvestida > 0f);
         tempoInvestidaRestante = duracaoInvestida;
         tempoRecargaRestante = recargaInvestida;
+        KayaAudioManager.TocarCarnifices(transform.position);
 
         // Detecta uma parede mesmo no PRIMEIRO passo da investida.
         if (VerificarImpactoLateralPrevisto())
@@ -314,8 +315,9 @@ public class InimigoBixel : MonoBehaviour
 
     public void TomarDano(int dano = 1)
     {
-        if (estaMorto) return;
+        if (estaMorto || dano <= 0) return;
 
+        KayaAudioManager.TocarHitCompartilhado(transform.position);
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 

@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(BossVida))]
 public class BossPeste : MonoBehaviour
 {
-    [Header("CONFIGURA«√O VISUAL")]
+    [Header("CONFIGURA√á√ÉO VISUAL")]
     public bool arteOriginalOlhaDireita = false;
 
     [Header("STATUS DE ATAQUE PLAYER")]
@@ -21,13 +21,13 @@ public class BossPeste : MonoBehaviour
     public GameObject prefabGosma;
     public Transform pontoBoca;
 
-    [Tooltip("Dist‚ncia m·xima no eixo X para considerar que est· por cima do Player")]
-    public float toler‚nciaSobrePlayer = 3f;
+    [Tooltip("Dist√¢ncia m√°xima no eixo X para considerar que est√° por cima do Player")]
+    public float toler√¢nciaSobrePlayer = 3f;
 
     [Tooltip("Tempo entre ataques com VIDA CHEIA (em segundos)")]
     public float tempoAtaqueVidaCheia = 4f;
 
-    [Tooltip("Tempo entre ataques com VIDA CRÕTICA (em segundos)")]
+    [Tooltip("Tempo entre ataques com VIDA CR√çTICA (em segundos)")]
     public float tempoAtaqueVidaBaixa = 1f;
 
     private Rigidbody2D rb;
@@ -40,7 +40,7 @@ public class BossPeste : MonoBehaviour
     private float timerAtaque;
     private float proximoIntervaloAtaque;
 
-    // ReferÍncia para o sistema de vida universal
+    // Refer√™ncia para o sistema de vida universal
     private BossVida bossVida;
 
     private void Start()
@@ -106,6 +106,7 @@ public class BossPeste : MonoBehaviour
                 if (anim != null)
                 {
                     anim.SetTrigger("Ataque");
+                    KayaAudioManager.TocarPeste(transform.position);
                 }
 
                 timerAtaque = 0f;
@@ -118,7 +119,7 @@ public class BossPeste : MonoBehaviour
     {
         if (playerTransform == null) return false;
 
-        bool estaAlinhadoX = Mathf.Abs(transform.position.x - playerTransform.position.x) <= toler‚nciaSobrePlayer;
+        bool estaAlinhadoX = Mathf.Abs(transform.position.x - playerTransform.position.x) <= toler√¢nciaSobrePlayer;
         bool estaAcimaY = transform.position.y > playerTransform.position.y;
 
         return estaAlinhadoX && estaAcimaY;
@@ -139,6 +140,7 @@ public class BossPeste : MonoBehaviour
         if (prefabGosma != null && pontoBoca != null)
         {
             Instantiate(prefabGosma, pontoBoca.position, prefabGosma.transform.rotation);
+            KayaAudioManager.TocarPesteCuspindo(pontoBoca.position);
         }
     }
 
@@ -205,6 +207,6 @@ public class BossPeste : MonoBehaviour
         );
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position, new Vector3(toler‚nciaSobrePlayer * 2f, 2f, 0f));
+        Gizmos.DrawWireCube(transform.position, new Vector3(toler√¢nciaSobrePlayer * 2f, 2f, 0f));
     }
 }

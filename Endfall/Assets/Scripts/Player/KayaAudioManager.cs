@@ -45,6 +45,31 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField] private AudioClip morte;
     [SerializeField, Range(0f, 1f)] private float volumeMorte = 0.8f;
 
+    [Header("Audio - inimigos e bosses (campos compartilhados)")]
+    [Tooltip("Sons de inimigos so tocam quando Kaya estiver proxima. Distancia em unidades do mundo.")]
+    [Min(1f)] [SerializeField] private float alcanceAudioInimigos = 350f;
+    [Tooltip("Alcance especifico para o hit universal.")]
+    [Min(1f)] [SerializeField] private float alcanceAudioHit = 280f;
+    [SerializeField] private AudioClip somLamentus;
+    [Range(0f, 1f)] [SerializeField] private float volumeLamentus = 0.7f;
+    [SerializeField] private AudioClip somCarnifices;
+    [Range(0f, 1f)] [SerializeField] private float volumeCarnifices = 0.7f;
+    [SerializeField] private AudioClip somPeste;
+    [Range(0f, 1f)] [SerializeField] private float volumePeste = 0.7f;
+    [SerializeField] private AudioClip somPesteCuspindo;
+    [Range(0f, 1f)] [SerializeField] private float volumePesteCuspindo = 0.7f;
+    [SerializeField] private AudioClip somCorvos;
+    [Range(0f, 1f)] [SerializeField] private float volumeCorvos = 0.65f;
+
+    [Header("Audio - Hit compartilhado (causar e receber dano)")]
+    [Tooltip("Mesmo clip para Kaya, inimigos e bosses; substitui Receber Dano da Kaya quando preenchido.")]
+    [SerializeField] private AudioClip somHitCompartilhado;
+    [Range(0f, 1f)] [SerializeField] private float volumeHitCompartilhado = 0.75f;
+    [Min(0f)] [SerializeField] private float intervaloEntreHits = 0.055f;
+
+    private static KayaAudioManager instancia;
+    private float ultimoHitCompartilhado = float.NegativeInfinity;
+
     [Header("Furia")]
     [SerializeField] private AudioClip ativarFuria;
     [SerializeField, Range(0f, 1f)] private float volumeAtivarFuria = 0.7f;
@@ -79,6 +104,7 @@ public class KayaAudioManager : MonoBehaviour
 
     private void Awake()
     {
+        instancia = this;
         movimento = GetComponentInParent<PlayerController>();
         animatorPassos = GetComponentInChildren<Animator>(true);
         hashEstadoAndar = Animator.StringToHash(estadoAnimacaoAndar);
@@ -285,8 +311,74 @@ public class KayaAudioManager : MonoBehaviour
 
     public void TocarDano()
     {
-        TocarEfeito(receberDano, volumeDano);
+        if (somHitCompartilhado != null)
+            TocarHitGlobal(transform.position, true);
+        else
+            TocarEfeito(receberDano, volumeDano);
         RegistrarCombate();
+    }
+
+    private void TocarSomInimigo(AudioClip clip, float volume, Vector3 origem, float alcance)
+    {
+        if (morreu || clip == null || fonteEfeitos == null) return;
+        float distancia = Vector2.Distance(transform.position, origem);
+        if (distancia > Mathf.Max(1f, alcance)) return;
+        // Menor volume na borda; efeito totalmente ausente fora do alcance.
+        float atenuacao = Mathf.Lerp(1f, 0.2f, distancia / Mathf.Max(1f, alcance));
+        fonteEfeitos.PlayOneShot(clip, volume * atenuacao);
+    }
+
+    private void TocarHitGlobal(Vector3 origem, bool hitNaKaya = false)
+    {
+        if (morreu || somHitCompartilhado == null || fonteEfeitos == null) return;
+        if (Time.unscaledTime - ultimoHitCompartilhado < intervaloEntreHits) return;
+        if (!hitNaKaya && Vector2.Distance(transform.position, origem) > alcanceAudioHit) return;
+        ultimoHitCompartilhado = Time.unscaledTime;
+        float distancia = Vector2.Distance(transform.position, origem);
+        float fator = hitNaKaya ? 1f : Mathf.Lerp(1f, 0.2f,
+            Mathf.Clamp01(distancia / Mathf.Max(1f, alcanceAudioHit)));
+        fonteEfeitos.PlayOneShot(somHitCompartilhado, volumeHitCompartilhado * fator);
+        RegistrarCombate();
+    }
+
+    public static void TocarHitCompartilhado(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarHitGlobal(origem);
+    }
+
+    public static void TocarLamentus(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarSomInimigo(
+            instancia.somLamentus, instancia.volumeLamentus, origem, instancia.alcanceAudioInimigos);
+    }
+
+    public static void TocarCarnifices(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarSomInimigo(
+            instancia.somCarnifices, instancia.volumeCarnifices, origem, instancia.alcanceAudioInimigos);
+    }
+
+    public static void TocarPeste(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarSomInimigo(
+            instancia.somPeste, instancia.volumePeste, origem, instancia.alcanceAudioInimigos);
+    }
+
+    public static void TocarPesteCuspindo(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarSomInimigo(
+            instancia.somPesteCuspindo, instancia.volumePesteCuspindo, origem, instancia.alcanceAudioInimigos);
+    }
+
+    public static void TocarCorvos(Vector3 origem)
+    {
+        if (instancia != null) instancia.TocarSomInimigo(
+            instancia.somCorvos, instancia.volumeCorvos, origem, instancia.alcanceAudioInimigos);
+    }
+
+    private void OnDestroy()
+    {
+        if (instancia == this) instancia = null;
     }
 
     public void TocarAtivarFuria() => TocarEfeito(ativarFuria, volumeAtivarFuria);

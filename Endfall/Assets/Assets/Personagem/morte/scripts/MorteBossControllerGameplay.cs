@@ -521,6 +521,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
             direcao = Quaternion.Euler(0f, 0f, angulo) * direcao;
         }
 
+        if (indice == 0)
+            KayaAudioManager.TocarCorvos(origem);
         GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
         CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
         if (projetil == null) projetil = corvo.AddComponent<CorvoBossProjectile>();
@@ -610,6 +612,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         }
 
         lamentusInvocados.Add(invocado);
+        KayaAudioManager.TocarLamentus(invocado.transform.position);
     }
 
     private IEnumerator AtaqueFoiceArremessada()

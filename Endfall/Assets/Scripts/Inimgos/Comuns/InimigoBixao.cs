@@ -138,8 +138,9 @@ public class InimigoBixao : MonoBehaviour
 
     public void ReceberDano(int dano = 1)
     {
-        if (vida <= 0) return;
+        if (vida <= 0 || dano <= 0) return;
 
+        KayaAudioManager.TocarHitCompartilhado(transform.position);
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 

@@ -105,8 +105,11 @@ public class CorvoBossProjectile : MonoBehaviour
 
     public void TomarDano(int quantidadeDano = 1)
     {
-        if (quantidadeDano > 0)
+        if (quantidadeDano > 0 && !resolvido)
+        {
+            KayaAudioManager.TocarHitCompartilhado(transform.position);
             DestruirCorvo();
+        }
     }
 
     public void ReceberDano(int quantidadeDano = 1) => TomarDano(quantidadeDano);

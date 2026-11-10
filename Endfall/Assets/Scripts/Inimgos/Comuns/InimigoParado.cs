@@ -525,6 +525,8 @@ public class InimigoParado : MonoBehaviour
 
     public void TomarDano(int quantidadeDano)
     {
+        if (vidaAtual <= 0 || quantidadeDano <= 0) return;
+        KayaAudioManager.TocarHitCompartilhado(transform.position);
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 

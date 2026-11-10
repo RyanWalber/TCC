@@ -22,6 +22,14 @@ public class HealthPickup : MonoBehaviour
 
     private Vector3 posicaoVisualInicial;
     private float faseFlutuacao;
+    // Elixires gerados DURANTE a luta nunca entram no save/checkpoint.
+    private bool geradoDuranteBoss;
+
+    public void ConfigurarComoElixirDeBoss(float cura)
+    {
+        geradoDuranteBoss = true;
+        quantidadeVida = Mathf.Max(1f, cura);
+    }
 
     private void Awake()
     {
@@ -47,6 +55,8 @@ public class HealthPickup : MonoBehaviour
 
     private void Start()
     {
+        if (geradoDuranteBoss) return;
+
         if (string.IsNullOrWhiteSpace(idUnico))
         {
             // Um ID aleatorio em Start mudaria a cada partida e quebraria o save.
@@ -70,10 +80,14 @@ public class HealthPickup : MonoBehaviour
         KayaAudioManager audioKaya = vida.GetComponent<KayaAudioManager>();
         if (audioKaya != null) audioKaya.TocarElixir();
 
-        if (SaveManager.Instance != null && !string.IsNullOrWhiteSpace(idUnico))
+        if (!geradoDuranteBoss && SaveManager.Instance != null &&
+            !string.IsNullOrWhiteSpace(idUnico))
             SaveManager.Instance.RegistrarElixirVidaColetado(idUnico);
 
-        gameObject.SetActive(false);
+        if (geradoDuranteBoss)
+            Destroy(gameObject);
+        else
+            gameObject.SetActive(false);
     }
 
 #if UNITY_EDITOR
