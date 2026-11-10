@@ -216,12 +216,12 @@ public class BossVida : MonoBehaviour
         // Morte definitiva tem prioridade sobre qualquer troca de estágio.
         if (vidaAtual <= 0f)
         {
-            KayaAudioManager.TocarHitCompartilhado(transform.position);
+            AudioInimigo.NotificarVidaBoss(this, false);
             Morrer();
             return;
         }
 
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        AudioInimigo.NotificarVidaBoss(this, false);
 
         // O evento pode ativar a proteção de fase IMEDIATAMENTE.
         VidaAlterada?.Invoke(ObterPercentualVida());
@@ -371,6 +371,7 @@ public class BossVida : MonoBehaviour
         }
         AtualizarCorTransicao();
         estaMorto = true;
+        AudioInimigo.NotificarVidaBoss(this, true);
         EncerrarElixiresDaArena();
 
         // Desativa física e colisões
