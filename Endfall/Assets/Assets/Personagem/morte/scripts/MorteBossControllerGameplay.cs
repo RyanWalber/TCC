@@ -227,6 +227,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         if (projetil == null)
             projetil = corvo.AddComponent<CorvoBossProjectile>();
 
+        projetil.DefinirAudioDono(Sons);
         projetil.Configurar(
             direcao,
             velocidadeCorvo,
