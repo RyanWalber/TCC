@@ -6,6 +6,7 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
     public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
     public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
+    public void AudioAoCausarHit() => audioInimigo.TocarHitCausado(this);
 
     [Header("Referencias")]
     [SerializeField] private Transform jogador;
@@ -111,6 +112,7 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
         BarrilGuerra scriptBarril = objBarril.GetComponent<BarrilGuerra>();
         if (scriptBarril != null)
         {
+            scriptBarril.DefinirDonoAudio(this);
             scriptBarril.Lançar(posSpawn, jogador.position, velocidadeBarril);
         }
     }
