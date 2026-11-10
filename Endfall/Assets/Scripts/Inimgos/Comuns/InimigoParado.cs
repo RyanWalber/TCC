@@ -6,6 +6,9 @@ using Transform = UnityEngine.Transform;
 [DefaultExecutionOrder(10000)]
 public class InimigoParado : MonoBehaviour
 {
+    [Header("Audio deste inimigo")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -445,6 +448,7 @@ public class InimigoParado : MonoBehaviour
 
     private void Update()
     {
+        audioInimigo.Atualizar(this);
         if (player == null) return;
 
         if (!jaEmergiu && !preparandoEmergencia)
@@ -510,7 +514,9 @@ public class InimigoParado : MonoBehaviour
         PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
+            float vidaAntes = playerHealth.VidaAtual;
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (playerHealth.VidaAtual < vidaAntes) audioInimigo.TocarHitCausado(this);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
@@ -526,7 +532,7 @@ public class InimigoParado : MonoBehaviour
     public void TomarDano(int quantidadeDano)
     {
         if (vidaAtual <= 0 || quantidadeDano <= 0) return;
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        audioInimigo.TocarHitRecebido(this);
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -561,6 +567,7 @@ public class InimigoParado : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        audioInimigo.TocarMorte(this);
         Destroy(gameObject);
     }
 
