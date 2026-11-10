@@ -225,7 +225,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
         Acao acao = estadoAtual.Selecionar(indiceAtaque);
         indiceAtaque = (indiceAtaque + 1) % estadoAtual.QuantidadeComportamentos;
         atacando = true;
-        rotinaAtaque = StartCoroutine(ExecutarAcao(acao));
+        // Congela a escolha de fase durante a habilidade, mesmo que
+        // o jogador reduza a vida enquanto a horda esta sendo lancada.
+        EstadoVida faseDoAtaque = estadoAtual;
+        rotinaAtaque = StartCoroutine(ExecutarAcao(acao, faseDoAtaque));
     }
 
     private void AtualizarEstadoVida()
@@ -237,10 +240,14 @@ public class MorteBossControllerGameplay : MonoBehaviour
         if (novo == estadoAtual) return;
         estadoAtual = novo;
         indiceAtaque = 0;
+        // O Animator reflete e pode filtrar ataques por esta fase.
+        if (animator != null)
+            animator.SetInteger("FaseVida",
+                estadoAtual == alta ? 1 : estadoAtual == media ? 2 : 3);
         Debug.Log("[Morte / State] Entrou em " + estadoAtual.Nome, this);
     }
 
-    private IEnumerator ExecutarAcao(Acao acao)
+    private IEnumerator ExecutarAcao(Acao acao, EstadoVida faseDoAtaque)
     {
         // Aproximacao serve SOMENTE para posicionar antes de invocar/lançar.
         // O ataque real da investida pertence exclusivamente a Vida Baixa.
@@ -250,10 +257,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
         switch (acao)
         {
             case Acao.CorvosDiretos:
-                yield return AtaqueCorvos(false);
+                yield return AtaqueCorvos(false, faseDoAtaque);
                 break;
             case Acao.CorvosLeque:
-                yield return AtaqueCorvos(true);
+                yield return AtaqueCorvos(true, faseDoAtaque);
                 break;
             case Acao.InvocarLamentus:
                 yield return AtaqueInvocacao();
@@ -269,8 +276,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
         movimentoAtivo = false;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
-        Reproduzir("morteociosa");
-
+        // O retorno para morteociosa acontece por Has Exit Time,
+        // configurado VISUALMENTE no Animator; nao forca Animator.Play().
         atacando = false;
         rotinaAtaque = null;
         proximoAtaque = Time.time + Mathf.Max(0.1f, intervaloAtaques);
@@ -302,9 +309,12 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
         destinoX = transform.position.x + Mathf.Sign(distancia) * avancar;
         movimentoAtivo = true;
-        string animacao = Mathf.Abs(distancia) > distanciaDeteccao * 0.45f ?
-            "morteindolonge" : "morteindo";
-        Reproduzir(animacao);
+        if (animator != null)
+        {
+            animator.SetBool("AproximacaoLonga",
+                Mathf.Abs(distancia) > distanciaDeteccao * 0.45f);
+            DispararTrigger("Aproximar");
+        }
 
         float espera = 0f;
         float limite = Mathf.Max(0.2f, tempoMaximoAproximacao);
@@ -317,23 +327,27 @@ public class MorteBossControllerGameplay : MonoBehaviour
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
     }
 
-    private IEnumerator AtaqueCorvos(bool emLeque)
+    private IEnumerator AtaqueCorvos(bool emLeque, EstadoVida faseDoAtaque)
     {
-        Reproduzir("mortelançando");
+        DispararTrigger("AtaqueCorvos");
         yield return new WaitForSeconds(0.65f);
 
-        int quantidade = estadoAtual == alta ? 4 :
-            estadoAtual == media ? 6 : 10;
+        int quantidade = faseDoAtaque == alta ? 4 :
+            faseDoAtaque == media ? 6 : 10;
         // A segunda horda da fase alta espalha os mesmos 4 corvos
         // em angulos distintos: terceira habilidade sem nova animacao.
+        // Garante que ate a horda de 10 saia durante o clipe
+        // mortelancando (1.95s), sem tiros depois do fim da animacao.
+        float intervaloReal = Mathf.Min(Mathf.Max(0.05f, intervaloCorvos),
+            (DuracaoCorvos - 0.75f) / Mathf.Max(1, quantidade - 1));
         for (int i = 0; i < quantidade; i++)
         {
             LancarCorvo(i, quantidade, emLeque);
             if (i + 1 < quantidade)
-                yield return new WaitForSeconds(Mathf.Max(0.05f, intervaloCorvos));
+                yield return new WaitForSeconds(intervaloReal);
         }
 
-        float usado = 0.65f + Mathf.Max(0f, quantidade - 1) * intervaloCorvos;
+        float usado = 0.65f + Mathf.Max(0f, quantidade - 1) * intervaloReal;
         if (DuracaoCorvos > usado)
             yield return new WaitForSeconds(DuracaoCorvos - usado);
     }
@@ -370,7 +384,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private IEnumerator AtaqueInvocacao()
     {
-        Reproduzir("mortesubindo");
+        DispararTrigger("InvocarLamentus");
         float tempoSpawn = Mathf.Clamp(instanteInvocacao, 0f, DuracaoSubindo);
         if (tempoSpawn > 0f)
             yield return new WaitForSeconds(tempoSpawn);
@@ -454,7 +468,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private IEnumerator AtaqueFoiceArremessada()
     {
-        Reproduzir("mortelancandofoice");
+        DispararTrigger("LancarFoice");
         // O proprio clipe ja anima foice_0 indo e voltando.
         // Nao duplicamos o desenho nem alteramos os keyframes.
         bool acertou = false;
@@ -509,7 +523,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
     {
         // O movimento "indo" ou "indolonge" so aproxima. Somente aqui
         // a animacao indoataque habilita a hitbox com dano.
-        Reproduzir("morteindoataque");
+        DispararTrigger("Investida");
         float tempo = 0f;
         while (tempo < DuracaoAtaqueFoice)
         {
@@ -524,14 +538,21 @@ public class MorteBossControllerGameplay : MonoBehaviour
             hitboxFoice.DefinirAtiva(false);
     }
 
-    private void Reproduzir(string nome)
+    private void DispararTrigger(string nome)
     {
         if (animator == null) return;
-        int hash = Animator.StringToHash("Base Layer." + nome);
-        if (animator.HasState(0, hash))
-            animator.Play(hash, 0, 0f);
-        else
-            Debug.LogWarning("[Morte] Estado nao encontrado: " + nome, this);
+
+        // Impede triggers antigos de ficarem pendentes e ativarem outro
+        // estado apos a fase mudar. A animacao e decidida nas SETAS
+        // do Morte 1.controller, nunca pelo Animator.Play aqui.
+        string[] gatilhos = {
+            "AtaqueCorvos", "InvocarLamentus", "LancarFoice",
+            "Aproximar", "Investida"
+        };
+        foreach (string gatilho in gatilhos)
+            if (gatilho != nome) animator.ResetTrigger(gatilho);
+
+        animator.SetTrigger(nome);
     }
 
     private void AtualizarOrientacao()

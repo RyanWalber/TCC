@@ -119,11 +119,14 @@ public sealed class FinalizadorMorte : MonoBehaviour
             animatorMorte.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             animatorMorte.speed = 1f;
             animatorMorte.ResetTrigger("AtaqueCorvos");
+            animatorMorte.ResetTrigger("InvocarLamentus");
+            animatorMorte.ResetTrigger("LancarFoice");
+            animatorMorte.ResetTrigger("Aproximar");
             animatorMorte.ResetTrigger("Investida");
             animatorMorte.ResetTrigger("Morte");
             int estado = Animator.StringToHash(NomeEstado);
             if (animatorMorte.HasState(0, estado))
-                animatorMorte.Play(estado, 0, 0f);
+                animatorMorte.SetTrigger("Morte");
             else
                 Debug.LogWarning("[EndFall] Estado mortemorre nao encontrado no Animator da Morte.", this);
         }
