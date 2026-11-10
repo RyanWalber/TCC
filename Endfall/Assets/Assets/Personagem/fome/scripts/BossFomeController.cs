@@ -82,6 +82,8 @@ public class BossFomeController : MonoBehaviour
 
     private void Atacar()
     {
+        AudioInimigo som = GetComponent<AudioInimigo>();
+        if (som != null) som.TocarAtaque();
         if (flechaVisualNaMao != null)
         {
             flechaVisualNaMao.SetActive(true);
