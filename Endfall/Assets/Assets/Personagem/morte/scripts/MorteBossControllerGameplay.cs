@@ -8,8 +8,22 @@ using UnityEngine;
 /// independente da maquina visual do Animator.
 /// </summary>
 [DisallowMultipleComponent]
-public class MorteBossControllerGameplay : MonoBehaviour
+public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 {
+    [Header("Audio da Morte - independente da Kaya")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+    [SerializeField] private AudioClip somCorvos;
+    [SerializeField, Range(0f, 1f)] private float volumeCorvos = 0.7f;
+    [SerializeField] private AudioClip somInvocacaoLamentus;
+    [SerializeField, Range(0f, 1f)] private float volumeInvocacao = 0.7f;
+    [SerializeField] private AudioClip somFoice;
+    [SerializeField, Range(0f, 1f)] private float volumeFoice = 0.75f;
+    [SerializeField] private AudioClip somInvestida;
+    [SerializeField, Range(0f, 1f)] private float volumeInvestida = 0.7f;
+    public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
+    public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
+    public void AudioAoCausarHit() => audioInimigo.TocarHitCausado(this);
+
     [Header("Referencias")]
     [SerializeField] private Transform jogador;
     [SerializeField] private Animator animator;
@@ -264,6 +278,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private void Update()
     {
+        audioInimigo.Atualizar(this);
         if (vidaBoss != null && vidaBoss.EstaMorto) return;
 
         EncontrarJogador();
@@ -475,6 +490,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private IEnumerator AtaqueCorvos(bool emLeque, EstadoVida faseDoAtaque)
     {
+        audioInimigo.TocarEspecial(this, somCorvos, volumeCorvos);
         DispararTrigger("AtaqueCorvos");
         yield return new WaitForSeconds(TempoDeAnimacao(0.65f));
 
@@ -521,11 +537,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
             direcao = Quaternion.Euler(0f, 0f, angulo) * direcao;
         }
 
-        if (indice == 0)
-            KayaAudioManager.TocarCorvos(origem);
         GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
         CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
         if (projetil == null) projetil = corvo.AddComponent<CorvoBossProjectile>();
+        projetil.DefinirDonoAudio(this);
         projetil.Configurar(direcao, velocidadeCorvo, Mathf.Max(1, danoCorvo), 4f,
             GetComponentsInChildren<Collider2D>(true), true);
     }
@@ -612,7 +627,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         }
 
         lamentusInvocados.Add(invocado);
-        KayaAudioManager.TocarLamentus(invocado.transform.position);
+        audioInimigo.TocarEspecial(this, somInvocacaoLamentus, volumeInvocacao, invocado.transform.position);
     }
 
     private IEnumerator AtaqueFoiceArremessada()
@@ -626,6 +641,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         foiceTemPosicaoAnterior = false;
         tempoAnimacaoFoice = 0f;
         arremessoFoiceEmAndamento = foiceAnimada != null;
+        audioInimigo.TocarEspecial(this, somFoice, volumeFoice);
         DispararTrigger("LancarFoice");
 
         float decorrido = 0f;
@@ -715,7 +731,11 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
         PlayerHealth vidaKaya = jogador.GetComponentInParent<PlayerHealth>();
         if (vidaKaya != null)
+        {
+            float antes = vidaKaya.VidaAtual;
             vidaKaya.TomarDanoDeInimigo(danoFoiceArremessada);
+            if (vidaKaya.VidaAtual < antes) audioInimigo.TocarHitCausado(this);
+        }
         return true;
     }
 
@@ -723,6 +743,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
     {
         // O movimento "indo" ou "indolonge" so aproxima. Somente aqui
         // a animacao indoataque habilita a hitbox com dano.
+        audioInimigo.TocarEspecial(this, somInvestida, volumeInvestida);
         DispararTrigger("Investida");
         float tempo = 0f;
         float duracaoReal = TempoDeAnimacao(DuracaoAtaqueFoice);
