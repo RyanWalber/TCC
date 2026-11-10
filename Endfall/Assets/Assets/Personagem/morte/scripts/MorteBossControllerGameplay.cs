@@ -67,6 +67,14 @@ public class MorteBossControllerGameplay : MonoBehaviour
     [Range(0.2f, 1.7f)] [SerializeField] private float inicioColisaoFoice = 1.06f;
     [Range(1f, 2.15f)] [SerializeField] private float fimColisaoFoice = 1.75f;
 
+    [Header("Alcance da foice arremessada")]
+    [Tooltip("A foice so vai ate o X em que Kaya estava no inicio do ataque, depois retorna. Nao muda o clipe original.")]
+    [SerializeField] private bool limitarFoiceAteKaya = true;
+    [Tooltip("X local do inicio da fuga da foice no clip mortelancandofoice. Valor medido no clip original.")]
+    [SerializeField] private float inicioOriginalFoiceLocalX = -67.4f;
+    [Tooltip("Distancia horizontal total do arremesso original (605.7 no clip). Mantem a ida/volta suaves.")]
+    [Min(1f)] [SerializeField] private float distanciaAnimadaFoice = 605.7f;
+
     private const float DuracaoCorvos = 1.95f;
     private const float DuracaoSubindo = 1.75f;
     private const float DuracaoFoiceArremessada = 2.1667f;
@@ -79,6 +87,12 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private MorteFoiceHitbox hitboxFoice;
     private Transform foiceAnimada;
     private Collider2D colliderKaya;
+    private bool arremessoFoiceEmAndamento;
+    private bool arremessoFoiceAcertou;
+    private bool foiceTemPosicaoAnterior;
+    private float alvoXFoice;
+    private float tempoAnimacaoFoice;
+    private Vector2 foicePosicaoAnterior;
     private Coroutine rotinaAtaque;
     private readonly List<GameObject> lamentusInvocados = new List<GameObject>();
     private Vector3 escalaVisualOriginal = Vector3.one;
@@ -318,6 +332,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
         }
         atacando = false;
         movimentoAtivo = false;
+        arremessoFoiceEmAndamento = false;
+        foiceTemPosicaoAnterior = false;
         multiplicadorVelocidadeMovimento = 1f;
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
@@ -598,28 +614,78 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private IEnumerator AtaqueFoiceArremessada()
     {
+        // Alvo fixado NO INICIO: Kaya pode escapar se sair do caminho.
+        // Preserva o clip de 2.1667 segundos, mas comprime seu deslocamento
+        // horizontal quando a distancia ate Kaya for menor que a original.
+        EncontrarJogador();
+        alvoXFoice = jogador != null ? jogador.position.x : transform.position.x;
+        arremessoFoiceAcertou = false;
+        foiceTemPosicaoAnterior = false;
+        tempoAnimacaoFoice = 0f;
+        arremessoFoiceEmAndamento = foiceAnimada != null;
         DispararTrigger("LancarFoice");
-        // O proprio clipe ja anima foice_0 indo e voltando.
-        // Nao duplicamos o desenho nem alteramos os keyframes.
-        bool acertou = false;
-        float decorrido = 0f;
-        Vector2 anterior = foiceAnimada != null ?
-            (Vector2)foiceAnimada.position : (Vector2)transform.position;
 
+        float decorrido = 0f;
         while (decorrido < TempoDeAnimacao(DuracaoFoiceArremessada))
         {
             decorrido += Time.deltaTime;
-            float tempoNoClipe = decorrido * velocidadeAnimacaoAtual;
-            if (foiceAnimada != null)
-            {
-                Vector2 atual = foiceAnimada.position;
-                if (!acertou && tempoNoClipe >= inicioColisaoFoice &&
-                    tempoNoClipe <= fimColisaoFoice)
-                    acertou = VerificarHitFoiceArremessada(anterior, atual);
-                anterior = atual;
-            }
+            tempoAnimacaoFoice = decorrido * velocidadeAnimacaoAtual;
+            // O reposicionamento VISUAL e o acerto sao feitos no LateUpdate,
+            // depois que o Animator escreve os keyframes da foice.
             yield return null;
         }
+
+        arremessoFoiceEmAndamento = false;
+        foiceTemPosicaoAnterior = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (!arremessoFoiceEmAndamento || foiceAnimada == null) return;
+
+        // Nao modifica animacoes de aproximação, ataque ou morte.
+        if (animator != null &&
+            !animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.mortelancandofoice"))
+        {
+            foiceTemPosicaoAnterior = false;
+            return;
+        }
+
+        // O inicio da ida acontece em 1.0167s no clip; antes disso
+        // os bracos e a foice continuam com a preparacao original.
+        if (limitarFoiceAteKaya && tempoAnimacaoFoice >= 1.0167f &&
+            foiceAnimada.parent != null && jogador != null)
+        {
+            Transform pai = foiceAnimada.parent;
+            Vector3 local = foiceAnimada.localPosition;
+
+            // A animacao vai para X local NEGATIVO (-67.4 ate -673.1).
+            // A orientacao visual da Morte ja inverte o X para a direita
+            // quando Kaya esta daquele lado: nao precisamos duplicar clips.
+            Vector3 alvoMundo = new Vector3(alvoXFoice,
+                foiceAnimada.position.y, foiceAnimada.position.z);
+            float destinoLocalX = pai.InverseTransformPoint(alvoMundo).x;
+            float distanciaDisponivel = Mathf.Max(0f,
+                inicioOriginalFoiceLocalX - destinoLocalX);
+            float proporcao = Mathf.Clamp01(
+                distanciaDisponivel / Mathf.Max(1f, distanciaAnimadaFoice));
+
+            local.x = inicioOriginalFoiceLocalX +
+                (local.x - inicioOriginalFoiceLocalX) * proporcao;
+            foiceAnimada.localPosition = local;
+        }
+
+        // Verifica o dano pela MESMA posicao visivel, depois da limitacao.
+        // Evita atingir Kaya a partir de uma posicao invisivel mais longe.
+        Vector2 atual = foiceAnimada.position;
+        if (foiceTemPosicaoAnterior && !arremessoFoiceAcertou &&
+            tempoAnimacaoFoice >= inicioColisaoFoice &&
+            tempoAnimacaoFoice <= fimColisaoFoice)
+            arremessoFoiceAcertou =
+                VerificarHitFoiceArremessada(foicePosicaoAnterior, atual);
+
+        foicePosicaoAnterior = atual;
+        foiceTemPosicaoAnterior = true;
     }
 
     private bool VerificarHitFoiceArremessada(Vector2 anterior, Vector2 atual)
@@ -742,6 +808,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
         movimentoAtivo = false;
         emTransicaoDeEstagio = false;
         rotinaTransicao = null;
+        arremessoFoiceEmAndamento = false;
+        foiceTemPosicaoAnterior = false;
         multiplicadorVelocidadeMovimento = 1f;
         if (animator != null) animator.speed = 1f;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
