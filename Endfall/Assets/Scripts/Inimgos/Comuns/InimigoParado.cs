@@ -6,6 +6,11 @@ using Transform = UnityEngine.Transform;
 [DefaultExecutionOrder(10000)]
 public class InimigoParado : MonoBehaviour
 {
+    [Header("Audio individual (opcional no prefab)")]
+    [SerializeField] private AudioInimigo audioInimigo;
+
+    private AudioInimigo Sons => audioInimigo != null ? audioInimigo : (audioInimigo = GetComponent<AudioInimigo>());
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -511,6 +516,7 @@ public class InimigoParado : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TomarDanoDeInimigo(danoNoJogador);
+            if (Sons != null) Sons.TocarHitCausado();
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>();
@@ -525,6 +531,7 @@ public class InimigoParado : MonoBehaviour
 
     public void TomarDano(int quantidadeDano)
     {
+        if (Sons != null) Sons.TocarHitRecebido();
         vidaAtual -= quantidadeDano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -559,6 +566,7 @@ public class InimigoParado : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        if (Sons != null) Sons.TocarMorte();
         Destroy(gameObject);
     }
 
