@@ -7,6 +7,9 @@ using Transform = UnityEngine.Transform;
 [RequireComponent(typeof(Rigidbody2D))]
 public class InimigoBixel : MonoBehaviour
 {
+    [Header("Audio deste inimigo")]
+    [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public Transform pivoVisual;
     public UnityArmatureComponent armatureComponent;
@@ -81,6 +84,7 @@ public class InimigoBixel : MonoBehaviour
 
     private void FixedUpdate()
     {
+        audioInimigo.Atualizar(this);
         if (estaMorto) return;
 
         if (tempoRecargaRestante > 0f)
@@ -179,7 +183,7 @@ public class InimigoBixel : MonoBehaviour
         Virar(direcaoInvestida > 0f);
         tempoInvestidaRestante = duracaoInvestida;
         tempoRecargaRestante = recargaInvestida;
-        KayaAudioManager.TocarCarnifices(transform.position);
+        audioInimigo.TocarAtaque(this);
 
         // Detecta uma parede mesmo no PRIMEIRO passo da investida.
         if (VerificarImpactoLateralPrevisto())
@@ -317,7 +321,7 @@ public class InimigoBixel : MonoBehaviour
     {
         if (estaMorto || dano <= 0) return;
 
-        KayaAudioManager.TocarHitCompartilhado(transform.position);
+        audioInimigo.TocarHitRecebido(this);
         vida -= dano;
         StartCoroutine(PiscarVermelhoDragonBones());
 
@@ -344,6 +348,7 @@ public class InimigoBixel : MonoBehaviour
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
+        audioInimigo.TocarMorte(this);
         if (estaMorto) return;
         estaMorto = true;
 
@@ -395,7 +400,9 @@ public class InimigoBixel : MonoBehaviour
         PlayerHealth playerHealth = jogadorObj.GetComponent<PlayerHealth>() ?? jogadorObj.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
         {
+            float vidaAntes = playerHealth.VidaAtual;
             playerHealth.TomarDanoDeInimigo(danoNoPlayer);
+            if (playerHealth.VidaAtual < vidaAntes) audioInimigo.TocarHitCausado(this);
         }
 
         Rigidbody2D rbPlayer = jogadorObj.GetComponent<Rigidbody2D>() ?? jogadorObj.GetComponentInParent<Rigidbody2D>();
