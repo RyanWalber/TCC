@@ -25,7 +25,21 @@ public class MorteBossControllerGameplay : MonoBehaviour
     [Tooltip("Vida alta acima de 50%, media ate 20%, baixa abaixo de 20%.")]
     [Range(0.25f, 0.9f)] [SerializeField] private float limiteVidaAlta = 0.5f;
     [Range(0.05f, 0.4f)] [SerializeField] private float limiteVidaBaixa = 0.2f;
-    [Min(0.1f)] [SerializeField] private float intervaloAtaques = 2.4f;
+    [Header("Velocidade dos ataques - ajuste no Inspector")]
+    [Tooltip("Segundos de descanso entre ataques de cada estágio.")]
+    [Min(0.05f)] [SerializeField] private float intervaloVidaAlta = 1.35f;
+    [Min(0.05f)] [SerializeField] private float intervaloVidaMedia = 1.05f;
+    [Min(0.05f)] [SerializeField] private float intervaloVidaBaixa = 0.8f;
+    [Tooltip("1 = velocidade original. Também acelera os tempos dos eventos para acompanhar a animação.")]
+    [Range(0.6f, 3f)] [SerializeField] private float velocidadeAnimAlta = 1.15f;
+    [Range(0.6f, 3f)] [SerializeField] private float velocidadeAnimMedia = 1.30f;
+    [Range(0.6f, 3f)] [SerializeField] private float velocidadeAnimBaixa = 1.45f;
+
+    [Header("Transição dos estágios")]
+    [Tooltip("Durante este tempo a Morte para, fica preta e invulnerável.")]
+    [Min(0.2f)] [SerializeField] private float duracaoTransicaoEstagio = 1.8f;
+    [Min(0f)] [SerializeField] private float intensidadeTremorBarra = 12f;
+    [Min(1f)] [SerializeField] private float frequenciaTremorBarra = 23f;
 
     [Header("Deteccao e aproximacao")]
     [Min(1f)] [SerializeField] private float distanciaDeteccao = 500f;
@@ -75,6 +89,11 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private float proximoAtaque;
     private int indiceAtaque;
     private EstadoVida estadoAtual;
+    private Acao acaoEmExecucao;
+    private float velocidadeAnimacaoAtual = 1f;
+    private float multiplicadorVelocidadeMovimento = 1f;
+    private bool emTransicaoDeEstagio;
+    private Coroutine rotinaTransicao;
 
     private enum Acao
     {
@@ -82,7 +101,9 @@ public class MorteBossControllerGameplay : MonoBehaviour
         CorvosLeque,
         InvocarLamentus,
         LancarFoice,
-        InvestidaComGolpe
+        LancarFoiceAposAproximar,
+        InvestidaComGolpe,
+        InvestidaLongaComGolpe
     }
 
     // Padrao State propriamente dito: cada classe encapsula a politica
@@ -117,9 +138,9 @@ public class MorteBossControllerGameplay : MonoBehaviour
         {
             switch (indice % 3)
             {
-                case 0: return Acao.CorvosDiretos;    // 6 corvos
-                case 1: return Acao.InvocarLamentus;
-                default: return Acao.LancarFoice;
+                case 0: return Acao.CorvosDiretos;              // 6 corvos
+                case 1: return Acao.LancarFoice;                // arremessa parada
+                default: return Acao.LancarFoiceAposAproximar; // aproxima e arremessa
             }
         }
     }
@@ -127,15 +148,14 @@ public class MorteBossControllerGameplay : MonoBehaviour
     private sealed class VidaBaixa : EstadoVida
     {
         public override string Nome => "Vida Baixa (<=20%)";
-        public override int QuantidadeComportamentos => 4;
+        public override int QuantidadeComportamentos => 3;
         public override Acao Selecionar(int indice)
         {
-            switch (indice % 4)
+            switch (indice % 3)
             {
-                case 0: return Acao.CorvosDiretos;    // 10 corvos
-                case 1: return Acao.InvocarLamentus;
-                case 2: return Acao.LancarFoice;
-                default: return Acao.InvestidaComGolpe;
+                case 0: return Acao.CorvosDiretos;           // 10 corvos
+                case 1: return Acao.InvestidaComGolpe;       // aproxima e golpeia
+                default: return Acao.InvestidaLongaComGolpe; // aproxima mais perto e golpeia
             }
         }
     }
@@ -149,6 +169,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
         corpoFisico = GetComponent<Rigidbody2D>();
         vidaBoss = GetComponent<BossVida>();
         if (vidaBoss == null) vidaBoss = GetComponentInParent<BossVida>();
+        if (vidaBoss != null)
+            vidaBoss.VidaAlterada += AoAlterarVida;
 
         if (corpoFisico != null)
         {
@@ -194,6 +216,31 @@ public class MorteBossControllerGameplay : MonoBehaviour
         AtualizarEstadoVida();
     }
 
+    private void AoAlterarVida(float percentual)
+    {
+        // O evento vem do BossVida no mesmo frame do dano, impedindo
+        // que um segundo projétil acerte antes da invulnerabilidade.
+        if (isActiveAndEnabled && vidaBoss != null && !vidaBoss.EstaMorto)
+            AtualizarEstadoVida();
+    }
+
+    private float VelocidadeDaFase(EstadoVida fase)
+    {
+        return Mathf.Max(0.1f, fase == alta ? velocidadeAnimAlta :
+            fase == media ? velocidadeAnimMedia : velocidadeAnimBaixa);
+    }
+
+    private float IntervaloDaFase(EstadoVida fase)
+    {
+        return Mathf.Max(0.05f, fase == alta ? intervaloVidaAlta :
+            fase == media ? intervaloVidaMedia : intervaloVidaBaixa);
+    }
+
+    private float TempoDeAnimacao(float segundosDoClipe)
+    {
+        return Mathf.Max(0.001f, segundosDoClipe / velocidadeAnimacaoAtual);
+    }
+
     private void EncontrarJogador()
     {
         if (jogador != null) return;
@@ -208,9 +255,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
         EncontrarJogador();
         if (jogador == null) return;
 
-        AtualizarOrientacao();
         AtualizarEstadoVida();
+        if (emTransicaoDeEstagio) return;
 
+        AtualizarOrientacao();
         if (atacando || Time.time < proximoAtaque) return;
         if (Vector2.Distance(transform.position, jogador.position) > distanciaDeteccao)
             return;
@@ -228,6 +276,9 @@ public class MorteBossControllerGameplay : MonoBehaviour
         // Congela a escolha de fase durante a habilidade, mesmo que
         // o jogador reduza a vida enquanto a horda esta sendo lancada.
         EstadoVida faseDoAtaque = estadoAtual;
+        acaoEmExecucao = acao;
+        velocidadeAnimacaoAtual = VelocidadeDaFase(faseDoAtaque);
+        if (animator != null) animator.speed = velocidadeAnimacaoAtual;
         rotinaAtaque = StartCoroutine(ExecutarAcao(acao, faseDoAtaque));
     }
 
@@ -238,20 +289,81 @@ public class MorteBossControllerGameplay : MonoBehaviour
             percentual > limiteVidaBaixa ? media : baixa;
 
         if (novo == estadoAtual) return;
+
+        EstadoVida anterior = estadoAtual;
         estadoAtual = novo;
         indiceAtaque = 0;
-        // O Animator reflete e pode filtrar ataques por esta fase.
         if (animator != null)
             animator.SetInteger("FaseVida",
                 estadoAtual == alta ? 1 : estadoAtual == media ? 2 : 3);
+
+        // Inicialização não deve provocar transição visual.
+        if (anterior != null && !emTransicaoDeEstagio)
+        {
+            IniciarTransicaoDeEstagio();
+        }
         Debug.Log("[Morte / State] Entrou em " + estadoAtual.Nome, this);
+    }
+
+    private void IniciarTransicaoDeEstagio()
+    {
+        emTransicaoDeEstagio = true;
+
+        // Interrompe qualquer habilidade anterior (até a horda em
+        // andamento). Corvos já lançados podem continuar voando.
+        if (rotinaAtaque != null)
+        {
+            StopCoroutine(rotinaAtaque);
+            rotinaAtaque = null;
+        }
+        atacando = false;
+        movimentoAtivo = false;
+        multiplicadorVelocidadeMovimento = 1f;
+        if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
+        if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
+
+        // Invulnerabilidade aplicada IMEDIATAMENTE, antes de aguardar
+        // um frame; BossVida também colore a personagem de preto.
+        if (vidaBoss != null)
+            vidaBoss.DefinirInvulnerabilidadeDeFase(true);
+
+        if (animator != null)
+        {
+            string[] limpar = { "AtaqueCorvos", "InvocarLamentus",
+                "LancarFoice", "Aproximar", "Investida", "CancelarAtaque" };
+            foreach (string gatilho in limpar) animator.ResetTrigger(gatilho);
+            animator.SetTrigger("CancelarAtaque");
+            animator.speed = 0f; // Congela a pose; nao altera timeScale global
+        }
+
+        rotinaTransicao = StartCoroutine(TransicaoDeEstagio());
+    }
+
+    private IEnumerator TransicaoDeEstagio()
+    {
+        float duracao = Mathf.Max(0.2f, duracaoTransicaoEstagio);
+        if (vidaBoss != null)
+            yield return vidaBoss.TremerBarraVida(duracao,
+                intensidadeTremorBarra, frequenciaTremorBarra);
+        else
+            yield return new WaitForSecondsRealtime(duracao);
+
+        if (vidaBoss == null || vidaBoss.EstaMorto)
+            yield break;
+
+        if (animator != null) animator.speed = 1f;
+        vidaBoss.DefinirInvulnerabilidadeDeFase(false);
+        emTransicaoDeEstagio = false;
+        rotinaTransicao = null;
+        // Dá tempo ao Animator para retornar suavemente à pose ociosa.
+        proximoAtaque = Time.time + 0.3f;
     }
 
     private IEnumerator ExecutarAcao(Acao acao, EstadoVida faseDoAtaque)
     {
-        // Aproximacao serve SOMENTE para posicionar antes de invocar/lançar.
-        // O ataque real da investida pertence exclusivamente a Vida Baixa.
-        if (acao == Acao.InvocarLamentus || acao == Acao.LancarFoice)
+        // A aproximação comum é usada apenas antes da invocação
+        // no estágio 1; as outras fases têm variações próprias.
+        if (acao == Acao.InvocarLamentus)
             yield return AproximarDaKaya();
 
         switch (acao)
@@ -268,19 +380,30 @@ public class MorteBossControllerGameplay : MonoBehaviour
             case Acao.LancarFoice:
                 yield return AtaqueFoiceArremessada();
                 break;
+            case Acao.LancarFoiceAposAproximar:
+                yield return AproximarDaKaya();
+                yield return AtaqueFoiceArremessada();
+                break;
             case Acao.InvestidaComGolpe:
                 yield return AproximarDaKaya();
+                yield return AtaqueInvestidaFinal();
+                break;
+            case Acao.InvestidaLongaComGolpe:
+                yield return AproximarDaKaya(
+                    Mathf.Max(15f, distanciaParadaAntesDaKaya * 0.55f),
+                    1.2f, true);
                 yield return AtaqueInvestidaFinal();
                 break;
         }
 
         movimentoAtivo = false;
+        multiplicadorVelocidadeMovimento = 1f;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
-        // O retorno para morteociosa acontece por Has Exit Time,
-        // configurado VISUALMENTE no Animator; nao forca Animator.Play().
+        if (animator != null) animator.speed = 1f;
+        // O retorno para morteociosa acontece pelas setas do Animator.
         atacando = false;
         rotinaAtaque = null;
-        proximoAtaque = Time.time + Mathf.Max(0.1f, intervaloAtaques);
+        proximoAtaque = Time.time + IntervaloDaFase(estadoAtual);
     }
 
     private void FixedUpdate()
@@ -288,7 +411,8 @@ public class MorteBossControllerGameplay : MonoBehaviour
         if (!movimentoAtivo || (vidaBoss != null && vidaBoss.EstaMorto)) return;
 
         float atual = corpoFisico != null ? corpoFisico.position.x : transform.position.x;
-        float x = Mathf.MoveTowards(atual, destinoX, velocidadeInvestida * Time.fixedDeltaTime);
+        float x = Mathf.MoveTowards(atual, destinoX,
+            velocidadeInvestida * multiplicadorVelocidadeMovimento * Time.fixedDeltaTime);
         if (corpoFisico != null)
             corpoFisico.MovePosition(new Vector2(x, corpoFisico.position.y));
         else
@@ -298,39 +422,45 @@ public class MorteBossControllerGameplay : MonoBehaviour
             movimentoAtivo = false;
     }
 
-    private IEnumerator AproximarDaKaya()
+    private IEnumerator AproximarDaKaya(
+        float distanciaParada = -1f, float fatorVelocidade = 1f,
+        bool animacaoLonga = false)
     {
         EncontrarJogador();
         if (jogador == null) yield break;
 
         float distancia = jogador.position.x - transform.position.x;
-        float avancar = Mathf.Max(0f, Mathf.Abs(distancia) - distanciaParadaAntesDaKaya);
+        float parada = distanciaParada >= 0f ?
+            distanciaParada : distanciaParadaAntesDaKaya;
+        float avancar = Mathf.Max(0f, Mathf.Abs(distancia) - parada);
         if (avancar <= 1f) yield break;
 
         destinoX = transform.position.x + Mathf.Sign(distancia) * avancar;
+        multiplicadorVelocidadeMovimento = Mathf.Max(0.2f, fatorVelocidade);
         movimentoAtivo = true;
         if (animator != null)
         {
             animator.SetBool("AproximacaoLonga",
-                Mathf.Abs(distancia) > distanciaDeteccao * 0.45f);
+                animacaoLonga || Mathf.Abs(distancia) > distanciaDeteccao * 0.45f);
             DispararTrigger("Aproximar");
         }
 
         float espera = 0f;
-        float limite = Mathf.Max(0.2f, tempoMaximoAproximacao);
+        float limite = TempoDeAnimacao(Mathf.Max(0.2f, tempoMaximoAproximacao));
         while (movimentoAtivo && espera < limite)
         {
             espera += Time.deltaTime;
             yield return null;
         }
         movimentoAtivo = false;
+        multiplicadorVelocidadeMovimento = 1f;
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
     }
 
     private IEnumerator AtaqueCorvos(bool emLeque, EstadoVida faseDoAtaque)
     {
         DispararTrigger("AtaqueCorvos");
-        yield return new WaitForSeconds(0.65f);
+        yield return new WaitForSeconds(TempoDeAnimacao(0.65f));
 
         int quantidade = faseDoAtaque == alta ? 4 :
             faseDoAtaque == media ? 6 : 10;
@@ -344,12 +474,12 @@ public class MorteBossControllerGameplay : MonoBehaviour
         {
             LancarCorvo(i, quantidade, emLeque);
             if (i + 1 < quantidade)
-                yield return new WaitForSeconds(intervaloReal);
+                yield return new WaitForSeconds(TempoDeAnimacao(intervaloReal));
         }
 
         float usado = 0.65f + Mathf.Max(0f, quantidade - 1) * intervaloReal;
         if (DuracaoCorvos > usado)
-            yield return new WaitForSeconds(DuracaoCorvos - usado);
+            yield return new WaitForSeconds(TempoDeAnimacao(DuracaoCorvos - usado));
     }
 
     private void LancarCorvo(int indice, int total, bool emLeque)
@@ -387,10 +517,10 @@ public class MorteBossControllerGameplay : MonoBehaviour
         DispararTrigger("InvocarLamentus");
         float tempoSpawn = Mathf.Clamp(instanteInvocacao, 0f, DuracaoSubindo);
         if (tempoSpawn > 0f)
-            yield return new WaitForSeconds(tempoSpawn);
+            yield return new WaitForSeconds(TempoDeAnimacao(tempoSpawn));
         InvocarLamentus();
         if (DuracaoSubindo > tempoSpawn)
-            yield return new WaitForSeconds(DuracaoSubindo - tempoSpawn);
+            yield return new WaitForSeconds(TempoDeAnimacao(DuracaoSubindo - tempoSpawn));
     }
 
     private void InvocarLamentus()
@@ -476,14 +606,15 @@ public class MorteBossControllerGameplay : MonoBehaviour
         Vector2 anterior = foiceAnimada != null ?
             (Vector2)foiceAnimada.position : (Vector2)transform.position;
 
-        while (decorrido < DuracaoFoiceArremessada)
+        while (decorrido < TempoDeAnimacao(DuracaoFoiceArremessada))
         {
             decorrido += Time.deltaTime;
+            float tempoNoClipe = decorrido * velocidadeAnimacaoAtual;
             if (foiceAnimada != null)
             {
                 Vector2 atual = foiceAnimada.position;
-                if (!acertou && decorrido >= inicioColisaoFoice &&
-                    decorrido <= fimColisaoFoice)
+                if (!acertou && tempoNoClipe >= inicioColisaoFoice &&
+                    tempoNoClipe <= fimColisaoFoice)
                     acertou = VerificarHitFoiceArremessada(anterior, atual);
                 anterior = atual;
             }
@@ -525,10 +656,11 @@ public class MorteBossControllerGameplay : MonoBehaviour
         // a animacao indoataque habilita a hitbox com dano.
         DispararTrigger("Investida");
         float tempo = 0f;
-        while (tempo < DuracaoAtaqueFoice)
+        float duracaoReal = TempoDeAnimacao(DuracaoAtaqueFoice);
+        while (tempo < duracaoReal)
         {
             tempo += Time.deltaTime;
-            float progresso = tempo / DuracaoAtaqueFoice;
+            float progresso = tempo / duracaoReal;
             if (hitboxFoice != null)
                 hitboxFoice.DefinirAtiva(
                     progresso >= InicioGolpe && progresso <= FimGolpe);
@@ -547,7 +679,7 @@ public class MorteBossControllerGameplay : MonoBehaviour
         // do Morte 1.controller, nunca pelo Animator.Play aqui.
         string[] gatilhos = {
             "AtaqueCorvos", "InvocarLamentus", "LancarFoice",
-            "Aproximar", "Investida"
+            "Aproximar", "Investida", "CancelarAtaque"
         };
         foreach (string gatilho in gatilhos)
             if (gatilho != nome) animator.ResetTrigger(gatilho);
@@ -600,9 +732,18 @@ public class MorteBossControllerGameplay : MonoBehaviour
 
     private void OnDisable()
     {
+        if (vidaBoss != null)
+        {
+            vidaBoss.VidaAlterada -= AoAlterarVida;
+            vidaBoss.DefinirInvulnerabilidadeDeFase(false);
+        }
         StopAllCoroutines();
         atacando = false;
         movimentoAtivo = false;
+        emTransicaoDeEstagio = false;
+        rotinaTransicao = null;
+        multiplicadorVelocidadeMovimento = 1f;
+        if (animator != null) animator.speed = 1f;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
 
         // Nao deixa Lamentus vivos atacando Kaya na cinematica de morte.

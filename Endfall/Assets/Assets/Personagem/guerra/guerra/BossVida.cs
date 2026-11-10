@@ -25,8 +25,15 @@ public class BossVida : MonoBehaviour
     private Color[] coresOriginais;
     private Coroutine corrotinaPiscar;
     private bool estaMorto = false;
+    private bool invulneravelNaTransicao;
+    private bool vidaConfigurada;
+    private RectTransform barraTremendo;
+    private Vector2 posicaoOriginalDaBarra;
 
     public bool EstaMorto => estaMorto;
+    public bool InvulneravelNaTransicao => invulneravelNaTransicao;
+    // Usado pela Morte final para iniciar a reação no mesmo frame do dano.
+    public event System.Action<float> VidaAlterada;
 
     // Usado pela Morte final sem alterar a vida de outros chefes.
     // Chamado em Start pelo controlador e refletido na barra de HP.
@@ -35,12 +42,15 @@ public class BossVida : MonoBehaviour
         if (estaMorto) return;
         vidaMaxima = Mathf.Max(1f, valor);
         vidaAtual = vidaMaxima;
+        vidaConfigurada = true;
         AtualizarBarraUI();
     }
 
     private void Start()
     {
-        vidaAtual = vidaMaxima;
+        // Se o controlador ja definiu HP em Start, nao sobrescreve.
+        if (!vidaConfigurada)
+            vidaAtual = vidaMaxima;
 
         // Pega todos os SpriteRenderers do Boss e dos filhos
         todosSprites = GetComponentsInChildren<SpriteRenderer>();
@@ -61,22 +71,118 @@ public class BossVida : MonoBehaviour
 
     public void TomarDano(float dano)
     {
-        if (estaMorto) return;
+        if (estaMorto || invulneravelNaTransicao || dano <= 0f) return;
 
-        vidaAtual -= dano;
-        vidaAtual = Mathf.Clamp(vidaAtual, 0f, vidaMaxima);
-
+        vidaAtual = Mathf.Clamp(vidaAtual - dano, 0f, vidaMaxima);
         AtualizarBarraUI();
 
-        if (todosSprites != null && todosSprites.Length > 0)
+        // Morte definitiva tem prioridade sobre qualquer troca de estágio.
+        if (vidaAtual <= 0f)
+        {
+            Morrer();
+            return;
+        }
+
+        // O evento pode ativar a proteção de fase IMEDIATAMENTE.
+        VidaAlterada?.Invoke(ObterPercentualVida());
+
+        if (!invulneravelNaTransicao && todosSprites != null &&
+            todosSprites.Length > 0)
         {
             if (corrotinaPiscar != null) StopCoroutine(corrotinaPiscar);
             corrotinaPiscar = StartCoroutine(RotinaPiscarVermelho());
         }
+    }
 
-        if (vidaAtual <= 0f)
+    // Deixa a boss totalmente preta durante o ritual de troca de fase.
+    // Os outros chefes nunca usam esse modo; seu comportamento permanece igual.
+    public void DefinirInvulnerabilidadeDeFase(bool ativar)
+    {
+        if (estaMorto || invulneravelNaTransicao == ativar) return;
+        invulneravelNaTransicao = ativar;
+
+        // Evita o vermelho da reação ao dano competir com a cor preta.
+        if (corrotinaPiscar != null)
         {
-            Morrer();
+            StopCoroutine(corrotinaPiscar);
+            corrotinaPiscar = null;
+        }
+        AtualizarCorTransicao();
+    }
+
+    private void AtualizarCorTransicao()
+    {
+        if (todosSprites == null) return;
+        for (int i = 0; i < todosSprites.Length; i++)
+        {
+            SpriteRenderer sprite = todosSprites[i];
+            if (sprite == null) continue;
+            if (invulneravelNaTransicao)
+            {
+                // Preserva o alfa da arte original, mas zera RGB.
+                float alfa = coresOriginais != null && i < coresOriginais.Length ?
+                    coresOriginais[i].a : sprite.color.a;
+                sprite.color = new Color(0f, 0f, 0f, alfa);
+            }
+            else if (coresOriginais != null && i < coresOriginais.Length)
+                sprite.color = coresOriginais[i];
+        }
+    }
+
+    private void LateUpdate()
+    {
+        // Animator pode escrever cores nos sprites a cada frame.
+        // Aplicar depois dele garante preto total ate o tremor terminar.
+        if (invulneravelNaTransicao)
+            AtualizarCorTransicao();
+    }
+
+    // Faz somente a barra da boss oscilar, sem deslocar Camera nem jogador.
+    public IEnumerator TremerBarraVida(float duracao, float amplitude, float frequencia)
+    {
+        RectTransform alvo = conteinerBarraDeVida != null ?
+            conteinerBarraDeVida.GetComponent<RectTransform>() : null;
+        if (alvo == null && barraDeVida != null)
+            alvo = barraDeVida.GetComponent<RectTransform>();
+
+        duracao = Mathf.Max(0.05f, duracao);
+        if (alvo == null)
+        {
+            yield return new WaitForSecondsRealtime(duracao);
+            yield break;
+        }
+
+        Vector2 original = alvo.anchoredPosition;
+        barraTremendo = alvo;
+        posicaoOriginalDaBarra = original;
+        float decorrido = 0f;
+        try
+        {
+            while (decorrido < duracao && alvo != null)
+            {
+                decorrido += Time.unscaledDeltaTime;
+                float tempo = decorrido * Mathf.Max(1f, frequencia);
+                float peso = Mathf.Sin(Mathf.PI * Mathf.Clamp01(decorrido / duracao));
+                Vector2 deslocamento = new Vector2(
+                    Mathf.Sin(tempo * 2.1f), Mathf.Cos(tempo * 2.8f)) *
+                    Mathf.Max(0f, amplitude) * peso;
+                alvo.anchoredPosition = original + deslocamento;
+                yield return null;
+            }
+        }
+        finally
+        {
+            if (alvo != null) alvo.anchoredPosition = original;
+            if (barraTremendo == alvo) barraTremendo = null;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (barraTremendo != null)
+        {
+            barraTremendo.anchoredPosition = posicaoOriginalDaBarra;
+            barraTremendo = null;
         }
     }
 
@@ -116,6 +222,13 @@ public class BossVida : MonoBehaviour
     private void Morrer()
     {
         if (estaMorto) return;
+        invulneravelNaTransicao = false;
+        if (corrotinaPiscar != null)
+        {
+            StopCoroutine(corrotinaPiscar);
+            corrotinaPiscar = null;
+        }
+        AtualizarCorTransicao();
         estaMorto = true;
 
         // Desativa física e colisões

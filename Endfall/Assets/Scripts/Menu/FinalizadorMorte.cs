@@ -123,6 +123,7 @@ public sealed class FinalizadorMorte : MonoBehaviour
             animatorMorte.ResetTrigger("LancarFoice");
             animatorMorte.ResetTrigger("Aproximar");
             animatorMorte.ResetTrigger("Investida");
+            animatorMorte.ResetTrigger("CancelarAtaque");
             animatorMorte.ResetTrigger("Morte");
             int estado = Animator.StringToHash(NomeEstado);
             if (animatorMorte.HasState(0, estado))
