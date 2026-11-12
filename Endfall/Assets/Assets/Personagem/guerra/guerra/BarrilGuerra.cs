@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class BarrilGuerra : MonoBehaviour
 {
+    [Header("Audio deste barril (lancamento e explosao)")]
+    [SerializeField] private AudioInimigo audioBarril = new AudioInimigo();
+
     [Header("CONFIGURAÇÕES DA EXPLOSÃO")]
     public float dano = 25f;
     public float forcaEmpurrao = 50f;
@@ -11,8 +14,6 @@ public class BarrilGuerra : MonoBehaviour
     public string tagDoPlayer = "Player";
     public string tagDoChao = "Chao";
 
-    private BossGuerraController donoAudio;
-    public void DefinirDonoAudio(BossGuerraController dono) { donoAudio = dono; }
     private Rigidbody2D rb;
     private bool jaExplodiu = false;
     private float tempoDesdeSpawn = 0f;
@@ -21,6 +22,11 @@ public class BarrilGuerra : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
+    {
+        audioBarril.TocarInvocacao(this);
     }
 
     private void Update()
@@ -82,6 +88,7 @@ public class BarrilGuerra : MonoBehaviour
     private void Explodir()
     {
         jaExplodiu = true;
+        audioBarril.TocarMorte(this);
 
         Collider2D[] acertados = Physics2D.OverlapCircleAll(transform.position, raioExplosao);
 
@@ -93,9 +100,9 @@ public class BarrilGuerra : MonoBehaviour
                 if (hp != null)
                 {
                     float antes = hp.VidaAtual;
-                    hp.TomarDano(dano);
-                    if (hp.VidaAtual < antes && donoAudio != null)
-                        donoAudio.AudioAoCausarHit();
+                    hp.TomarDanoDeInimigo(dano);
+                    if (hp.VidaAtual < antes)
+                        audioBarril.TocarHitCausado(this, true);
                 }
 
                 Rigidbody2D rbPlayer = hit.GetComponent<Rigidbody2D>() ?? hit.GetComponentInParent<Rigidbody2D>();

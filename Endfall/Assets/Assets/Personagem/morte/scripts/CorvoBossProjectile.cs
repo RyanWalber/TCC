@@ -1,14 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Movimento e impacto do corvo lançado pela Morte. É adicionado pelo controller
-/// ao prefab Corvo em tempo de execução, então não exige mexer no prefab manualmente.
+/// Movimento e impacto do corvo lancado pela Morte.
+/// Coloque este componente no prefab Corvo para editar o audio de CADA corvo no Inspector.
 /// </summary>
 [DisallowMultipleComponent]
 public class CorvoBossProjectile : MonoBehaviour
 {
-    private MorteBossControllerGameplay donoAudio;
-    public void DefinirDonoAudio(MorteBossControllerGameplay dono) { donoAudio = dono; }
+    [Header("Audio deste corvo (configurado no prefab Corvo)")]
+    [SerializeField] private AudioInimigo audioCorvo = new AudioInimigo();
     private Rigidbody2D corpoFisico;
     private Collider2D[] collidersCorvo;
     private float tempoDeVida = 4f;
@@ -57,6 +57,8 @@ public class CorvoBossProjectile : MonoBehaviour
             }
         }
 
+        // Cada corvo dispara seu proprio audio ao ser invocado, sem usar a Morte.
+        audioCorvo.TocarInvocacao(this);
         Destroy(gameObject, tempoDeVida);
     }
 
@@ -89,7 +91,7 @@ public class CorvoBossProjectile : MonoBehaviour
             {
                 float antes = hp.VidaAtual;
                 hp.TomarDanoDeInimigo(dano);
-                if (hp.VidaAtual < antes && donoAudio != null) donoAudio.AudioAoCausarHit();
+                if (hp.VidaAtual < antes) audioCorvo.TocarHitCausado(this, true);
             }
 
             DestruirCorvo();
@@ -113,7 +115,8 @@ public class CorvoBossProjectile : MonoBehaviour
     {
         if (quantidadeDano > 0 && !resolvido)
         {
-            if (donoAudio != null) donoAudio.AudioAoReceberHit();
+            audioCorvo.TocarHitRecebido(this, true);
+            audioCorvo.TocarMorte(this);
             DestruirCorvo();
         }
     }

@@ -39,6 +39,8 @@ public class InimigoBixao : MonoBehaviour
 
     private void Start()
     {
+        // O som de aparicao pertence a este inimigo, se configurado no prefab.
+        audioInimigo.TocarInvocacao(this);
         escalaOriginal = transform.localScale;
 
         if (player == null)

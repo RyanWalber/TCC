@@ -112,7 +112,6 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
         BarrilGuerra scriptBarril = objBarril.GetComponent<BarrilGuerra>();
         if (scriptBarril != null)
         {
-            scriptBarril.DefinirDonoAudio(this);
             scriptBarril.Lançar(posSpawn, jogador.position, velocidadeBarril);
         }
     }

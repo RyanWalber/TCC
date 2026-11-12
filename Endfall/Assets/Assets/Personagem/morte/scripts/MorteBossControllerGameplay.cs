@@ -12,10 +12,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 {
     [Header("Audio da Morte - independente da Kaya")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
-    [SerializeField] private AudioClip somCorvos;
-    [SerializeField, Range(0f, 1f)] private float volumeCorvos = 0.7f;
-    [SerializeField] private AudioClip somInvocacaoLamentus;
-    [SerializeField, Range(0f, 1f)] private float volumeInvocacao = 0.7f;
     [SerializeField] private AudioClip somFoice;
     [SerializeField, Range(0f, 1f)] private float volumeFoice = 0.75f;
     [SerializeField] private AudioClip somInvestida;
@@ -490,7 +486,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
     private IEnumerator AtaqueCorvos(bool emLeque, EstadoVida faseDoAtaque)
     {
-        audioInimigo.TocarEspecial(this, somCorvos, volumeCorvos);
         DispararTrigger("AtaqueCorvos");
         yield return new WaitForSeconds(TempoDeAnimacao(0.65f));
 
@@ -540,7 +535,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         GameObject corvo = Instantiate(prefabCorvo, origem, Quaternion.identity);
         CorvoBossProjectile projetil = corvo.GetComponent<CorvoBossProjectile>();
         if (projetil == null) projetil = corvo.AddComponent<CorvoBossProjectile>();
-        projetil.DefinirDonoAudio(this);
         projetil.Configurar(direcao, velocidadeCorvo, Mathf.Max(1, danoCorvo), 4f,
             GetComponentsInChildren<Collider2D>(true), true);
     }
@@ -627,7 +621,11 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         }
 
         lamentusInvocados.Add(invocado);
-        audioInimigo.TocarEspecial(this, somInvocacaoLamentus, volumeInvocacao, invocado.transform.position);
+        // O audio de invocacao e configurado no proprio prefab Lamentus.
+        // InimigoParado toca o seu som ao surgir; outros inimigos comuns
+        // tocam o som de aparicao no proprio Start.
+        InimigoParado audioDoInvocado = invocado.GetComponent<InimigoParado>();
+        if (audioDoInvocado != null) audioDoInvocado.TocarAoSerInvocado();
     }
 
     private IEnumerator AtaqueFoiceArremessada()

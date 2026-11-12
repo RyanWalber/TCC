@@ -40,6 +40,8 @@ public class InimigoBixinho : MonoBehaviour
 
     private void Start()
     {
+        // O som de aparicao pertence a este inimigo, se configurado no prefab.
+        audioInimigo.TocarInvocacao(this);
         vidaAtual = vidaMaxima;
 
         // Pega o componente DragonBones automaticamente caso não esteja arrastado no Inspector

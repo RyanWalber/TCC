@@ -85,6 +85,16 @@ public class InimigoParado : MonoBehaviour
     private Vector3 posicaoOculta;
     private Vector3 posicaoExposta;
     private bool jaEmergiu = false;
+    private bool audioDeSurgimentoTocado;
+
+    // Pode ser chamado pelo chefe que invocou; o som e do inimigo, nao do chefe.
+    public void TocarAoSerInvocado()
+    {
+        if (audioDeSurgimentoTocado) return;
+        audioDeSurgimentoTocado = true;
+        audioInimigo.TocarInvocacao(this);
+    }
+
 
     private void Start()
     {
@@ -400,6 +410,7 @@ public class InimigoParado : MonoBehaviour
     private IEnumerator AvisarEEmergir()
     {
         preparandoEmergencia = true;
+        TocarAoSerInvocado();
 
         if (efeitoPoeira == null)
             PrepararEfeitoPoeira();

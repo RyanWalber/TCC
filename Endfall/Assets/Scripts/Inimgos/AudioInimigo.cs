@@ -15,6 +15,11 @@ public sealed class AudioInimigo
     [SerializeField] private AudioClip somProprio;
     [SerializeField] private AudioClip somAtaque;
 
+    [Header("Ao aparecer / ser invocado (som deste personagem)")]
+    [SerializeField] private AudioClip somInvocacao;
+    [SerializeField, Range(0f, 1f)] private float volumeInvocacao = 0.65f;
+    [SerializeField, Range(0f, 0.25f)] private float variacaoPitchInvocacao = 0.08f;
+
     [Header("Volume de cada tipo")]
     [SerializeField, Range(0f, 1f)] private float volumeHitCausado = 0.75f;
     [SerializeField, Range(0f, 1f)] private float volumeHitRecebido = 0.75f;
@@ -74,6 +79,36 @@ public sealed class AudioInimigo
         return true;
     }
 
+    // Uma fonte TEMPORARIA por invocacao. O som pertence a este personagem,
+    // continua mesmo que o projetil seja destruido e permite varios corvos simultaneos.
+    private bool TocarIndependente(Component emissor, AudioClip clip, float volume,
+        bool variarPitch = false)
+    {
+        if (emissor == null || clip == null || morreu) return false;
+        Vector3 origem = emissor.transform.position;
+        if (!EmAlcance(origem)) return false;
+
+        float distancia = Vector2.Distance(origem, kaya.position);
+        float fator = Mathf.Lerp(1f, 0.2f,
+            Mathf.Clamp01(distancia / Mathf.Max(1f, alcance)));
+
+        GameObject temporario = new GameObject("Audio - " + emissor.gameObject.name);
+        temporario.transform.position = origem;
+        AudioSource saida = temporario.AddComponent<AudioSource>();
+        saida.playOnAwake = false;
+        saida.spatialBlend = 0f;
+        saida.pitch = variarPitch
+            ? UnityEngine.Random.Range(1f - variacaoPitchInvocacao,
+                                       1f + variacaoPitchInvocacao)
+            : 1f;
+        saida.PlayOneShot(clip, Mathf.Clamp01(volume) * fator);
+        UnityEngine.Object.Destroy(temporario, clip.length / Mathf.Max(0.1f, saida.pitch) + 0.2f);
+        return true;
+    }
+
+    public void TocarInvocacao(Component emissor) =>
+        TocarIndependente(emissor, somInvocacao, volumeInvocacao, true);
+
     public void Atualizar(Component emissor)
     {
         if (morreu || somProprio == null || intervaloSomProprio <= 0f ||
@@ -91,18 +126,22 @@ public sealed class AudioInimigo
     public void TocarAtaque(Component emissor) =>
         Tocar(emissor, somAtaque, volumeAtaque);
 
-    public void TocarHitCausado(Component emissor)
+    public void TocarHitCausado(Component emissor, bool continuarAposDestruir = false)
     {
         if (Time.unscaledTime - ultimoHitCausado < intervaloHits) return;
-        if (Tocar(emissor, hitCausado, volumeHitCausado))
-            ultimoHitCausado = Time.unscaledTime;
+        bool tocou = continuarAposDestruir
+            ? TocarIndependente(emissor, hitCausado, volumeHitCausado)
+            : Tocar(emissor, hitCausado, volumeHitCausado);
+        if (tocou) ultimoHitCausado = Time.unscaledTime;
     }
 
-    public void TocarHitRecebido(Component emissor)
+    public void TocarHitRecebido(Component emissor, bool continuarAposDestruir = false)
     {
         if (Time.unscaledTime - ultimoHitRecebido < intervaloHits) return;
-        if (Tocar(emissor, hitRecebido, volumeHitRecebido))
-            ultimoHitRecebido = Time.unscaledTime;
+        bool tocou = continuarAposDestruir
+            ? TocarIndependente(emissor, hitRecebido, volumeHitRecebido)
+            : Tocar(emissor, hitRecebido, volumeHitRecebido);
+        if (tocou) ultimoHitRecebido = Time.unscaledTime;
     }
 
     // Sons exclusivos: cuspida da Peste, corvos e foice da Morte, etc.

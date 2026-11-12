@@ -60,6 +60,8 @@ public class InimigoBixel : MonoBehaviour
 
     private void Start()
     {
+        // O som de aparicao pertence a este inimigo, se configurado no prefab.
+        audioInimigo.TocarInvocacao(this);
         posicaoInicial = transform.position;
         rb = GetComponent<Rigidbody2D>();
         colisorBixel = GetComponent<Collider2D>();

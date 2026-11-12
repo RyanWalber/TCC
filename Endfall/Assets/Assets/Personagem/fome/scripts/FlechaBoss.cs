@@ -2,12 +2,15 @@ using UnityEngine;
 
 public class FlechaBoss : MonoBehaviour
 {
-    [Header("Configurações da Flecha")]
+    [Header("Audio desta flecha")]
+    [SerializeField] private AudioInimigo audioFlecha = new AudioInimigo();
+
+    [Header("ConfiguraÃ§Ãµes da Flecha")]
     [SerializeField] private float velocidade = 12f;
-    [SerializeField] private float dano = 20f; // <--- Esta variável vai criar o campo no Inspector
+    [SerializeField] private float dano = 20f; // <--- Esta variÃ¡vel vai criar o campo no Inspector
     [SerializeField] private float tempoVida = 5f;
 
-    [Header("Ajuste de Rotação")]
+    [Header("Ajuste de RotaÃ§Ã£o")]
     [Tooltip("Ajuste esse valor se a flecha sair torta. Teste com -90, 90 ou 180 dependendo de como o sprite foi desenhado.")]
     [SerializeField] private float offsetAngulo = -90f;
 
@@ -20,6 +23,7 @@ public class FlechaBoss : MonoBehaviour
 
     private void Start()
     {
+        audioFlecha.TocarInvocacao(this);
         Destroy(gameObject, tempoVida);
     }
 
@@ -30,10 +34,10 @@ public class FlechaBoss : MonoBehaviour
             rb.linearVelocity = direcao.normalized * velocidade;
         }
 
-        // Calcula o ângulo em direção ao jogador
+        // Calcula o Ã¢ngulo em direÃ§Ã£o ao jogador
         float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
 
-        // Aplica a rotação corrigida pelo offset do sprite
+        // Aplica a rotaÃ§Ã£o corrigida pelo offset do sprite
         transform.rotation = Quaternion.Euler(0, 0, angulo + offsetAngulo);
     }
 
@@ -41,9 +45,14 @@ public class FlechaBoss : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            if (collision.TryGetComponent<PlayerHealth>(out PlayerHealth playerHealth))
+            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
+            if (playerHealth == null) playerHealth = collision.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null)
             {
-                playerHealth.TomarDano(dano); // Aplica o valor de dano configurado
+                float vidaAnterior = playerHealth.VidaAtual;
+                playerHealth.TomarDanoDeInimigo(dano);
+                if (playerHealth.VidaAtual < vidaAnterior)
+                    audioFlecha.TocarHitCausado(this, true);
             }
             Destroy(gameObject);
         }

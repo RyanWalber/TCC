@@ -158,6 +158,7 @@ GameObject:
   - component: {fileID: 5973177334664114051}
   - component: {fileID: 3838563036114776631}
   - component: {fileID: 1326334294061604474}
+  - component: {fileID: 881001926673352991}
   m_Layer: 0
   m_Name: Corvo
   m_TagString: Inimigo
@@ -561,3 +562,33 @@ MonoBehaviour:
   m_AlwaysUpdate: 1
   m_AutoRebind: 0
   m_BoundsMode: 0
+
+--- !u!114 &881001926673352991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2607479918619878126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca3ef43b42054c3eb1d4ba99f51c8e23, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CorvoBossProjectile
+  audioCorvo:
+    hitCausado: {fileID: 0}
+    hitRecebido: {fileID: 0}
+    morte: {fileID: 0}
+    somProprio: {fileID: 0}
+    somAtaque: {fileID: 0}
+    somInvocacao: {fileID: 8300000, guid: fbed2e145f88e574c8eb6b74e063889, type: 3}
+    volumeInvocacao: 0.3
+    variacaoPitchInvocacao: 0.08
+    volumeHitCausado: 0.75
+    volumeHitRecebido: 0.75
+    volumeMorte: 0.8
+    volumeProprio: 0.7
+    volumeAtaque: 0.7
+    alcance: 650
+    intervaloHits: 0.055
+    intervaloSomProprio: 8

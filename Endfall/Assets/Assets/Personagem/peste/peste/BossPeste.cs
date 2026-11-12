@@ -7,8 +7,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
 {
     [Header("Audio da Peste")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
-    [SerializeField] private AudioClip somCuspida;
-    [SerializeField, Range(0f, 1f)] private float volumeCuspida = 0.7f;
 
     public void AudioAoReceberHit() => audioInimigo.TocarHitRecebido(this);
     public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
@@ -149,7 +147,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         if (prefabGosma != null && pontoBoca != null)
         {
             Instantiate(prefabGosma, pontoBoca.position, prefabGosma.transform.rotation);
-            audioInimigo.TocarEspecial(this, somCuspida, volumeCuspida, pontoBoca.position);
         }
     }
 
