@@ -22756,6 +22756,9 @@ MonoBehaviour:
     morte: {fileID: 0}
     somProprio: {fileID: 0}
     somAtaque: {fileID: 0}
+    somInvocacao: {fileID: 0}
+    volumeInvocacao: 0.65
+    variacaoPitchInvocacao: 0.08
     volumeHitCausado: 0.75
     volumeHitRecebido: 0.75
     volumeMorte: 0.8
@@ -22764,10 +22767,6 @@ MonoBehaviour:
     alcance: 350
     intervaloHits: 0.055
     intervaloSomProprio: 8
-  somCorvos: {fileID: 8300000, guid: fbed2e145f88e574c8eb6b74e063889f, type: 3}
-  volumeCorvos: 0.7
-  somInvocacaoLamentus: {fileID: 0}
-  volumeInvocacao: 0.7
   somFoice: {fileID: 0}
   volumeFoice: 0.75
   somInvestida: {fileID: 8300000, guid: ea3e18728f0979349ad475280ac99540, type: 3}
@@ -260831,7 +260830,7 @@ MonoBehaviour:
   conteinerBarraDeVida: {fileID: 421269861}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   duracaoPiscar: 0.15
-  prefabElixirArena: {fileID: 0}
+  prefabElixirArena: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
   distanciaAtivacaoElixires: 350
   atrasoPrimeiroElixir: 7
   intervaloSpawnElixires: 18
