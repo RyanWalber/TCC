@@ -256,8 +256,16 @@ MonoBehaviour:
   fonteRespiracaoNormal: {fileID: 0}
   fonteRespiracaoCansada: {fileID: 0}
   fonteAmbiente: {fileID: 0}
+  fonteMusicaCombate: {fileID: 0}
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 1
+  musicaCombate: {fileID: 0}
+  volumeMusicaCombate: 0.6
+  raioDeteccaoCombate: 220
+  intervaloVerificacaoCombate: 0.35
+  duracaoTransicaoMusicas: 2
+  proporcaoAmbienteNoCombate: 0
+  atrasoRetornoAmbiente: 1
   passos: {fileID: 8300000, guid: 60274b222f5ec194a8f8e59e2a0710af, type: 3}
   variacoesPassos:
   - {fileID: 8300000, guid: 93c4d00141e5231439f7d89e9d049841, type: 3}

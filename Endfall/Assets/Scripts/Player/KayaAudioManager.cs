@@ -10,11 +10,26 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField] private AudioSource fonteRespiracaoNormal;
     [SerializeField] private AudioSource fonteRespiracaoCansada;
     [SerializeField] private AudioSource fonteAmbiente;
+    [SerializeField] private AudioSource fonteMusicaCombate;
 
     [Header("Ambiente da fase (loop 2D)")]
     [Tooltip("Vento ou som de fundo da fase. Deixe vazio para explorar em silencio.")]
     [SerializeField] private AudioClip somAmbiente;
     [SerializeField, Range(0f, 1f)] private float volumeAmbiente = 0.25f;
+
+    [Header("Musica de combate (crossfade com ambiente)")]
+    [Tooltip("Arraste aqui a faixa de rock de combate (2.wav).")]
+    [SerializeField] private AudioClip musicaCombate;
+    [SerializeField, Range(0f, 1f)] private float volumeMusicaCombate = 0.6f;
+    [Tooltip("Inicia combate quando inimigo vivo chega a esta distancia da Kaya.")]
+    [SerializeField, Min(1f)] private float raioDeteccaoCombate = 220f;
+    [SerializeField, Min(0.1f)] private float intervaloVerificacaoCombate = 0.35f;
+    [Tooltip("Tempo, em segundos, para troca suave nos dois sentidos.")]
+    [SerializeField, Min(0.1f)] private float duracaoTransicaoMusicas = 2f;
+    [Tooltip("Quanto do ambiente fica tocando durante o combate (0 = apenas rock).")]
+    [SerializeField, Range(0f, 1f)] private float proporcaoAmbienteNoCombate = 0f;
+    [Tooltip("Evita alternancia rapida entre trilhas ao passar na borda da distancia.")]
+    [SerializeField, Min(0f)] private float atrasoRetornoAmbiente = 1f;
 
     [Header("Movimentacao")]
     [Tooltip("Passo unico (usado quando nao ha variacoes preenchidas).")]
@@ -69,6 +84,9 @@ public class KayaAudioManager : MonoBehaviour
     private int indiceVariacaoPasso;
     private float ultimoEventoCombate = float.NegativeInfinity;
     private float misturaCansaco;
+    private float misturaCombate;
+    private float proximaBuscaDeInimigos;
+    private float ultimoInstanteInimigoPerto = float.NegativeInfinity;
     private bool morreu;
 
     private void Awake()
@@ -105,6 +123,16 @@ public class KayaAudioManager : MonoBehaviour
             fonteAmbiente == fonteRespiracaoCansada)
             fonteAmbiente = CriarFonte("Audio - Ambiente da Fase");
 
+        // Fontes independentes para as duas musicas. Nenhuma reutiliza tiro,
+        // passos, respiracao ou efeitos.
+        if (fonteMusicaCombate == null ||
+            fonteMusicaCombate == fonteEfeitos ||
+            fonteMusicaCombate == fontePassos ||
+            fonteMusicaCombate == fonteRespiracaoNormal ||
+            fonteMusicaCombate == fonteRespiracaoCansada ||
+            fonteMusicaCombate == fonteAmbiente)
+            fonteMusicaCombate = CriarFonte("Audio - Musica de Combate");
+
         // Compatibilidade com os clips que ja foram arrastados para os AudioSources.
         if (tiro == null && fonteEfeitos.clip != null) tiro = fonteEfeitos.clip;
         if (respiracaoNormal == null && fonteRespiracaoNormal.clip != null)
@@ -115,14 +143,33 @@ public class KayaAudioManager : MonoBehaviour
         ConfigurarFonte(fonteRespiracaoNormal, true);
         ConfigurarFonte(fonteRespiracaoCansada, true);
         ConfigurarFonte(fonteAmbiente, true);
+        ConfigurarFonte(fonteMusicaCombate, true);
 
         // So as fontes de respiracao tocam continuamente.
         fonteEfeitos.Stop();
         fontePassos.Stop();
         IniciarRespiracao(fonteRespiracaoNormal, respiracaoNormal, volumeRespiracaoNormal);
         IniciarRespiracao(fonteRespiracaoCansada, respiracaoCansada, 0f);
-        // Um loop independente para vento/ambiencia, sem piano nem musica obrigatoria.
-        IniciarRespiracao(fonteAmbiente, somAmbiente, volumeAmbiente);
+        // Ambos os loops iniciam juntos no relogio DSP, para manter o mesmo
+        // ponto musical mesmo enquanto um deles estiver com volume zero.
+        // Essa sincronia e especialmente util se 1.wav e 2.wav tem a mesma duracao.
+        fonteAmbiente.Stop();
+        fonteMusicaCombate.Stop();
+        fonteAmbiente.clip = somAmbiente;
+        fonteAmbiente.volume = volumeAmbiente;
+        fonteMusicaCombate.clip = musicaCombate;
+        fonteMusicaCombate.volume = 0f;
+        if (somAmbiente != null && musicaCombate != null)
+        {
+            double inicioSincronizado = AudioSettings.dspTime + 0.1d;
+            fonteAmbiente.PlayScheduled(inicioSincronizado);
+            fonteMusicaCombate.PlayScheduled(inicioSincronizado);
+        }
+        else
+        {
+            if (somAmbiente != null) fonteAmbiente.Play();
+            if (musicaCombate != null) fonteMusicaCombate.Play();
+        }
     }
 
     private AudioSource CriarFonte(string nome)
@@ -154,6 +201,7 @@ public class KayaAudioManager : MonoBehaviour
         if (morreu) return;
 
         AtualizarRespiracao();
+        AtualizarTransicaoMusicas();
     }
 
     // O Animator atualiza sua pose antes do LateUpdate.
@@ -225,6 +273,79 @@ public class KayaAudioManager : MonoBehaviour
             fontePassos.PlayOneShot(clip, volumePassos);
     }
 
+    private bool ExisteAmeacaProxima()
+    {
+        // Collider do proprio inimigo; nao confunde paredes e plataformas
+        // com inimigos. A musica nao dispara por tiros sem inimigos.
+        Collider2D[] proximos = Physics2D.OverlapCircleAll(
+            transform.position, Mathf.Max(1f, raioDeteccaoCombate));
+        foreach (Collider2D colisao in proximos)
+        {
+            if (colisao == null || !colisao.gameObject.activeInHierarchy ||
+                colisao.transform.root == transform.root) continue;
+
+            BossVida vidaBoss = colisao.GetComponentInParent<BossVida>();
+            if (vidaBoss != null && vidaBoss.EstaMorto) continue;
+            VidaBossGuerra vidaGuerra = colisao.GetComponentInParent<VidaBossGuerra>();
+            if (vidaGuerra != null && vidaGuerra.GetVidaAtual() <= 0f) continue;
+
+            InimigoBixel bixel = colisao.GetComponentInParent<InimigoBixel>();
+            if (bixel != null && bixel.isActiveAndEnabled) return true;
+
+            InimigoBixinho bixinho = colisao.GetComponentInParent<InimigoBixinho>();
+            if (bixinho != null && bixinho.isActiveAndEnabled) return true;
+
+            InimigoBixao bixao = colisao.GetComponentInParent<InimigoBixao>();
+            if (bixao != null && bixao.isActiveAndEnabled) return true;
+
+            InimigoParado parado = colisao.GetComponentInParent<InimigoParado>();
+            if (parado != null && parado.isActiveAndEnabled) return true;
+
+            BossFomeController fome = colisao.GetComponentInParent<BossFomeController>();
+            if (fome != null && fome.isActiveAndEnabled) return true;
+
+            BossPeste peste = colisao.GetComponentInParent<BossPeste>();
+            if (peste != null && peste.isActiveAndEnabled) return true;
+
+            BossGuerraController guerra = colisao.GetComponentInParent<BossGuerraController>();
+            if (guerra != null && guerra.isActiveAndEnabled) return true;
+
+            MorteBossControllerGameplay bossMorte =
+                colisao.GetComponentInParent<MorteBossControllerGameplay>();
+            if (bossMorte != null && bossMorte.isActiveAndEnabled) return true;
+
+            CorvoBossProjectile corvo = colisao.GetComponentInParent<CorvoBossProjectile>();
+            if (corvo != null && corvo.isActiveAndEnabled) return true;
+        }
+        return false;
+    }
+
+    private void AtualizarTransicaoMusicas()
+    {
+        if (fonteAmbiente == null || fonteMusicaCombate == null) return;
+
+        if (Time.time >= proximaBuscaDeInimigos)
+        {
+            proximaBuscaDeInimigos = Time.time +
+                Mathf.Max(0.1f, intervaloVerificacaoCombate);
+            if (musicaCombate != null && ExisteAmeacaProxima())
+                ultimoInstanteInimigoPerto = Time.time;
+        }
+
+        bool emCombate = musicaCombate != null &&
+            Time.time - ultimoInstanteInimigoPerto <= atrasoRetornoAmbiente;
+
+        misturaCombate = Mathf.MoveTowards(misturaCombate,
+            emCombate ? 1f : 0f,
+            Time.deltaTime / Mathf.Max(0.1f, duracaoTransicaoMusicas));
+        float crossfade = Mathf.SmoothStep(0f, 1f, misturaCombate);
+
+        // Quando um sobe, o outro desce. Na volta acontece o inverso.
+        fonteAmbiente.volume = volumeAmbiente *
+            Mathf.Lerp(1f, proporcaoAmbienteNoCombate, crossfade);
+        fonteMusicaCombate.volume = volumeMusicaCombate * crossfade;
+    }
+
     private void AtualizarRespiracao()
     {
         float tempoDesdeCombate = Time.time - ultimoEventoCombate;
@@ -294,6 +415,7 @@ public class KayaAudioManager : MonoBehaviour
         fonteRespiracaoNormal.Stop();
         fonteRespiracaoCansada.Stop();
         fontePassos.Stop();
+        if (fonteMusicaCombate != null) fonteMusicaCombate.Stop();
 
         // A cena pode recarregar imediatamente depois da morte.
         // Um objeto temporario conserva o som durante o renascimento.
