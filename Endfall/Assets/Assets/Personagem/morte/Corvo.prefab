@@ -582,7 +582,7 @@ MonoBehaviour:
     somProprio: {fileID: 0}
     somAtaque: {fileID: 0}
     somInvocacao: {fileID: 8300000, guid: fbed2e145f88e574c8eb6b74e063889, type: 3}
-    volumeInvocacao: 0.3
+    volumeInvocacao: 0.85
     variacaoPitchInvocacao: 0.08
     volumeHitCausado: 0.75
     volumeHitRecebido: 0.75

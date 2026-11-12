@@ -23,6 +23,14 @@ public class CorvoBossProjectile : MonoBehaviour
         escalaOriginal = transform.localScale;
     }
 
+    private void Start()
+    {
+        // Iniciar apos o Instantiate/Configurar. Cada instancia do prefab
+        // tem seu proprio clip e reproduz UMA vez, sem depender da boss Morte.
+        if (audioCorvo == null || !audioCorvo.TocarInvocacao(this, true))
+            Debug.LogWarning("[Corvo] Som de invocacao nao reproduzido. Confira Som Invocacao no prefab Corvo.", this);
+    }
+
     public void Configurar(Vector2 direcao, float velocidade, int danoCausado, float duracao,
                            Collider2D[] collidersDono, bool arteOriginalOlhaEsquerda)
     {
@@ -57,8 +65,6 @@ public class CorvoBossProjectile : MonoBehaviour
             }
         }
 
-        // Cada corvo dispara seu proprio audio ao ser invocado, sem usar a Morte.
-        audioCorvo.TocarInvocacao(this);
         Destroy(gameObject, tempoDeVida);
     }
 

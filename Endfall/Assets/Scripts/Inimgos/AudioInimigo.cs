@@ -82,15 +82,21 @@ public sealed class AudioInimigo
     // Uma fonte TEMPORARIA por invocacao. O som pertence a este personagem,
     // continua mesmo que o projetil seja destruido e permite varios corvos simultaneos.
     private bool TocarIndependente(Component emissor, AudioClip clip, float volume,
-        bool variarPitch = false)
+        bool variarPitch = false, bool ignorarAlcance = false)
     {
         if (emissor == null || clip == null || morreu) return false;
         Vector3 origem = emissor.transform.position;
-        if (!EmAlcance(origem)) return false;
+        if (!ignorarAlcance && !EmAlcance(origem)) return false;
 
-        float distancia = Vector2.Distance(origem, kaya.position);
-        float fator = Mathf.Lerp(1f, 0.2f,
-            Mathf.Clamp01(distancia / Mathf.Max(1f, alcance)));
+        // Sons de invocados (ex.: corvos) sao 2D, audiveis por instancia
+        // e nao devem perder volume por estarem distantes da Kaya.
+        float fator = 1f;
+        if (!ignorarAlcance)
+        {
+            float distancia = Vector2.Distance(origem, kaya.position);
+            fator = Mathf.Lerp(1f, 0.2f,
+                Mathf.Clamp01(distancia / Mathf.Max(1f, alcance)));
+        }
 
         GameObject temporario = new GameObject("Audio - " + emissor.gameObject.name);
         temporario.transform.position = origem;
@@ -106,8 +112,8 @@ public sealed class AudioInimigo
         return true;
     }
 
-    public void TocarInvocacao(Component emissor) =>
-        TocarIndependente(emissor, somInvocacao, volumeInvocacao, true);
+    public bool TocarInvocacao(Component emissor, bool ignorarAlcance = false) =>
+        TocarIndependente(emissor, somInvocacao, volumeInvocacao, true, ignorarAlcance);
 
     public void Atualizar(Component emissor)
     {
