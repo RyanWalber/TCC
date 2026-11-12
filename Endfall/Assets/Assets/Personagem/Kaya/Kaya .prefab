@@ -232,11 +232,11 @@ MonoBehaviour:
   tempoInvencivel: 0.8
   animatorKaya: {fileID: 0}
   duracaoMorteFallback: 2.5
-  visualKaya: {fileID: 0}
+  visualKaya: {fileID: 5253500606166841097}
   travarPosicaoHorizontalNaMorte: 1
   fixarPesDuranteMorte: 1
-  peMorte1: {fileID: 0}
-  peMorte2: {fileID: 0}
+  peMorte1: {fileID: 7862312062342338178}
+  peMorte2: {fileID: 8689483676223425136}
   fixarAlturaDosPes: 1
   respeitarDirecaoAoMorrer: 1
 --- !u!114 &5637321679780660970
@@ -251,13 +251,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c197e8640b0baa64a9b9e8730a13f6f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KayaAudioManager
-  fonteMusicaCombate: {fileID: 0}
-  musicaCombate: {fileID: 0}
-  volumeMusicaCombate: 0.6
-  raioDeteccaoCombate: 220
-  intervaloVerificacaoCombate: 0.35
-  duracaoTransicaoMusicas: 2
-  proporcaoAmbienteNoCombate: 0
   fonteEfeitos: {fileID: 0}
   fontePassos: {fileID: 0}
   fonteRespiracaoNormal: {fileID: 0}
@@ -274,15 +267,15 @@ MonoBehaviour:
   estadoAnimacaoAndar: kayandando
   fasePrimeiraPisada: 0.15
   faseSegundaPisada: 0.65
-  pulo: {fileID: 0}
-  volumePulo: 0.65
+  pulo: {fileID: 8300000, guid: 6f71b6e20715a5a4295e024329ac679b, type: 3}
+  volumePulo: 0.4
   aterrissagem: {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
-  volumeAterrissagem: 0.113
-  dash: {fileID: 0}
+  volumeAterrissagem: 0.4
+  dash: {fileID: 8300000, guid: ea3e18728f0979349ad475280ac99540, type: 3}
   volumeDash: 0.65
-  tiro: {fileID: 0}
+  tiro: {fileID: 8300000, guid: 666b5afb89b4d6949b26828183d985fa, type: 3}
   volumeTiro: 0.7
-  receberDano: {fileID: 0}
+  receberDano: {fileID: 8300000, guid: e593effb94eade7438b63eb4e5be59de, type: 3}
   volumeDano: 0.75
   morte: {fileID: 0}
   volumeMorte: 0.8
@@ -290,10 +283,10 @@ MonoBehaviour:
   volumeAtivarFuria: 0.7
   desativarFuria: {fileID: 0}
   volumeDesativarFuria: 0.6
-  respiracaoNormal: {fileID: 0}
-  volumeRespiracaoNormal: 0.12
-  respiracaoCansada: {fileID: 0}
-  volumeRespiracaoCansada: 0.55
+  respiracaoNormal: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
+  volumeRespiracaoNormal: 0.7
+  respiracaoCansada: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
+  volumeRespiracaoCansada: 1
   esperaAposCombate: 3
   duracaoFolegoPesado: 2
   tempoRecuperacao: 8
@@ -718,5 +711,15 @@ Transform:
 --- !u!4 &5253500606166841097 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6928856036780025634, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
+  m_PrefabInstance: {fileID: 2936368042210725931}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7862312062342338178 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5034065640682981033, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
+  m_PrefabInstance: {fileID: 2936368042210725931}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8689483676223425136 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5789144706078071387, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
   m_PrefabInstance: {fileID: 2936368042210725931}
   m_PrefabAsset: {fileID: 0}

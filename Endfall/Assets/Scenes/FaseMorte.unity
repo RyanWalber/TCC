@@ -156,11 +156,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!4 &34128448 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5253500606166841097, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-  m_PrefabInstance: {fileID: 499255766}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &41898036
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,6 +918,10 @@ MonoBehaviour:
   - {x: 400, y: 0, z: 0}
   velocidade: 100
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &161366920
 PolygonCollider2D:
@@ -1813,6 +1812,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1910783530}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 1573233925}
 --- !u!4 &290932363
 Transform:
@@ -1975,6 +1978,10 @@ MonoBehaviour:
   - {x: 0, y: -400, z: 0}
   velocidade: 200
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &311263278
 PolygonCollider2D:
@@ -3169,10 +3176,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: multPulo
-      value: 1.35
-      objectReference: {fileID: 0}
-    - target: {fileID: 644927710069476239, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: fillFuria
       value: 
       objectReference: {fileID: 1446279013}
@@ -3180,74 +3183,14 @@ PrefabInstance:
       propertyPath: vinhetaTelaFuria
       value: 
       objectReference: {fileID: 2114315931}
-    - target: {fileID: 2501818598126200591, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3828932577259812292, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: fillVida
       value: 
       objectReference: {fileID: 2052540702}
     - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: peMorte1
-      value: 
-      objectReference: {fileID: 1560905555}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: peMorte2
-      value: 
-      objectReference: {fileID: 592579427}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: visualKaya
-      value: 
-      objectReference: {fileID: 34128448}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 60156738}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: dash
-      value: 
-      objectReference: {fileID: 8300000, guid: ea3e18728f0979349ad475280ac99540, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: pulo
-      value: 
-      objectReference: {fileID: 8300000, guid: 6f71b6e20715a5a4295e024329ac679b, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: tiro
-      value: 
-      objectReference: {fileID: 8300000, guid: 666b5afb89b4d6949b26828183d985fa, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumePulo
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: receberDano
-      value: 
-      objectReference: {fileID: 8300000, guid: e593effb94eade7438b63eb4e5be59de, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: respiracaoNormal
-      value: 
-      objectReference: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: respiracaoCansada
-      value: 
-      objectReference: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumeAterrissagem
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumeRespiracaoNormal
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: volumeRespiracaoCansada
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14006
@@ -3291,10 +3234,6 @@ PrefabInstance:
     - target: {fileID: 8744568874949199937, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_Name
       value: 'Kaya '
-      objectReference: {fileID: 0}
-    - target: {fileID: 8744568874949199937, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3414,6 +3353,10 @@ MonoBehaviour:
   - {x: 400, y: 0, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &511802449
 PolygonCollider2D:
@@ -3842,11 +3785,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &592579427 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8689483676223425136, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-  m_PrefabInstance: {fileID: 499255766}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &596186844 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5750693430429887954, guid: 37e66bce4beb4754b94bdf7eaf5f4ab3, type: 3}
@@ -3957,6 +3895,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 2139898686}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 252783199}
 --- !u!4 &609825584
 Transform:
@@ -4747,6 +4689,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1151416526}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 1113893126}
 --- !u!4 &793325463
 Transform:
@@ -5687,6 +5633,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1086924346}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 155610298}
 --- !u!4 &967996443
 Transform:
@@ -6267,6 +6217,10 @@ MonoBehaviour:
   - {x: 0, y: 300, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &1033639468
 PolygonCollider2D:
@@ -23066,6 +23020,10 @@ MonoBehaviour:
   - {x: -400, y: 0, z: 0}
   velocidade: 400
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &1479627213
 PolygonCollider2D:
@@ -23391,11 +23349,6 @@ GameObject:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4792310880243954488, guid: 9557fb647ddbacd438c7292480d2d437, type: 3}
   m_PrefabInstance: {fileID: 133401677}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1560905555 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7862312062342338178, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-  m_PrefabInstance: {fileID: 499255766}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1573233924
 GameObject:
@@ -252460,6 +252413,10 @@ MonoBehaviour:
   - {x: 3000, y: 0, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 1
 --- !u!60 &1726197755
 PolygonCollider2D:
@@ -252762,6 +252719,10 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 100
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &1771840890
 PolygonCollider2D:
@@ -253555,6 +253516,10 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 100
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &1863422820
 PolygonCollider2D:
@@ -254035,6 +254000,10 @@ MonoBehaviour:
   intensidadeTreme: 1
   tempoParaRenascer: 3
   renascerPlataforma: 1
+  somTremor: {fileID: 0}
+  somQueda: {fileID: 0}
+  somRetorno: {fileID: 0}
+  volumeAudio: 0.7
 --- !u!1001 &1876336858
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -254187,6 +254156,10 @@ MonoBehaviour:
   - {x: 0, y: -400, z: 0}
   velocidade: 200
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!60 &1885995820
 PolygonCollider2D:
@@ -260970,6 +260943,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1177709379}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 643915145}
 --- !u!4 &2024185610
 Transform:
