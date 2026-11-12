@@ -163,6 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5631c096d55b8454e89ffda54d370079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthPickup
+  somColetaVida: {fileID: 0}
+  volumeColetaVida: 0.8
   quantidadeVida: 10
   idUnico: 05c998c0-40cb-4594-b300-b4c7ba16f4f2
 --- !u!58 &735302663767421035

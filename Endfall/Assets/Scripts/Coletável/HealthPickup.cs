@@ -12,6 +12,10 @@ public class HealthPickup : MonoBehaviour
     [Header("Configuracao do elixir")]
     [Min(1f)] [SerializeField] private float quantidadeVida = 25f;
 
+    [Header("Audio deste elixir")]
+    [SerializeField] private AudioClip somColetaVida;
+    [SerializeField, Range(0f, 1f)] private float volumeColetaVida = 0.8f;
+
     [Tooltip("Identificador persistente e exclusivo desta instancia na cena.")]
     [SerializeField] private string idUnico;
 
@@ -77,8 +81,7 @@ public class HealthPickup : MonoBehaviour
         if (vida == null || vida.VidaAtual >= vida.VidaMaxima) return;
 
         vida.RecuperarVida(quantidadeVida);
-        KayaAudioManager audioKaya = vida.GetComponent<KayaAudioManager>();
-        if (audioKaya != null) audioKaya.TocarElixir();
+        AudioObjeto2D.Tocar(somColetaVida, volumeColetaVida, transform.position, "Coleta de vida");
 
         if (!geradoDuranteBoss && SaveManager.Instance != null &&
             !string.IsNullOrWhiteSpace(idUnico))

@@ -7,6 +7,15 @@ public class PlataformaMovel : MonoBehaviour
     public float velocidade = 3f;
     public float tempoDeEspera = 1f;
 
+    [Header("Audio desta plataforma movel")]
+    [SerializeField] private AudioClip somMovimento;
+    [SerializeField, Range(0f, 1f)] private float volumeMovimento = 0.55f;
+    [SerializeField, Min(0.05f)] private float tempoFadeSom = 0.25f;
+    [SerializeField, Min(1f)] private float distanciaAudio = 250f;
+    private AudioSource fonteMovimento;
+    private Transform alvoAudio;
+    private float proximaBuscaAudio;
+
     [Header("Ativacao opcional")]
     [Tooltip("Se marcado, a plataforma so inicia quando a Kaya pisar em cima. Desmarcado: funciona como antes.")]
     [SerializeField] private bool iniciarAoPisar = false;
@@ -24,6 +33,17 @@ public class PlataformaMovel : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Kinematic;
         movimentoLiberado = !iniciarAoPisar;
 
+        if (somMovimento != null)
+        {
+            fonteMovimento = gameObject.AddComponent<AudioSource>();
+            fonteMovimento.playOnAwake = false;
+            fonteMovimento.loop = true;
+            fonteMovimento.spatialBlend = 0f;
+            fonteMovimento.clip = somMovimento;
+            fonteMovimento.volume = 0f;
+            fonteMovimento.Play();
+        }
+
         pontosGlobais = new Vector3[pontos.Length + 1];
         pontosGlobais[0] = transform.position;
 
@@ -36,11 +56,16 @@ public class PlataformaMovel : MonoBehaviour
     private void FixedUpdate()
     {
         VelocidadeAtual = Vector2.zero;
-        if (!movimentoLiberado || pontosGlobais == null || pontosGlobais.Length <= 1) return;
+        if (!movimentoLiberado || pontosGlobais == null || pontosGlobais.Length <= 1)
+        {
+            AtualizarAudioMovimento();
+            return;
+        }
 
         if (temporizadorEspera > 0f)
         {
             temporizadorEspera -= Time.fixedDeltaTime;
+            AtualizarAudioMovimento();
             return;
         }
 
@@ -59,6 +84,25 @@ public class PlataformaMovel : MonoBehaviour
             indicePontoAtual = (indicePontoAtual + 1) % pontosGlobais.Length;
             temporizadorEspera = tempoDeEspera;
         }
+        AtualizarAudioMovimento();
+    }
+
+    private void AtualizarAudioMovimento()
+    {
+        if (fonteMovimento == null) return;
+        if (alvoAudio == null && Time.time >= proximaBuscaAudio)
+        {
+            proximaBuscaAudio = Time.time + 1f;
+            GameObject jogador = GameObject.FindGameObjectWithTag("Player");
+            if (jogador != null) alvoAudio = jogador.transform;
+        }
+        bool perto = alvoAudio != null &&
+            Vector2.Distance(transform.position, alvoAudio.position) <= distanciaAudio;
+        float velocidadeRelativa = Mathf.Clamp01(
+            VelocidadeAtual.magnitude / Mathf.Max(0.01f, velocidade));
+        float alvo = perto ? volumeMovimento * velocidadeRelativa : 0f;
+        fonteMovimento.volume = Mathf.MoveTowards(fonteMovimento.volume, alvo,
+            Time.fixedDeltaTime * volumeMovimento / Mathf.Max(0.05f, tempoFadeSom));
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

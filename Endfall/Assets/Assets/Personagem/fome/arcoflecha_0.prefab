@@ -166,6 +166,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1ca11c49e04da44482fc121fef932c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlechaBoss
+  audioFlecha:
+    hitCausado: {fileID: 0}
+    hitRecebido: {fileID: 0}
+    morte: {fileID: 0}
+    somProprio: {fileID: 0}
+    somAtaque: {fileID: 0}
+    somInvocacao: {fileID: 0}
+    volumeInvocacao: 0.65
+    variacaoPitchInvocacao: 0.08
+    volumeHitCausado: 0.75
+    volumeHitRecebido: 0.75
+    volumeMorte: 0.8
+    volumeProprio: 0.7
+    volumeAtaque: 0.7
+    alcance: 350
+    intervaloHits: 0.055
+    intervaloSomProprio: 8
   velocidade: 200
   dano: 20
   tempoVida: 5

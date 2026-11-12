@@ -8,6 +8,12 @@ public class PlataformaDeQueda : MonoBehaviour
     public float tempoParaRenascer = 3f;
     public bool renascerPlataforma = true;
 
+    [Header("Audio desta plataforma de queda")]
+    [SerializeField] private AudioClip somTremor;
+    [SerializeField] private AudioClip somQueda;
+    [SerializeField] private AudioClip somRetorno;
+    [SerializeField, Range(0f, 1f)] private float volumeAudio = 0.7f;
+
     private Rigidbody2D rb;
     private Vector3 posicaoInicial;
     private Quaternion rotacaoInicial;
@@ -40,6 +46,7 @@ public class PlataformaDeQueda : MonoBehaviour
     private IEnumerator SequenciaDeQueda()
     {
         estaCaindo = true;
+        AudioObjeto2D.Tocar(somTremor, volumeAudio, transform.position, "Plataforma tremendo");
 
         float tempo = 0f;
         // Move o corpo cinemático usando a física, sem teleportar o Transform
@@ -64,6 +71,7 @@ public class PlataformaDeQueda : MonoBehaviour
         {
             rb.bodyType = RigidbodyType2D.Dynamic;
         }
+        AudioObjeto2D.Tocar(somQueda, volumeAudio, transform.position, "Plataforma caindo");
 
         yield return new WaitForSeconds(tempoParaRenascer);
 
@@ -79,6 +87,7 @@ public class PlataformaDeQueda : MonoBehaviour
 
     private void ResetarPlataforma()
     {
+        AudioObjeto2D.Tocar(somRetorno, volumeAudio, posicaoInicial, "Plataforma retornando");
         if (rb != null)
         {
             rb.bodyType = RigidbodyType2D.Kinematic;

@@ -107,6 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 339a2d725f25ae24d986de7f0bbb0e94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlataformaDeQueda
+  somTremor: {fileID: 0}
+  somQueda: {fileID: 0}
+  somRetorno: {fileID: 0}
+  volumeAudio: 0.7
   tempoParaCair: 1
   intensidadeTreme: 1
   tempoParaRenascer: 3

@@ -251,6 +251,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c197e8640b0baa64a9b9e8730a13f6f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KayaAudioManager
+  fonteMusicaCombate: {fileID: 0}
+  musicaCombate: {fileID: 0}
+  volumeMusicaCombate: 0.6
+  raioDeteccaoCombate: 220
+  intervaloVerificacaoCombate: 0.35
+  duracaoTransicaoMusicas: 2
+  proporcaoAmbienteNoCombate: 0
   fonteEfeitos: {fileID: 0}
   fontePassos: {fileID: 0}
   fonteRespiracaoNormal: {fileID: 0}
@@ -291,10 +298,6 @@ MonoBehaviour:
   duracaoFolegoPesado: 2
   tempoRecuperacao: 8
   suavidadeTransicao: 1
-  coletarElixir: {fileID: 0}
-  volumeElixir: 0.65
-  ativarCheckpoint: {fileID: 0}
-  volumeCheckpoint: 0.7
 --- !u!82 &3828932577259812292
 AudioSource:
   m_ObjectHideFlags: 0

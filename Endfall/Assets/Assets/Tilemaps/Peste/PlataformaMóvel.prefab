@@ -107,6 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 137ee4dcc1304cc4684606744926b17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlataformaMovel
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   pontos:
   - {x: 0, y: 300, z: 0}
   velocidade: 50

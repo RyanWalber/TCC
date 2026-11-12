@@ -61,12 +61,6 @@ public class KayaAudioManager : MonoBehaviour
     [SerializeField, Min(0.1f)] private float tempoRecuperacao = 8f;
     [SerializeField, Min(0.1f)] private float suavidadeTransicao = 1f;
 
-    [Header("Interacoes")]
-    [SerializeField] private AudioClip coletarElixir;
-    [SerializeField, Range(0f, 1f)] private float volumeElixir = 0.65f;
-    [SerializeField] private AudioClip ativarCheckpoint;
-    [SerializeField, Range(0f, 1f)] private float volumeCheckpoint = 0.7f;
-
     private PlayerController movimento;
     private Animator animatorPassos;
     private int hashEstadoAndar;
@@ -291,8 +285,6 @@ public class KayaAudioManager : MonoBehaviour
 
     public void TocarAtivarFuria() => TocarEfeito(ativarFuria, volumeAtivarFuria);
     public void TocarDesativarFuria() => TocarEfeito(desativarFuria, volumeDesativarFuria);
-    public void TocarElixir() => TocarEfeito(coletarElixir, volumeElixir);
-    public void TocarCheckpoint() => TocarEfeito(ativarCheckpoint, volumeCheckpoint);
 
     public void TocarMorte()
     {
