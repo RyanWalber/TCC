@@ -153,7 +153,7 @@ MonoBehaviour:
   forcaDoPulo: 200
   tempoCoyote: 0.15
   groundCheck: {fileID: 9105069308953572735}
-  groundCheckRaio: 4
+  groundCheckRaio: 4.5
   chaoLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -259,7 +259,7 @@ MonoBehaviour:
   fonteMusicaCombate: {fileID: 0}
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 1
-  musicaCombate: {fileID: 0}
+  musicaCombate: {fileID: 8300000, guid: 9e4f70585d1dd8247986d1d2fdad2621, type: 3}
   volumeMusicaCombate: 0.6
   raioDeteccaoCombate: 220
   intervaloVerificacaoCombate: 0.35
