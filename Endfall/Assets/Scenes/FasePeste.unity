@@ -8992,7 +8992,7 @@ MonoBehaviour:
     volumeAtaque: 0.7
     alcance: 800
     intervaloHits: 0
-    intervaloSomProprio: 0
+    tempoFadeSomProprio: 0.4
   arteOriginalOlhaDireita: 1
   danoNoPlayer: 25
   forcaEmpurrao: 8
@@ -25794,10 +25794,18 @@ PrefabInstance:
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1825194628}
+    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: duracaoDash
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: tiro
       value: 
       objectReference: {fileID: 8300000, guid: 666b5afb89b4d6949b26828183d985fa, type: 3}
+    - target: {fileID: 5637321679780660970, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
+      propertyPath: volumeRespiracaoNormal
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -500
@@ -165573,7 +165581,7 @@ MonoBehaviour:
     volumeAtaque: 0.7
     alcance: 350
     intervaloHits: 0.055
-    intervaloSomProprio: 8
+    tempoFadeSomProprio: 0.4
   armatureComponent: {fileID: 0}
   velocidade: 100
   velocidadeRotacao: 10
