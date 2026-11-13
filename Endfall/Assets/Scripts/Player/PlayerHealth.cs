@@ -79,8 +79,10 @@ public class PlayerHealth : MonoBehaviour
     [Header("Estabilizacao visual durante a morte")]
     [Tooltip("Objeto visual que recebe a animacao. Se vazio, usa o objeto do Animator.")]
     [SerializeField] private Transform visualKaya;
-    [Tooltip("Impede que a animacao desloque a Kaya para frente e para tras no eixo X. Nao bloqueia a rotacao nem os ossos.")]
+    [Tooltip("Trava a posicao visual X/Y/Z onde Kaya recebeu o golpe fatal, sem alterar a queda fisica se morreu no ar.")]
     [SerializeField] private bool travarPosicaoHorizontalNaMorte = true;
+    [Tooltip("Quanto a compensacao VERTICAL dos pes pode deslocar o visual do lugar da morte. Zero = corpo absolutamente fixo.")]
+    [Min(0f)] [SerializeField] private float limiteCorrecaoVerticalPes = 0f;
 
     [Header("Pes fixos durante a queda")]
     [Tooltip("Mantem a posicao dos pes no mundo enquanto o corpo executa kayamorrendo.")]
@@ -101,7 +103,7 @@ public class PlayerHealth : MonoBehaviour
     private bool referenciaDosPesCapturada;
     private static readonly int EstadoMorrendo = Animator.StringToHash("kayamorrendo");
 
-    private float posicaoXVisualNaMorte;
+    private Vector3 posicaoLocalVisualNaMorte;
     private bool posicaoMorteCapturada;
     private static readonly int TriggerMorrer = Animator.StringToHash("Morrer");
 
@@ -186,9 +188,16 @@ public class PlayerHealth : MonoBehaviour
     {
         if (!estaMorta || visualKaya == null) return;
 
-        // A mira deixa de atuar quando Kaya morre. Algumas transicoes do
-        // Animator redefinem a orientacao para a direita. Reaplica somente
-        // o espelhamento Y, mantendo o giro Z e todas as animacoes dos ossos.
+        // A animação kayamorrendo original gravava a POSICAO do rig:
+        // X -27.9 -> 47.8 e Y 7.4 -> -8.4. Mantemos a raiz do
+        // personagem no mesmo ponto em que morreu, em ambos os lados.
+        // Nao mexer no Transform do PLAYER: se morreu no ar, ele ainda
+        // pode cair normalmente pelo Rigidbody2D.
+        if (travarPosicaoHorizontalNaMorte && posicaoMorteCapturada)
+            visualKaya.localPosition = posicaoLocalVisualNaMorte;
+
+        // Captura o Y da mira no golpe fatal e nunca usa o mouse de novo.
+        // Preserva o giro Z de queda, que e espelhado automaticamente.
         if (respeitarDirecaoAoMorrer)
         {
             Vector3 angulos = visualKaya.localEulerAngles;
@@ -196,47 +205,26 @@ public class PlayerHealth : MonoBehaviour
             visualKaya.localEulerAngles = angulos;
         }
 
-        // O Animator atualiza as poses antes do LateUpdate. Compensamos
-        // somente a posicao do objeto visual: nunca alteramos os ossos,
-        // a rotacao da queda ou o Rigidbody2D do jogador.
-        // O rig mexe os pes para frente/tras durante kayamorrendo.
-        // Se Kaya morreu no CHAO, compensar a posicao do visual para
-        // manter os pes exatamente no mesmo ponto do mundo.
-        // Se morreu no AR, nunca ancorar: o Rigidbody pode cair.
-        if (fixarPesDuranteMorte && morreuApoiadaNoChao &&
-            (peMorte1 != null || peMorte2 != null))
-        {
-            if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
-                return;
-
-            AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
-            if (estado.shortNameHash != EstadoMorrendo)
-                return;
-
-            Vector3 centroPes = ObterCentroPesNoMundo();
-            if (!referenciaDosPesCapturada)
-            {
-                // Captura no PRIMEIRO frame da animacao de morte, evitando
-                // que a pose anterior (ociosa/andar) cause um tranco.
-                posicaoReferenciaDosPes = centroPes;
-                referenciaDosPesCapturada = true;
-                return;
-            }
-
-            Vector3 correcao = posicaoReferenciaDosPes - centroPes;
-            if (!fixarAlturaDosPes) correcao.y = 0f;
-            correcao.z = 0f;
-            visualKaya.position += correcao;
+        // Na morte em solo, nao mover a Kaya horizontalmente para
+        // perseguir o centro dos pes: esse era o tranco que fazia o
+        // corpo deslizar para os lados enquanto o rig mudava de pose.
+        // So um ajuste vertical MINIMO mantem o contato com o chao.
+        // Limite 0 => posicao do visual absolutamente fixa.
+        if (!morreuApoiadaNoChao || !fixarPesDuranteMorte ||
+            !fixarAlturaDosPes || limiteCorrecaoVerticalPes <= 0f ||
+            !referenciaDosPesCapturada ||
+            (peMorte1 == null && peMorte2 == null))
             return;
-        }
 
-        // Compatibilidade com outros rigs sem os ossos dos pes configurados.
-        if (travarPosicaoHorizontalNaMorte && posicaoMorteCapturada)
-        {
-            Vector3 posicao = visualKaya.localPosition;
-            posicao.x = posicaoXVisualNaMorte;
-            visualKaya.localPosition = posicao;
-        }
+        if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
+            return;
+        AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
+        if (estado.shortNameHash != EstadoMorrendo) return;
+
+        float deltaY = posicaoReferenciaDosPes.y - ObterCentroPesNoMundo().y;
+        float correcaoY = Mathf.Clamp(deltaY,
+            -limiteCorrecaoVerticalPes, limiteCorrecaoVerticalPes);
+        visualKaya.position += Vector3.up * correcaoY;
     }
 
     private Vector3 ObterCentroPesNoMundo()
@@ -335,8 +323,11 @@ public class PlayerHealth : MonoBehaviour
         {
             // A orientacao da MiraMouse e Y=180 para a esquerda e Y=0
             // para a direita. Captura o lado ANTES de desativar a mira.
-            olhandoParaEsquerdaAoMorrer = Vector3.Dot(visualKaya.right, transform.right) < 0f;
-            posicaoXVisualNaMorte = visualKaya.localPosition.x;
+            // O MiraMouse usa Y=180 para a esquerda; o Dot com o
+            // vetor right variava conforme a rotacao Z da mira.
+            olhandoParaEsquerdaAoMorrer =
+                Mathf.Abs(Mathf.DeltaAngle(visualKaya.localEulerAngles.y, 180f)) < 90f;
+            posicaoLocalVisualNaMorte = visualKaya.localPosition;
             posicaoMorteCapturada = true;
         }
 
