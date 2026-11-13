@@ -13,6 +13,12 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     [SerializeField] private Transform pontoDisparo;
     [SerializeField] private GameObject prefabFlecha;
 
+    [Header("Risada da hiena - AO SOLTAR A FLECHA")]
+    [Tooltip("Arraste a risada adaptada da Fome aqui. Toca no mesmo instante em que a flecha e criada (Animation Event DispararFlecha).")]
+    [SerializeField] private AudioClip risadaHienaAoDisparar;
+    [Tooltip("Volume da risada da hiena ao disparar. O audio continua respeitando o Alcance do Audio Inimigo.")]
+    [SerializeField, Range(0f, 1f)] private float volumeRisadaHiena = 0.8f;
+
     [Header("Visual do Boss")]
     [Tooltip("Arraste o objeto 'arcoeflecha_0' aqui")]
     [SerializeField] private GameObject flechaVisualNaMao;
@@ -121,6 +127,11 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
         {
             // Instancia a flecha na posição do pontoDisparo
             GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, Quaternion.identity);
+
+            // A hiena gargalha NO MOMENTO do disparo, nao ao comecar
+            // a puxar o arco. Clip e volume escolhidos no Inspector.
+            audioInimigo.TocarEspecial(this, risadaHienaAoDisparar,
+                volumeRisadaHiena, pontoDisparo.position);
 
             // Calcula o vetor direto do Ponto de Disparo até a posição do Player
             Vector2 direcao = (player.position - pontoDisparo.position).normalized;
