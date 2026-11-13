@@ -103,8 +103,10 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     [Range(1f, 2.15f)] [SerializeField] private float fimColisaoFoice = 1.75f;
 
     [Header("Alcance da foice arremessada")]
-    [Tooltip("A foice so vai ate o X em que Kaya estava no inicio do ataque, depois retorna. Nao muda o clipe original.")]
+    [Tooltip("A foice vai ate uma distancia EXTRA depois do X onde Kaya estava quando foi arremessada. Mantem a ida e a volta da animacao.")]
     [SerializeField] private bool limitarFoiceAteKaya = true;
+    [Tooltip("Distancia que a foice ultrapassa a posicao inicial da Kaya, na direcao do arremesso. Aumente para dar mais espaco de esquiva.")]
+    [Min(0f)] [SerializeField] private float distanciaExtraDepoisDaKaya = 80f;
     [Tooltip("X local do inicio da fuga da foice no clip mortelancandofoice. Valor medido no clip original.")]
     [SerializeField] private float inicioOriginalFoiceLocalX = -67.4f;
     [Tooltip("Distancia horizontal total do arremesso original (605.7 no clip). Mantem a ida/volta suaves.")]
@@ -666,11 +668,20 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
     private IEnumerator AtaqueFoiceArremessada()
     {
-        // Alvo fixado NO INICIO: Kaya pode escapar se sair do caminho.
-        // Preserva o clip de 2.1667 segundos, mas comprime seu deslocamento
-        // horizontal quando a distancia ate Kaya for menor que a original.
+        // Mira somente uma vez: Kaya pode fugir para qualquer lado apos
+        // o lancamento. A foice cruza o X inicial da Kaya e so entao retorna.
+        // Mantem o tempo e a animacao original de 2.1667 segundos.
         EncontrarJogador();
-        alvoXFoice = jogador != null ? jogador.position.x : transform.position.x;
+        if (jogador != null)
+        {
+            float direcao = jogador.position.x < transform.position.x ? -1f : 1f;
+            alvoXFoice = jogador.position.x + direcao *
+                Mathf.Max(0f, distanciaExtraDepoisDaKaya);
+        }
+        else
+        {
+            alvoXFoice = transform.position.x;
+        }
         arremessoFoiceAcertou = false;
         foiceTemPosicaoAnterior = false;
         tempoAnimacaoFoice = 0f;
@@ -720,7 +731,10 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             float destinoLocalX = pai.InverseTransformPoint(alvoMundo).x;
             float distanciaDisponivel = Mathf.Max(0f,
                 inicioOriginalFoiceLocalX - destinoLocalX);
-            float proporcao = Mathf.Clamp01(
+            // Nao usar Clamp01: quando Kaya esta mais distante, a foice
+            // precisa poder percorrer ALEM do deslocamento original do clip
+            // para atingir o ponto extra, sem parar antes da posicao dela.
+            float proporcao = Mathf.Max(0f,
                 distanciaDisponivel / Mathf.Max(1f, distanciaAnimadaFoice));
 
             local.x = inicioOriginalFoiceLocalX +
@@ -728,8 +742,8 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             foiceAnimada.localPosition = local;
         }
 
-        // Verifica o dano pela MESMA posicao visivel, depois da limitacao.
-        // Evita atingir Kaya a partir de uma posicao invisivel mais longe.
+        // Verifica o dano pela MESMA posicao visivel, inclusive ao ultrapassar
+        // Kaya. Nao cria hit invisivel nem rastreia Kaya depois do lancamento.
         Vector2 atual = foiceAnimada.position;
         if (foiceTemPosicaoAnterior && !arremessoFoiceAcertou &&
             tempoAnimacaoFoice >= inicioColisaoFoice &&
