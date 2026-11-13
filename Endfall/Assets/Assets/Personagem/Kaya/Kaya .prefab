@@ -230,6 +230,8 @@ MonoBehaviour:
   painelGameOver: {fileID: 0}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   tempoInvencivel: 0.8
+  tempoFlashVermelho: 0.12
+  quantidadePiscadas: 2
   animatorKaya: {fileID: 0}
   duracaoMorteFallback: 2.5
   visualKaya: {fileID: 5253500606166841097}
@@ -259,7 +261,7 @@ MonoBehaviour:
   fonteMusicaCombate: {fileID: 0}
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 1
-  musicaCombate: {fileID: 8300000, guid: 9e4f70585d1dd8247986d1d2fdad2621, type: 3}
+  musicaCombate: {fileID: 8300000, guid: 25251cccdfeee2e47ab51a1a6eea174c, type: 3}
   volumeMusicaCombate: 0.1
   raioDeteccaoCombate: 220
   intervaloVerificacaoCombate: 0.35

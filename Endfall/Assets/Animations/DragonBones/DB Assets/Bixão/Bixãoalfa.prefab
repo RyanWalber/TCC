@@ -199,7 +199,7 @@ MonoBehaviour:
     hitCausado: {fileID: 0}
     hitRecebido: {fileID: 0}
     morte: {fileID: 0}
-    somProprio: {fileID: 0}
+    somProprio: {fileID: 8300000, guid: fceec7834ba00d54cb02410f2a8165c8, type: 3}
     somAtaque: {fileID: 0}
     somInvocacao: {fileID: 0}
     volumeInvocacao: 0.65
@@ -211,7 +211,10 @@ MonoBehaviour:
     volumeAtaque: 0.7
     alcance: 350
     intervaloHits: 0.055
-    intervaloSomProprio: 8
+    tempoFadeSomProprio: 0.4
+  feedbackDano:
+    corFlash: {r: 1, g: 0.12, b: 0.12, a: 1}
+    duracaoFlash: 0.18
   player: {fileID: 0}
   armatureComponent: {fileID: 4714697607845167709}
   animVoar: fly

@@ -2426,6 +2426,10 @@ MonoBehaviour:
   intensidadeTreme: 1
   tempoParaRenascer: 3
   renascerPlataforma: 1
+  somTremor: {fileID: 0}
+  somQueda: {fileID: 0}
+  somRetorno: {fileID: 0}
+  volumeAudio: 0.7
 --- !u!50 &650367382
 Rigidbody2D:
   serializedVersion: 5
@@ -9158,6 +9162,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eb63afa2944b6047b24b6f80a19bc6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossFomeController
+  audioInimigo:
+    hitCausado: {fileID: 0}
+    hitRecebido: {fileID: 0}
+    morte: {fileID: 0}
+    somProprio: {fileID: 0}
+    somAtaque: {fileID: 0}
+    somInvocacao: {fileID: 0}
+    volumeInvocacao: 0.65
+    variacaoPitchInvocacao: 0.08
+    volumeHitCausado: 0.75
+    volumeHitRecebido: 0.75
+    volumeMorte: 0.8
+    volumeProprio: 0.7
+    volumeAtaque: 0.7
+    alcance: 350
+    intervaloHits: 0.055
+    tempoFadeSomProprio: 0.4
   player: {fileID: 9137787154099114289}
   animator: {fileID: 7744268129180291390}
   pontoDisparo: {fileID: 468945691}
@@ -9183,6 +9204,20 @@ MonoBehaviour:
   conteinerBarraDeVida: {fileID: 153774913}
   corDano: {r: 1, g: 0, b: 0, a: 1}
   duracaoPiscar: 0.15
+  prefabElixirArena: {fileID: 0}
+  distanciaAtivacaoElixires: 350
+  atrasoPrimeiroElixir: 7
+  intervaloSpawnElixires: 18
+  maximoElixiresPresentes: 2
+  quantidadeTotalElixires: 6
+  curaElixirArena: 25
+  pontosElixires: []
+  raioSpawnElixires: 200
+  chaoParaElixires:
+    serializedVersion: 2
+    m_Bits: 8
+  alturaAcimaDoChaoElixires: 12
+  removerElixiresQuandoBossMorrer: 1
   tempoParaDestruir: 0.5
 --- !u!114 &1174186880
 MonoBehaviour:
@@ -10348,6 +10383,10 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 50
   tempoDeEspera: 1
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
   iniciarAoPisar: 0
 --- !u!50 &1331005646
 Rigidbody2D:
@@ -10481,6 +10520,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1955416191}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 1880639298}
 --- !u!4 &1336878502
 Transform:
@@ -10549,7 +10592,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 0.15686275}
+  m_Color: {r: 0.254902, g: 0.4117647, b: 0.882353, a: 0.23529412}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -35217,6 +35260,10 @@ MonoBehaviour:
   intensidadeTreme: 1
   tempoParaRenascer: 3
   renascerPlataforma: 1
+  somTremor: {fileID: 0}
+  somQueda: {fileID: 0}
+  somRetorno: {fileID: 0}
+  volumeAudio: 0.7
 --- !u!50 &1455909207
 Rigidbody2D:
   serializedVersion: 5
@@ -35548,6 +35595,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 857719021}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 399331239}
 --- !u!4 &1458351271
 Transform:
@@ -35602,6 +35653,10 @@ MonoBehaviour:
   intensidadeTreme: 1
   tempoParaRenascer: 3
   renascerPlataforma: 1
+  somTremor: {fileID: 0}
+  somQueda: {fileID: 0}
+  somRetorno: {fileID: 0}
+  volumeAudio: 0.7
 --- !u!50 &1459615340
 Rigidbody2D:
   serializedVersion: 5
@@ -36214,6 +36269,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   fogoParticulas: {fileID: 1854925691}
+  somAtivarCheckpoint: {fileID: 0}
+  volumeAtivarCheckpoint: 0.8
+  audioChamas: {fileID: 0}
+  somChamasPadrao: {fileID: 0}
   pontoDeRenascer: {fileID: 1726453020}
 --- !u!50 &1629227951
 Rigidbody2D:
@@ -36500,7 +36559,11 @@ MonoBehaviour:
   - {x: 0, y: 400, z: 0}
   velocidade: 50
   tempoDeEspera: 1
-  iniciarAoPisar: 0
+  somMovimento: {fileID: 0}
+  volumeMovimento: 0.55
+  tempoFadeSom: 0.25
+  distanciaAudio: 250
+  iniciarAoPisar: 1
 --- !u!50 &1697135564
 Rigidbody2D:
   serializedVersion: 5

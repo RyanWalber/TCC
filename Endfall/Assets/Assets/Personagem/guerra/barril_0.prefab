@@ -175,7 +175,7 @@ MonoBehaviour:
     hitCausado: {fileID: 0}
     hitRecebido: {fileID: 0}
     morte: {fileID: 0}
-    somProprio: {fileID: 0}
+    somProprio: {fileID: 8300000, guid: eabe8698d9f7b8846bdb43ff3afe11fe, type: 3}
     somAtaque: {fileID: 0}
     somInvocacao: {fileID: 0}
     volumeInvocacao: 0.65
@@ -187,7 +187,7 @@ MonoBehaviour:
     volumeAtaque: 0.7
     alcance: 350
     intervaloHits: 0.055
-    intervaloSomProprio: 8
+    tempoFadeSomProprio: 0.4
   dano: 25
   forcaEmpurrao: 50
   raioExplosao: 30

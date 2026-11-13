@@ -8264,7 +8264,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 472208128502994686, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 922093377830565533, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_Mesh
@@ -8273,7 +8273,7 @@ PrefabInstance:
     - target: {fileID: 1561247814855655472, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 771de55bff05fea44bc581b33dc2d192, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 3606775284243942967, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_Name
       value: bixinhoalfa (7)
@@ -8328,28 +8328,28 @@ PrefabInstance:
       objectReference: {fileID: 938667681}
     - target: {fileID: 7771213939154683179, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 5.1551075
       objectReference: {fileID: 0}
     - target: {fileID: 7771213939154683179, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 3.5923045
       objectReference: {fileID: 0}
     - target: {fileID: 8330434100342755438, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 5.3250785
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8330434100342755438, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.6179252
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8407171625317360210, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8857369481306047968, guid: cf8bc30d996722f4eb4047f0a9c687c3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2100000, guid: 771de55bff05fea44bc581b33dc2d192, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9632,6 +9632,10 @@ PrefabInstance:
     - target: {fileID: 342847607051937248, guid: 5d4f340b1c7df9b4f9808144b7ef79f0, type: 3}
       propertyPath: tempoDeEspera
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 342847607051937248, guid: 5d4f340b1c7df9b4f9808144b7ef79f0, type: 3}
+      propertyPath: iniciarAoPisar
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 342847607051937248, guid: 5d4f340b1c7df9b4f9808144b7ef79f0, type: 3}
       propertyPath: pontos.Array.size
@@ -28810,7 +28814,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 0.15686275}
+  m_Color: {r: 0.254902, g: 0.4117647, b: 0.882353, a: 0.23529412}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -153460,6 +153464,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Barradafuria
       objectReference: {fileID: 0}
+    - target: {fileID: 552914565122637084, guid: e52882e63fc897a4aa7bf640aa394b1d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8466841392807878379, guid: e52882e63fc897a4aa7bf640aa394b1d, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -166068,6 +166076,9 @@ MonoBehaviour:
     alcance: 350
     intervaloHits: 0.055
     tempoFadeSomProprio: 0.4
+  feedbackDano:
+    corFlash: {r: 1, g: 0.12, b: 0.12, a: 1}
+    duracaoFlash: 0.18
   armatureComponent: {fileID: 0}
   velocidade: 100
   velocidadeRotacao: 10
