@@ -22802,8 +22802,8 @@ MonoBehaviour:
   pontoLancamentoCorvos: {fileID: 469893147}
   prefabLamentus: {fileID: 5848801748747309047, guid: 6c65a0493c1050f458f983d7556a4d7b, type: 3}
   vidaMaximaMorte: 2400
-  limiteVidaAlta: 0.5
-  limiteVidaBaixa: 0.2
+  limiteVidaAlta: 0.7
+  limiteVidaBaixa: 0.4
   intervaloVidaAlta: 1.35
   intervaloVidaMedia: 1.05
   intervaloVidaBaixa: 0.8

@@ -371,7 +371,7 @@ MonoBehaviour:
     hitCausado: {fileID: 0}
     hitRecebido: {fileID: 0}
     morte: {fileID: 0}
-    somProprio: {fileID: 0}
+    somProprio: {fileID: 8300000, guid: 4f1b03f81c1ffbb47942b5cde7601feb, type: 3}
     somAtaque: {fileID: 0}
     somInvocacao: {fileID: 0}
     volumeInvocacao: 0.65
@@ -379,11 +379,14 @@ MonoBehaviour:
     volumeHitCausado: 0.75
     volumeHitRecebido: 0.75
     volumeMorte: 0.8
-    volumeProprio: 0.7
+    volumeProprio: 0.5
     volumeAtaque: 0.7
     alcance: 350
     intervaloHits: 0.055
-    intervaloSomProprio: 8
+    tempoFadeSomProprio: 0.4
+  feedbackDano:
+    corFlash: {r: 1, g: 0.12, b: 0.12, a: 1}
+    duracaoFlash: 0.18
   armatureComponent: {fileID: 8097832843650113953}
   raioDeteccao: 120
   offsetDeteccao: {x: 40, y: 25}

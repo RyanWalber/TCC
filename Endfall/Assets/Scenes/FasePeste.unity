@@ -9099,7 +9099,7 @@ MonoBehaviour:
     alcance: 800
     intervaloHits: 0
     tempoFadeSomProprio: 0.4
-  arteOriginalOlhaDireita: 1
+  arteOriginalOlhaDireita: 0
   danoNoPlayer: 25
   forcaEmpurrao: 8
   velocidade: 200
@@ -9109,9 +9109,8 @@ MonoBehaviour:
   pontoBoca: {fileID: 1680129822}
   "toler\xE2nciaSobrePlayer": 10
   tempoAtaqueVidaCheia: 0.5
-  tempoAtaqueVidaBaixa: 0.1
-  distanciaPararPerseguicao: 2
-  alturaSobreKaya: 3
+  tempoAtaqueVidaBaixa: 0.01
+  multiplicadorIntervaloCuspe: 0.5
 --- !u!50 &373490618
 Rigidbody2D:
   serializedVersion: 5
