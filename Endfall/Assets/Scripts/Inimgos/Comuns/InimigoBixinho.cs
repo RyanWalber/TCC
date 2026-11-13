@@ -9,6 +9,10 @@ public class InimigoBixinho : MonoBehaviour
     [Header("Audio deste inimigo")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
 
+    [Header("Feedback visual ao receber dano")]
+    [SerializeField] private FeedbackDanoDragonBones feedbackDano =
+        new FeedbackDanoDragonBones();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -53,6 +57,16 @@ public class InimigoBixinho : MonoBehaviour
             GameObject p = GameObject.FindWithTag("Player");
             if (p != null) player = p.transform;
         }
+    }
+
+    private void Update()
+    {
+        feedbackDano.Atualizar();
+    }
+
+    private void OnDisable()
+    {
+        feedbackDano.Restaurar();
     }
 
     private void FixedUpdate()
@@ -156,7 +170,7 @@ public class InimigoBixinho : MonoBehaviour
 
         audioInimigo.TocarHitRecebido(this);
         vidaAtual -= quantidadeDano;
-        StartCoroutine(PiscarVermelhoDragonBones());
+        feedbackDano.ReceberHit(this, armatureComponent);
 
         if (vidaAtual <= 0)
         {
@@ -169,22 +183,6 @@ public class InimigoBixinho : MonoBehaviour
         TomarDano(quantidadeDano);
     }
 
-    private IEnumerator PiscarVermelhoDragonBones()
-    {
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
-            corVermelha.redMultiplier = 1f;
-            corVermelha.greenMultiplier = 0f;
-            corVermelha.blueMultiplier = 0f;
-
-            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
-
-            armatureComponent.color = corVermelha;
-            yield return new WaitForSeconds(0.15f);
-            armatureComponent.color = corNormal;
-        }
-    }
 
     private void Morrer()
     {
@@ -194,9 +192,12 @@ public class InimigoBixinho : MonoBehaviour
         estaMorto = true;
 
         rb.linearVelocity = Vector2.zero;
-        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>(true))
+            c.enabled = false;
+        rb.simulated = false;
 
-        Destroy(gameObject);
+        // A ultima bala tambem mostra o flash antes de desaparecer.
+        Destroy(gameObject, feedbackDano.DuracaoVisivel);
     }
 
     private void OnDrawGizmosSelected()

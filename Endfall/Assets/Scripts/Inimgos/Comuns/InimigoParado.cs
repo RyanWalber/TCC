@@ -9,6 +9,10 @@ public class InimigoParado : MonoBehaviour
     [Header("Audio deste inimigo")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
 
+    [Header("Feedback visual ao receber dano")]
+    [SerializeField] private FeedbackDanoDragonBones feedbackDano =
+        new FeedbackDanoDragonBones();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public UnityArmatureComponent armatureComponent;
 
@@ -364,6 +368,11 @@ public class InimigoParado : MonoBehaviour
         renderizadorPoeira.sharedMaterial = materialPoeiraCriado;
     }
 
+    private void OnDisable()
+    {
+        feedbackDano.Restaurar();
+    }
+
     private void OnDestroy()
     {
         if (materialPoeiraCriado != null)
@@ -459,6 +468,8 @@ public class InimigoParado : MonoBehaviour
 
     private void Update()
     {
+        feedbackDano.Atualizar();
+        if (vidaAtual <= 0) return;
         audioInimigo.Atualizar(this);
         if (player == null) return;
 
@@ -545,7 +556,7 @@ public class InimigoParado : MonoBehaviour
         if (vidaAtual <= 0 || quantidadeDano <= 0) return;
         audioInimigo.TocarHitRecebido(this);
         vidaAtual -= quantidadeDano;
-        StartCoroutine(PiscarVermelhoDragonBones());
+        feedbackDano.ReceberHit(this, armatureComponent);
 
         if (vidaAtual <= 0)
         {
@@ -558,28 +569,14 @@ public class InimigoParado : MonoBehaviour
         TomarDano(quantidadeDano);
     }
 
-    private IEnumerator PiscarVermelhoDragonBones()
-    {
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
-            corVermelha.redMultiplier = 1f;
-            corVermelha.greenMultiplier = 0f;
-            corVermelha.blueMultiplier = 0f;
-
-            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
-
-            armatureComponent.color = corVermelha;
-            yield return new WaitForSeconds(0.15f);
-            armatureComponent.color = corNormal;
-        }
-    }
 
     private void Morrer()
     {
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         audioInimigo.TocarMorte(this);
-        Destroy(gameObject);
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>(true))
+            c.enabled = false;
+        Destroy(gameObject, feedbackDano.DuracaoVisivel);
     }
 
     private void OnDrawGizmosSelected()

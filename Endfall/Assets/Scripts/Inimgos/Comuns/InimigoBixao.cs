@@ -9,6 +9,10 @@ public class InimigoBixao : MonoBehaviour
     [Header("Audio deste inimigo")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
 
+    [Header("Feedback visual ao receber dano")]
+    [SerializeField] private FeedbackDanoDragonBones feedbackDano =
+        new FeedbackDanoDragonBones();
+
     public Transform player;
     public UnityArmatureComponent armatureComponent;
     public string animVoar = "fly";
@@ -55,9 +59,15 @@ public class InimigoBixao : MonoBehaviour
 
     private void Update()
     {
+        feedbackDano.Atualizar();
         audioInimigo.Atualizar(this);
         if (player == null) return;
         AtualizarInclinacao();
+    }
+
+    private void OnDisable()
+    {
+        feedbackDano.Restaurar();
     }
 
     private void FixedUpdate()
@@ -150,7 +160,7 @@ public class InimigoBixao : MonoBehaviour
 
         audioInimigo.TocarHitRecebido(this);
         vida -= dano;
-        StartCoroutine(PiscarVermelhoDragonBones());
+        feedbackDano.ReceberHit(this, armatureComponent);
 
         if (vida <= 0)
         {
@@ -167,28 +177,12 @@ public class InimigoBixao : MonoBehaviour
         EstadoMundoCheckpoint.RegistrarMorte(gameObject);
         audioInimigo.TocarMorte(this);
         rb.linearVelocity = Vector2.zero;
-        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
-        Destroy(gameObject, 0.15f);
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>(true))
+            c.enabled = false;
+        rb.simulated = false;
+        Destroy(gameObject, Mathf.Max(0.15f, feedbackDano.DuracaoVisivel));
     }
 
-    private IEnumerator PiscarVermelhoDragonBones()
-    {
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
-            corVermelha.redMultiplier = 1f;
-            corVermelha.greenMultiplier = 0f;
-            corVermelha.blueMultiplier = 0f;
-
-            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
-
-            armatureComponent.color = corVermelha;
-            yield return new WaitForSeconds(0.15f);
-
-            if (armatureComponent != null)
-                armatureComponent.color = corNormal;
-        }
-    }
 
     private void Fugir()
     {

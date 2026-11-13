@@ -10,6 +10,10 @@ public class InimigoBixel : MonoBehaviour
     [Header("Audio deste inimigo")]
     [SerializeField] private AudioInimigo audioInimigo = new AudioInimigo();
 
+    [Header("Feedback visual ao receber dano")]
+    [SerializeField] private FeedbackDanoDragonBones feedbackDano =
+        new FeedbackDanoDragonBones();
+
     [Header("CONFIGURAÇÃO VISUAL")]
     public Transform pivoVisual;
     public UnityArmatureComponent armatureComponent;
@@ -263,8 +267,14 @@ public class InimigoBixel : MonoBehaviour
 
     private void Update()
     {
+        feedbackDano.Atualizar();
         if (estaMorto) return;
         AtualizarAnimacao();
+    }
+
+    private void OnDisable()
+    {
+        feedbackDano.Restaurar();
     }
 
     private void Patrulhar()
@@ -325,27 +335,11 @@ public class InimigoBixel : MonoBehaviour
 
         audioInimigo.TocarHitRecebido(this);
         vida -= dano;
-        StartCoroutine(PiscarVermelhoDragonBones());
+        feedbackDano.ReceberHit(this, armatureComponent);
 
         if (vida <= 0) Morrer();
     }
 
-    private IEnumerator PiscarVermelhoDragonBones()
-    {
-        if (armatureComponent != null)
-        {
-            DragonBones.ColorTransform corVermelha = new DragonBones.ColorTransform();
-            corVermelha.redMultiplier = 1f;
-            corVermelha.greenMultiplier = 0f;
-            corVermelha.blueMultiplier = 0f;
-
-            DragonBones.ColorTransform corNormal = new DragonBones.ColorTransform();
-
-            armatureComponent.color = corVermelha;
-            yield return new WaitForSeconds(0.15f);
-            armatureComponent.color = corNormal;
-        }
-    }
 
     private void Morrer()
     {
@@ -355,10 +349,11 @@ public class InimigoBixel : MonoBehaviour
         estaMorto = true;
 
         rb.linearVelocity = Vector2.zero;
-        if (GetComponent<Collider2D>()) GetComponent<Collider2D>().enabled = false;
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>(true))
+            c.enabled = false;
         rb.simulated = false;
 
-        Destroy(gameObject);
+        Destroy(gameObject, feedbackDano.DuracaoVisivel);
     }
 
     private void OnCollisionEnter2D(Collision2D colisao)

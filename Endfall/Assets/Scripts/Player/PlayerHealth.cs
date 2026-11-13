@@ -27,6 +27,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private GameObject painelGameOver;
     [SerializeField] private Color corDano = Color.red;
     [SerializeField] private float tempoInvencivel = 0.8f;
+    [Header("Piscada da Kaya quando toma dano")]
+    [SerializeField, Min(0.03f)] private float tempoFlashVermelho = 0.12f;
+    [SerializeField, Range(1, 5)] private int quantidadePiscadas = 2;
 
     // Lista de todos os Sprites do corpo fatiado da Kaya
     private SpriteRenderer[] todosSprites;
@@ -105,7 +108,7 @@ public class PlayerHealth : MonoBehaviour
             SaveManager.Instance.ConfirmarRenascimentoInicializado();
 
         // Pega todos os sprites do corpo da Kaya
-        todosSprites = GetComponentsInChildren<SpriteRenderer>();
+        todosSprites = GetComponentsInChildren<SpriteRenderer>(true);
         if (todosSprites != null && todosSprites.Length > 0)
         {
             coresOriginais = new Color[todosSprites.Length];
@@ -208,7 +211,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void TomarDano(float quantidadeDano)
     {
-        if (estaMorta || estaInvencivel) return;
+        if (estaMorta || estaInvencivel || quantidadeDano <= 0f) return;
 
         if (audioKaya != null) audioKaya.TocarDano();
         vidaAtual -= quantidadeDano;
@@ -237,7 +240,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void TomarDanoDeInimigo(float quantidadeDano)
     {
-        if (estaMorta || estaInvencivel) return;
+        if (estaMorta || estaInvencivel || quantidadeDano <= 0f) return;
 
         // Soma a Fúria antes do dano, assim até um golpe fatal conta como dano recebido.
         if (sistemaFuria != null)
@@ -246,26 +249,32 @@ public class PlayerHealth : MonoBehaviour
         TomarDano(quantidadeDano);
     }
 
+    private void AplicarCorKaya(Color cor, bool restaurarOriginal)
+    {
+        if (todosSprites == null || coresOriginais == null) return;
+        for (int i = 0; i < todosSprites.Length; i++)
+        {
+            if (todosSprites[i] != null)
+                todosSprites[i].color = restaurarOriginal ? coresOriginais[i] : cor;
+        }
+    }
+
     private IEnumerator RotinaInvencibilidade()
     {
         estaInvencivel = true;
+        int piscadas = Mathf.Max(1, quantidadePiscadas);
+        float duracaoTotal = Mathf.Max(0.05f, tempoInvencivel);
+        float vermelho = Mathf.Min(Mathf.Max(0.03f, tempoFlashVermelho),
+            duracaoTotal / (2f * piscadas));
+        float normal = Mathf.Max(0f, (duracaoTotal - vermelho * piscadas) / piscadas);
 
-        // Pinta todo o corpo da Kaya de vermelho
-        for (int i = 0; i < todosSprites.Length; i++)
+        for (int i = 0; i < piscadas; i++)
         {
-            if (todosSprites[i] != null) todosSprites[i].color = corDano;
+            AplicarCorKaya(corDano, false);
+            yield return new WaitForSeconds(vermelho);
+            AplicarCorKaya(Color.white, true);
+            if (normal > 0f) yield return new WaitForSeconds(normal);
         }
-
-        yield return new WaitForSeconds(0.15f);
-
-        // Restaura as cores originais do corpo
-        for (int i = 0; i < todosSprites.Length; i++)
-        {
-            if (todosSprites[i] != null) todosSprites[i].color = coresOriginais[i];
-        }
-
-        yield return new WaitForSeconds(tempoInvencivel - 0.15f);
-
         estaInvencivel = false;
     }
 
@@ -277,6 +286,7 @@ public class PlayerHealth : MonoBehaviour
 
         // Impede que a rotina de invencibilidade altere as cores durante a morte.
         StopAllCoroutines();
+        AplicarCorKaya(Color.white, true);
 
         if (visualKaya != null)
         {
