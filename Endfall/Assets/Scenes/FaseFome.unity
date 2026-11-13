@@ -37914,11 +37914,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6792230948933182889, guid: d3566f73ae5002c479afa210454b4227, type: 3}
   m_PrefabInstance: {fileID: 1204666218}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &1667541887 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 7167094372518568699, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-  m_PrefabInstance: {fileID: 6724941423854766951}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1697135560
 GameObject:
   m_ObjectHideFlags: 0
@@ -51193,29 +51188,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3741171165473331290}
     - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: animatorKaya
-      value: 
-      objectReference: {fileID: 1667541887}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: painelGameOver
       value: 
       objectReference: {fileID: 1386497101}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: velocidadeMundoNaMorte
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: tempoEntradaCameraLenta
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4098034864036435177, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: velocidadeAnimacaoQueda
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4752287519697750252, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
-      propertyPath: groundCheckRaio
-      value: 4.5
-      objectReference: {fileID: 0}
     - target: {fileID: 7101281585216477631, guid: 99f0ccb6e55354642bde33cc49c6358c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4037

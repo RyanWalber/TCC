@@ -209,6 +209,7 @@ MonoBehaviour:
   fillFuria: {fileID: 0}
   luzNeonFuria: {fileID: 0}
   vinhetaTelaFuria: {fileID: 0}
+  tempoFadeVinheta: 0.18
   teclaFuria: 113
 --- !u!114 &4098034864036435177
 MonoBehaviour:
@@ -232,10 +233,22 @@ MonoBehaviour:
   tempoInvencivel: 0.8
   tempoFlashVermelho: 0.12
   quantidadePiscadas: 2
-  animatorKaya: {fileID: 0}
+  animatorKaya: {fileID: 7167094372518568699}
   duracaoMorteFallback: 2.5
+  usarMorteCinematografica: 1
+  velocidadeMundoNaMorte: 0.1
+  tempoEntradaCameraLenta: 0.1
+  desacelerarMusicasESons: 1
+  intensidadeCameraLentaAudio: 1
+  velocidadeAnimacaoQueda: 0.2
+  atrasoFadeNaMorte: 0.25
+  duracaoFadeNaMorte: 1.8
   visualKaya: {fileID: 5253500606166841097}
   travarPosicaoHorizontalNaMorte: 1
+  ancorarPesPelosOssos: 1
+  iteracoesAncoragemPes: 5
+  maximoGrausPorArticulacao: 24
+  toleranciaAncoragemPes: 0.04
   fixarPesDuranteMorte: 1
   peMorte1: {fileID: 7862312062342338178}
   peMorte2: {fileID: 8689483676223425136}
@@ -574,6 +587,10 @@ PrefabInstance:
     - target: {fileID: 3368946434071521358, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_Name
       value: Ani Kaya
+      objectReference: {fileID: 0}
+    - target: {fileID: 3819755934948095346, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.516772
       objectReference: {fileID: 0}
     - target: {fileID: 3930920937610458180, guid: ff61565dc43f7604fa2cc452291cbec9, type: 3}
       propertyPath: m_TagString
