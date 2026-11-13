@@ -22201,7 +22201,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 215408940600973636, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1621334966606405424, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
       propertyPath: m_Pivot.x
@@ -22801,7 +22801,7 @@ MonoBehaviour:
   prefabCorvo: {fileID: 2607479918619878126, guid: 0314f913be3a2b4468a034a369adba69, type: 3}
   pontoLancamentoCorvos: {fileID: 469893147}
   prefabLamentus: {fileID: 5848801748747309047, guid: 6c65a0493c1050f458f983d7556a4d7b, type: 3}
-  vidaMaximaMorte: 3000
+  vidaMaximaMorte: 2400
   limiteVidaAlta: 0.5
   limiteVidaBaixa: 0.2
   intervaloVidaAlta: 1.35
@@ -23822,6 +23822,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroUniversal
   bossTransform: {fileID: 1433506103}
   tempoFocoNoBoss: 2
+  tempoRetornoCamera: 0.6
   atrasoParaAtacar: 3
   painelBarraVida: {fileID: 0}
   fadeEntradaBarra: 0.4
@@ -275373,7 +275374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4440ac39ddb34334cbb41c5be701ea93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossVida
-  vidaMaxima: 3000
+  vidaMaxima: 2400
   barraDeVida: {fileID: 421269863}
   conteinerBarraDeVida: {fileID: 421269861}
   corDano: {r: 1, g: 0, b: 0, a: 1}
@@ -275381,10 +275382,10 @@ MonoBehaviour:
   prefabElixirArena: {fileID: 2548336140744573666, guid: a209f35f5b804d94a8acba448269225d, type: 3}
   distanciaAtivacaoElixires: 350
   atrasoPrimeiroElixir: 7
-  intervaloSpawnElixires: 2
+  intervaloSpawnElixires: 10
   maximoElixiresPresentes: 4
   quantidadeTotalElixires: 6
-  curaElixirArena: 10
+  curaElixirArena: 20
   pontosElixires:
   - {fileID: 591135882}
   - {fileID: 537910320}
@@ -275400,6 +275401,17 @@ MonoBehaviour:
     m_Bits: 8
   alturaAcimaDoChaoElixires: 12
   removerElixiresQuandoBossMorrer: 1
+  usarSpawnNaCamera: 1
+  pontosVisiveisParaTestar: 8
+  margemLateralCamera: 0.1
+  margemVerticalCamera: 0.12
+  distanciaMinimaDaKayaNaTela: 0.35
+  diferencaMaximaAlturaPlataforma: 45
+  distanciaMinimaEntreElixiresNaTela: 0.18
+  iniciarElixiresPeloGatilho: 1
+  tempoParaElixirSumir: 10
+  fadeDesaparecimentoElixir: 0.75
+  reposicaoContinuaAteBossMorrer: 1
   tempoParaDestruir: 0.5
 --- !u!114 &1999776002
 MonoBehaviour:

@@ -7864,7 +7864,7 @@ Transform:
   m_GameObject: {fileID: 293849248}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -642, y: 146, z: 0}
+  m_LocalPosition: {x: 8383, y: 163, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9110,6 +9110,8 @@ MonoBehaviour:
   "toler\xE2nciaSobrePlayer": 10
   tempoAtaqueVidaCheia: 0.5
   tempoAtaqueVidaBaixa: 0.1
+  distanciaPararPerseguicao: 2
+  alturaSobreKaya: 3
 --- !u!50 &373490618
 Rigidbody2D:
   serializedVersion: 5
@@ -9287,6 +9289,17 @@ MonoBehaviour:
     m_Bits: 8
   alturaAcimaDoChaoElixires: 12
   removerElixiresQuandoBossMorrer: 1
+  usarSpawnNaCamera: 1
+  pontosVisiveisParaTestar: 8
+  margemLateralCamera: 0.1
+  margemVerticalCamera: 0.12
+  distanciaMinimaDaKayaNaTela: 0.35
+  diferencaMaximaAlturaPlataforma: 45
+  distanciaMinimaEntreElixiresNaTela: 0.18
+  iniciarElixiresPeloGatilho: 1
+  tempoParaElixirSumir: 10
+  fadeDesaparecimentoElixir: 0.75
+  reposicaoContinuaAteBossMorrer: 1
   tempoParaDestruir: 0.5
 --- !u!114 &373490621
 MonoBehaviour:
@@ -9302,7 +9315,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
   barraVidaUI: {fileID: 1399007034}
   jogador: {fileID: 938667681}
+  ativarPorDistanciaSemGatilho: 0
   distanciaAtivacao: 800
+  fadeEntrada: 0.4
+  fadeSaida: 0.5
 --- !u!1001 &385788781
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17248,6 +17264,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroUniversal
   bossTransform: {fileID: 373490615}
   tempoFocoNoBoss: 3
+  tempoRetornoCamera: 0.6
+  atrasoParaAtacar: 3
+  painelBarraVida: {fileID: 0}
+  fadeEntradaBarra: 0.4
+  fadeSaidaBarra: 0.5
   tamanhoGatilho: {x: 100, y: 100}
   corGizmo: {r: 0, g: 1, b: 1, a: 1}
 --- !u!61 &654658305
@@ -152718,7 +152739,7 @@ Transform:
   m_GameObject: {fileID: 1407507669}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11700, y: -721, z: 0}
+  m_LocalPosition: {x: 11362, y: -721, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

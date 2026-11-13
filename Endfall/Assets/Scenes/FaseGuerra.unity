@@ -1013,7 +1013,7 @@ Transform:
   m_GameObject: {fileID: 77990979}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 475.8955, y: 168.83582, z: 0}
+  m_LocalPosition: {x: 399, y: 168.83582, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17068,6 +17068,17 @@ MonoBehaviour:
     m_Bits: 8
   alturaAcimaDoChaoElixires: 12
   removerElixiresQuandoBossMorrer: 1
+  usarSpawnNaCamera: 1
+  pontosVisiveisParaTestar: 8
+  margemLateralCamera: 0.1
+  margemVerticalCamera: 0.12
+  distanciaMinimaDaKayaNaTela: 0.35
+  diferencaMaximaAlturaPlataforma: 45
+  distanciaMinimaEntreElixiresNaTela: 0.18
+  iniciarElixiresPeloGatilho: 1
+  tempoParaElixirSumir: 10
+  fadeDesaparecimentoElixir: 0.75
+  reposicaoContinuaAteBossMorrer: 1
   tempoParaDestruir: 0.5
 --- !u!114 &711801907
 MonoBehaviour:
@@ -17083,7 +17094,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
   barraVidaUI: {fileID: 2050953889}
   jogador: {fileID: 568609564}
+  ativarPorDistanciaSemGatilho: 0
   distanciaAtivacao: 1000
+  fadeEntrada: 0.4
+  fadeSaida: 0.5
 --- !u!1 &732784944
 GameObject:
   m_ObjectHideFlags: 0
@@ -22553,7 +22567,7 @@ Transform:
   m_GameObject: {fileID: 874959939}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -239, y: 380, z: 0}
+  m_LocalPosition: {x: 9240, y: 379, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -44868,6 +44882,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroUniversal
   bossTransform: {fileID: 711801902}
   tempoFocoNoBoss: 3
+  tempoRetornoCamera: 0.6
+  atrasoParaAtacar: 3
+  painelBarraVida: {fileID: 0}
+  fadeEntradaBarra: 0.4
+  fadeSaidaBarra: 0.5
   tamanhoGatilho: {x: 21.8, y: 100}
   corGizmo: {r: 0, g: 1, b: 1, a: 1}
 --- !u!61 &1796603309
@@ -44925,7 +44944,7 @@ Transform:
   m_GameObject: {fileID: 1796603307}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9327.6, y: 401.3, z: 0}
+  m_LocalPosition: {x: 9416, y: 401.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
