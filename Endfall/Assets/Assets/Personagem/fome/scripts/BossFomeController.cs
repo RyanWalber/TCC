@@ -13,6 +13,14 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     [SerializeField] private Transform pontoDisparo;
     [SerializeField] private GameObject prefabFlecha;
 
+    [Header("Som Proprio da Hiena - em intervalos")]
+    [Tooltip("Quanto tempo espera para emitir o primeiro Som Proprio. Apenas a Fome usa intervalos, sem loop.")]
+    [Min(0f)] [SerializeField] private float atrasoPrimeiroSomProprio = 3f;
+    [Tooltip("Menor pausa entre o FIM de um Som Proprio e o proximo.")]
+    [Min(0.1f)] [SerializeField] private float pausaMinimaSomProprio = 6f;
+    [Tooltip("Maior pausa entre o FIM de um Som Proprio e o proximo.")]
+    [Min(0.1f)] [SerializeField] private float pausaMaximaSomProprio = 10f;
+
     [Header("Risada da hiena - AO SOLTAR A FLECHA")]
     [Tooltip("Arraste a risada adaptada da Fome aqui. Toca no mesmo instante em que a flecha e criada (Animation Event DispararFlecha).")]
     [SerializeField] private AudioClip risadaHienaAoDisparar;
@@ -34,6 +42,7 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     private float cronometroAtaque;
     private bool combatePeloGatilho;
     private float ataqueLiberadoEm = float.PositiveInfinity;
+    private float proximoSomProprioEm;
 
     public void AtivarPeloGatilho(float espera)
     {
@@ -47,11 +56,12 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     private void Start()
     {
         BuscarPlayer();
+        proximoSomProprioEm = Time.time + Mathf.Max(0f, atrasoPrimeiroSomProprio);
     }
 
     private void Update()
     {
-        audioInimigo.Atualizar(this);
+        AtualizarSomProprioEmIntervalos();
         if (player == null)
         {
             BuscarPlayer();
@@ -69,6 +79,27 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
             Atacar();
             cronometroAtaque = 0f;
         }
+    }
+
+    private void AtualizarSomProprioEmIntervalos()
+    {
+        if (Time.time < proximoSomProprioEm) return;
+
+        // Se estiver fora do alcance da Kaya ou sem clip, nao toca.
+        // Ao voltar para o alcance, tenta de novo sem iniciar um loop.
+        bool tocou = audioInimigo.TocarSomProprioUmaVez(this);
+        if (!tocou)
+        {
+            proximoSomProprioEm = Time.time + 0.75f;
+            return;
+        }
+
+        // A pausa comeca depois do fim do clip: os sons nao se
+        // sobrepoem, mesmo que o usuario escolha uma pausa curta.
+        float minimo = Mathf.Max(0.1f, pausaMinimaSomProprio);
+        float maximo = Mathf.Max(minimo, pausaMaximaSomProprio);
+        proximoSomProprioEm = Time.time + audioInimigo.DuracaoSomProprio +
+            Random.Range(minimo, maximo);
     }
 
     private void BuscarPlayer()

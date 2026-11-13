@@ -166,6 +166,15 @@ public sealed class AudioInimigo
 
     public void TocarSomProprio(Component emissor) => Atualizar(emissor);
 
+    // Utilizado SOMENTE pelo Cavaleiro da Fome. Os demais inimigos
+    // continuam usando Atualizar() com seus loops e fades habituais.
+    // Reaproveita o Som Proprio, Volume Proprio e Alcance do Inspector.
+    public bool TocarSomProprioUmaVez(Component emissor) =>
+        Tocar(emissor, somProprio, volumeProprio);
+
+    public float DuracaoSomProprio =>
+        somProprio != null ? somProprio.length : 0f;
+
     private void PararSomProprio()
     {
         if (fonteSomProprio == null) return;
