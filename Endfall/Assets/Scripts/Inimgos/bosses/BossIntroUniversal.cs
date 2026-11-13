@@ -11,6 +11,8 @@ public class BossIntroUniversal : MonoBehaviour
     [Header("CONFIGURAÇÃO DA INTRO")]
     [Tooltip("Tempo em segundos que a câmera fica parada focada no Boss")]
     public float tempoFocoNoBoss = 2f;
+    [Tooltip("Tempo de retorno da camera ate a Kaya antes de liberar os comandos. Ajuste para acompanhar a suavidade da Cinemachine.")]
+    [Min(0f)] public float tempoRetornoCamera = 0.6f;
 
     [Header("COMBATE POR GATILHO")]
     [Tooltip("Quanto tempo depois de pisar no gatilho o boss pode atacar. A introducao da camera tem prioridade, para evitar ataques durante o foco.")]
@@ -32,6 +34,8 @@ public class BossIntroUniversal : MonoBehaviour
     private bool jaDisparou = false;
     private BossBarraFade fadeBarra;
     private BossHealthBarController controleBarra;
+    private PlayerController controleKaya;
+    private bool introEmAndamento;
 
     private void Awake()
     {
@@ -86,6 +90,16 @@ public class BossIntroUniversal : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             jaDisparou = true;
+            playerTransform = collision.transform;
+            controleKaya = collision.GetComponentInParent<PlayerController>();
+            if (controleKaya == null)
+                controleKaya = playerTransform.GetComponentInChildren<PlayerController>(true);
+
+            // Trava comandos no exato instante do gatilho, antes da camera
+            // mudar. A gravidade e animacoes da Kaya continuam funcionando.
+            introEmAndamento = true;
+            if (controleKaya != null)
+                controleKaya.DefinirBloqueioIntroBoss(true);
 
             // Inicia a trilha da batalha no gatilho da introducao, sem
             // depender da distancia da Kaya ate o boss.
@@ -132,7 +146,8 @@ public class BossIntroUniversal : MonoBehaviour
         // Quando a camera ainda estiver focada no boss, nao permitir
         // dano antecipado. O atraso configurado comeca no gatilho.
         float espera = Mathf.Max(Mathf.Max(0f, atrasoParaAtacar),
-            Mathf.Max(0f, tempoFocoNoBoss) + 1.2f);
+            Mathf.Max(0f, tempoFocoNoBoss) + 1.2f +
+            Mathf.Max(0f, tempoRetornoCamera));
 
         BossFomeController fome = EncontrarNoChefe<BossFomeController>(bossTransform);
         if (fome != null) fome.AtivarPeloGatilho(espera);
@@ -175,13 +190,13 @@ public class BossIntroUniversal : MonoBehaviour
     {
         if (cinemachineCam == null || playerTransform == null || bossTransform == null)
         {
-            Debug.LogError("[INTRO BOSS] Certifique-se de que arrastou o Boss para o Inspector do gatilho!");
+            Debug.LogError("[INTRO BOSS] Nao foi possivel apresentar o chefe. Verifique a camera, a Kaya e o Boss no Inspector.", this);
+            FinalizarBloqueioDaIntro();
             yield break;
         }
 
-        // Para o movimento da Kaya
-        Rigidbody2D rbPlayer = playerTransform.GetComponent<Rigidbody2D>();
-        if (rbPlayer != null) rbPlayer.linearVelocity = Vector2.zero;
+        // O PlayerController ja zerou o movimento ao entrar no gatilho.
+        // Nao desligar esse componente: assim gravidade e animacoes continuam.
 
         // 1. MUTA O ALVO DA CINEMACHINE PARA O BOSS
         AlterarAlvoCinemachine(bossTransform);
@@ -192,8 +207,33 @@ public class BossIntroUniversal : MonoBehaviour
         // 3. VOLTA O ALVO DA CINEMACHINE PARA A KAYA
         AlterarAlvoCinemachine(playerTransform);
 
-        // Desativa este gatilho
+        // Aguarda a camera se aproximar novamente da Kaya antes de liberar
+        // movimento/pulo/dash/tiro. Ajustavel conforme o blend da cena.
+        if (tempoRetornoCamera > 0f)
+            yield return new WaitForSeconds(tempoRetornoCamera);
+
+        FinalizarBloqueioDaIntro();
+
+        // Desativa somente o gatilho, preservando o combate em andamento.
         gameObject.SetActive(false);
+    }
+
+    private void FinalizarBloqueioDaIntro()
+    {
+        if (!introEmAndamento) return;
+        introEmAndamento = false;
+        if (controleKaya != null)
+            controleKaya.DefinirBloqueioIntroBoss(false);
+    }
+
+    private void OnDisable()
+    {
+        // Se o gatilho for desligado durante a cinematica, a Kaya nao
+        // pode ficar travada para sempre (morte, troca de cena, etc.).
+        if (introEmAndamento && cinemachineCam != null &&
+            playerTransform != null)
+            AlterarAlvoCinemachine(playerTransform);
+        FinalizarBloqueioDaIntro();
     }
 
     private void AlterarAlvoCinemachine(Transform novoAlvo)

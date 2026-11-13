@@ -51,17 +51,35 @@ public class PlayerController : MonoBehaviour
     public bool EstaMovendoNoChao => estaNoChao && !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.1f;
     private KayaAudioManager audioKaya;
     private bool controlesBloqueadosPorDialogo;
+    private bool controlesBloqueadosPelaIntroBoss;
 
-    public bool ControlesBloqueadosPorDialogo => controlesBloqueadosPorDialogo;
+    // O mesmo estado e consultado por TiroPlayer e SistemaFuria:
+    // a intro tambem bloqueia tiro e Furia, sem afetar a trava dos dialogos.
+    public bool ControlesBloqueadosPorDialogo =>
+        controlesBloqueadosPorDialogo || controlesBloqueadosPelaIntroBoss;
 
-    // Desativa somente os comandos: o PlayerController e o Animator continuam ativos.
+    public void DefinirBloqueioIntroBoss(bool bloquear)
+    {
+        if (controlesBloqueadosPelaIntroBoss == bloquear) return;
+        bool estavaBloqueado = ControlesBloqueadosPorDialogo;
+        controlesBloqueadosPelaIntroBoss = bloquear;
+        AtualizarEstadoBloqueio(estavaBloqueado);
+    }
+
+    // Desativa somente os comandos: PlayerController, gravidade e Animator continuam ativos.
     public void DefinirBloqueioDialogo(bool bloquear)
     {
         if (controlesBloqueadosPorDialogo == bloquear) return;
+        bool estavaBloqueado = ControlesBloqueadosPorDialogo;
         controlesBloqueadosPorDialogo = bloquear;
+        AtualizarEstadoBloqueio(estavaBloqueado);
+    }
+
+    private void AtualizarEstadoBloqueio(bool estavaBloqueado)
+    {
         inputHorizontal = 0f;
 
-        if (bloquear && rb != null)
+        if (!estavaBloqueado && ControlesBloqueadosPorDialogo && rb != null)
         {
             if (estaDandoDash)
             {
@@ -74,9 +92,8 @@ public class PlayerController : MonoBehaviour
                     playerAnimation.DefinirDash(false);
             }
 
-            // Ao comecar a conversa, encerra uma eventual subida de pulo:
-            // a gravidade continua ativa e Kaya pode cair ate a plataforma.
-            // Nao altera a movimentacao normal fora do dialogo.
+            // Para na horizontal e cancela a subida do pulo, sem congelar
+            // a fisica. Kaya continua podendo cair sobre a plataforma.
             float velocidadeVertical = Mathf.Min(0f, rb.linearVelocity.y);
             rb.linearVelocity = new Vector2(0f, velocidadeVertical);
             rb.WakeUp();
@@ -156,7 +173,7 @@ public class PlayerController : MonoBehaviour
             contadorCoyote -= Time.deltaTime;
         }
 
-        if (controlesBloqueadosPorDialogo)
+        if (ControlesBloqueadosPorDialogo)
         {
             inputHorizontal = 0f;
             AtualizarAnimacoes();
@@ -189,7 +206,7 @@ public class PlayerController : MonoBehaviour
         // Detecção contínua abaixo dos pés: mais estável nas junções entre plataformas.
         estaNoChao = VerificarChao() || (plataformaSuporte != null && !estaSubindoPulo);
 
-        if (controlesBloqueadosPorDialogo)
+        if (ControlesBloqueadosPorDialogo)
         {
             // Sem input, mas preservando gravidade e movimento das plataformas.
             float movimentoPlataforma = plataformaSuporte != null && estaNoChao
