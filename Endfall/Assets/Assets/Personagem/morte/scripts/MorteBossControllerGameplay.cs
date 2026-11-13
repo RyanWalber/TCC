@@ -20,6 +20,31 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     public void AudioAoMorrer() => audioInimigo.TocarMorte(this);
     public void AudioAoCausarHit() => audioInimigo.TocarHitCausado(this);
 
+    [Header("MUSICA - RITUAL / INVULNERABILIDADE")]
+    [Tooltip("Musica exclusiva enquanto a Morte fica preta e invulneravel ao trocar de estagio. Arraste a faixa aqui.")]
+    [SerializeField] private AudioClip musicaTransicaoEstagio;
+    [Tooltip("Opcional. Fonte propria para a musica do ritual; se vazia, criada automaticamente.")]
+    [SerializeField] private AudioSource fonteMusicaTransicao;
+    [SerializeField, Range(0f, 1f)] private float volumeMusicaTransicao = 0.7f;
+    [Tooltip("Quanto das musicas normais continua audivel enquanto o ritual toca. Zero = silencio das trilhas.")]
+    [SerializeField, Range(0f, 1f)] private float volumeTrilhasDuranteTransicao = 0.08f;
+    [SerializeField, Min(0.05f)] private float fadeEntradaMusicaTransicao = 0.25f;
+    [SerializeField, Min(0.05f)] private float fadeSaidaMusicaTransicao = 0.35f;
+
+    [Header("GRITO FINAL - ANIMACAO MORTEMORRE")]
+    [Tooltip("Grito da Morte ao iniciar a animacao mortemorre. Nao confundir com o som Morte em Audio Inimigo.")]
+    [SerializeField] private AudioClip gritoFinal;
+    [Tooltip("Musica especial durante mortemorre. Se vazia, reutiliza a musica do ritual.")]
+    [SerializeField] private AudioClip musicaMorteFinal;
+    [SerializeField, Range(0f, 1f)] private float volumeMusicaMorteFinal = 0.7f;
+    [SerializeField, Range(0f, 1f)] private float volumeInicialGrito = 0.08f;
+    [SerializeField, Range(0f, 1f)] private float volumeMaximoGrito = 0.95f;
+    [SerializeField, Min(0.05f)] private float tempoCrescimentoGrito = 2.5f;
+    [SerializeField, Min(0f)] private float atrasoInicioGrito = 0f;
+    [Tooltip("Reduz as musicas de fundo durante o grito. Nao reduz o proprio grito.")]
+    [SerializeField, Range(0f, 1f)] private float volumeTrilhasDuranteGrito = 0.08f;
+    [SerializeField, Min(0.05f)] private float fadeMusicasParaGrito = 0.35f;
+
     [Header("Referencias")]
     [SerializeField] private Transform jogador;
     [SerializeField] private Animator animator;
@@ -118,6 +143,8 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     private float multiplicadorVelocidadeMovimento = 1f;
     private bool emTransicaoDeEstagio;
     private Coroutine rotinaTransicao;
+    private bool tocandoRitual;
+    private KayaAudioManager musicaKaya;
 
     private enum Acao
     {
@@ -206,6 +233,8 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         }
 
         EncontrarJogador();
+        if (jogador != null)
+            musicaKaya = jogador.GetComponentInParent<KayaAudioManager>();
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
         if (raizVisual == null && animator != null) raizVisual = animator.transform;
         if (raizVisual != null)
@@ -275,6 +304,7 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     private void Update()
     {
         audioInimigo.Atualizar(this);
+        AtualizarVolumeRitual();
         if (vidaBoss != null && vidaBoss.EstaMorto) return;
 
         EncontrarJogador();
@@ -354,6 +384,8 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         if (vidaBoss != null)
             vidaBoss.DefinirInvulnerabilidadeDeFase(true);
 
+        IniciarAudioRitual();
+
         if (animator != null)
         {
             string[] limpar = { "AtaqueCorvos", "InvocarLamentus",
@@ -376,8 +408,12 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             yield return new WaitForSecondsRealtime(duracao);
 
         if (vidaBoss == null || vidaBoss.EstaMorto)
+        {
+            EncerrarAudioRitual(true);
             yield break;
+        }
 
+        EncerrarAudioRitual(false);
         if (animator != null) animator.speed = 1f;
         vidaBoss.DefinirInvulnerabilidadeDeFase(false);
         emTransicaoDeEstagio = false;
@@ -812,6 +848,174 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     }
     public void ReceberDano(int quantidadeDano) => TomarDano(quantidadeDano);
 
+
+    private KayaAudioManager LocalizarMusicaKaya()
+    {
+        if (musicaKaya != null) return musicaKaya;
+        if (jogador != null)
+            musicaKaya = jogador.GetComponentInParent<KayaAudioManager>();
+        if (musicaKaya == null)
+        {
+            GameObject kaya = GameObject.FindGameObjectWithTag("Player");
+            if (kaya != null)
+                musicaKaya = kaya.GetComponentInParent<KayaAudioManager>();
+        }
+        return musicaKaya;
+    }
+
+    private void IniciarAudioRitual()
+    {
+        if (musicaTransicaoEstagio == null) return;
+
+        if (fonteMusicaTransicao == null)
+        {
+            GameObject emissor = new GameObject("Audio - Ritual da Morte");
+            emissor.transform.SetParent(transform, false);
+            fonteMusicaTransicao = emissor.AddComponent<AudioSource>();
+        }
+
+        fonteMusicaTransicao.playOnAwake = false;
+        fonteMusicaTransicao.loop = true;
+        fonteMusicaTransicao.spatialBlend = 0f;
+        fonteMusicaTransicao.Stop();
+        fonteMusicaTransicao.clip = musicaTransicaoEstagio;
+        fonteMusicaTransicao.volume = 0f;
+        fonteMusicaTransicao.Play();
+        tocandoRitual = true;
+
+        KayaAudioManager trilha = LocalizarMusicaKaya();
+        if (trilha != null)
+            trilha.AbafarMusicas(volumeTrilhasDuranteTransicao,
+                fadeEntradaMusicaTransicao);
+    }
+
+    private void EncerrarAudioRitual(bool imediato)
+    {
+        tocandoRitual = false;
+        if (imediato && fonteMusicaTransicao != null)
+        {
+            fonteMusicaTransicao.Stop();
+            fonteMusicaTransicao.volume = 0f;
+        }
+
+        KayaAudioManager trilha = LocalizarMusicaKaya();
+        if (trilha != null)
+            trilha.RestaurarMusicas(imediato ? 0.05f : fadeSaidaMusicaTransicao);
+    }
+
+    private void AtualizarVolumeRitual()
+    {
+        if (fonteMusicaTransicao == null) return;
+
+        float destino = tocandoRitual ? volumeMusicaTransicao : 0f;
+        float duracao = tocandoRitual ? fadeEntradaMusicaTransicao : fadeSaidaMusicaTransicao;
+        float passo = Time.unscaledDeltaTime / Mathf.Max(0.05f, duracao);
+        fonteMusicaTransicao.volume = Mathf.MoveTowards(
+            fonteMusicaTransicao.volume, destino, passo);
+
+        if (!tocandoRitual && fonteMusicaTransicao.isPlaying &&
+            fonteMusicaTransicao.volume <= 0.001f)
+            fonteMusicaTransicao.Stop();
+    }
+
+    // Musica especial da animacao mortemorre, independente deste componente:
+    // BossVida desativa a IA no golpe fatal e o som deve continuar na cinematica.
+    public void IniciarMusicaMorteFinal(MonoBehaviour controladorCinematica)
+    {
+        AudioClip faixa = musicaMorteFinal != null ? musicaMorteFinal : musicaTransicaoEstagio;
+        if (faixa == null || controladorCinematica == null) return;
+
+        GameObject emissor = new GameObject("Audio - Musica Final da Morte");
+        emissor.transform.SetParent(controladorCinematica.transform, false);
+        AudioSource fonte = emissor.AddComponent<AudioSource>();
+        fonte.playOnAwake = false;
+        fonte.loop = true;
+        fonte.spatialBlend = 0f;
+        fonte.clip = faixa;
+        fonte.volume = 0f;
+        fonte.Play();
+
+        KayaAudioManager trilha = LocalizarMusicaKaya();
+        if (trilha != null)
+            trilha.AbafarMusicas(volumeTrilhasDuranteTransicao,
+                fadeEntradaMusicaTransicao);
+
+        controladorCinematica.StartCoroutine(FadeMusicaMorteFinal(
+            fonte, Mathf.Clamp01(volumeMusicaMorteFinal),
+            Mathf.Max(0.05f, fadeEntradaMusicaTransicao)));
+    }
+
+    private static IEnumerator FadeMusicaMorteFinal(
+        AudioSource fonte, float volumeAlvo, float duracao)
+    {
+        float decorrido = 0f;
+        while (fonte != null && decorrido < duracao)
+        {
+            decorrido += Time.unscaledDeltaTime;
+            fonte.volume = Mathf.Lerp(0f, volumeAlvo,
+                Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(decorrido / duracao)));
+            yield return null;
+        }
+        if (fonte != null) fonte.volume = volumeAlvo;
+    }
+
+    // Chamado pelo FinalizadorMorte quando a animacao 'mortemorre' comeca.
+    // O som roda no controlador da CINEMATICA, pois BossVida desativa este
+    // script no golpe final e cancelaria coroutines executadas aqui.
+    public void IniciarGritoFinal(MonoBehaviour controladorCinematica)
+    {
+        if (gritoFinal == null || controladorCinematica == null) return;
+
+        GameObject emissor = new GameObject("Audio - Grito Final da Morte");
+        emissor.transform.SetParent(controladorCinematica.transform, false);
+        AudioSource fonte = emissor.AddComponent<AudioSource>();
+        fonte.playOnAwake = false;
+        fonte.loop = false;
+        fonte.spatialBlend = 0f;
+        fonte.volume = Mathf.Clamp01(volumeInicialGrito);
+        fonte.clip = gritoFinal;
+
+        KayaAudioManager trilha = LocalizarMusicaKaya();
+        controladorCinematica.StartCoroutine(RotinaGritoFinal(
+            fonte, Mathf.Clamp01(volumeInicialGrito), Mathf.Clamp01(volumeMaximoGrito),
+            Mathf.Max(0.05f, tempoCrescimentoGrito),
+            Mathf.Max(0f, atrasoInicioGrito),
+            trilha, volumeTrilhasDuranteGrito, fadeMusicasParaGrito,
+            musicaMorteFinal != null || musicaTransicaoEstagio != null));
+    }
+
+    private static IEnumerator RotinaGritoFinal(
+        AudioSource fonte, float volumeInicial, float volumeMaximo,
+        float duracaoCrescimento, float atraso,
+        KayaAudioManager trilha, float volumeDuranteGrito, float tempoFadeMusica,
+        bool manterTrilhasAbafadas)
+    {
+        if (atraso > 0f) yield return new WaitForSecondsRealtime(atraso);
+        if (fonte == null || fonte.clip == null) yield break;
+
+        if (trilha != null)
+            trilha.AbafarMusicas(volumeDuranteGrito, tempoFadeMusica);
+
+        fonte.volume = volumeInicial;
+        fonte.Play();
+
+        float decorrido = 0f;
+        while (fonte != null && fonte.isPlaying)
+        {
+            decorrido += Time.unscaledDeltaTime;
+            float progresso = Mathf.SmoothStep(0f, 1f,
+                Mathf.Clamp01(decorrido / duracaoCrescimento));
+            fonte.volume = Mathf.Lerp(volumeInicial, volumeMaximo, progresso);
+            yield return null;
+        }
+
+        // Durante a cinematica final a faixa especial ainda esta tocando.
+        // Restaurar a musica de combate aqui criaria um salto indesejado.
+        if (trilha != null && !manterTrilhasAbafadas)
+            trilha.RestaurarMusicas(tempoFadeMusica);
+        if (fonte != null) Destroy(fonte.gameObject);
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.85f, 0.1f, 1f);
@@ -820,6 +1024,7 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
     private void OnDisable()
     {
+        EncerrarAudioRitual(true);
         if (vidaBoss != null)
         {
             vidaBoss.VidaAlterada -= AoAlterarVida;

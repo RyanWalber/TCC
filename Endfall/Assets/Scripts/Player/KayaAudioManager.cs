@@ -88,6 +88,12 @@ public class KayaAudioManager : MonoBehaviour
     private float proximaBuscaDeInimigos;
     private float ultimoInstanteInimigoPerto = float.NegativeInfinity;
 
+    // Controle externo usado pela Cavaleira da Morte no ritual e no grito.
+    // Afeta SOMENTE as duas trilhas, preservando tiros, passos e outros SFX.
+    private float fatorMusicaExterno = 1f;
+    private float fatorMusicaExternoAlvo = 1f;
+    private float duracaoFadeMusicaExterno = 0.35f;
+
     // BossIntroUniversal inicia e mantem a trilha ate a derrota do chefe.
     private bool combateBossAtivo;
     private Transform bossDoGatilho;
@@ -280,6 +286,18 @@ public class KayaAudioManager : MonoBehaviour
             fontePassos.PlayOneShot(clip, volumePassos);
     }
 
+    public void AbafarMusicas(float proporcao, float duracaoFade)
+    {
+        fatorMusicaExternoAlvo = Mathf.Clamp01(proporcao);
+        duracaoFadeMusicaExterno = Mathf.Max(0.05f, duracaoFade);
+    }
+
+    public void RestaurarMusicas(float duracaoFade)
+    {
+        fatorMusicaExternoAlvo = 1f;
+        duracaoFadeMusicaExterno = Mathf.Max(0.05f, duracaoFade);
+    }
+
     public void IniciarCombateBoss(Transform boss)
     {
         if (morreu || boss == null) return;
@@ -380,10 +398,16 @@ public class KayaAudioManager : MonoBehaviour
             Time.deltaTime / Mathf.Max(0.1f, duracaoTransicaoMusicas));
         float crossfade = Mathf.SmoothStep(0f, 1f, misturaCombate);
 
-        // Quando um sobe, o outro desce. Na volta acontece o inverso.
+        // Abaixa as duas musicas suavemente durante eventos especiais.
+        // O crossfade entre ambiente e combate continua no ponto correto.
+        fatorMusicaExterno = Mathf.MoveTowards(
+            fatorMusicaExterno, fatorMusicaExternoAlvo,
+            Time.unscaledDeltaTime / Mathf.Max(0.05f, duracaoFadeMusicaExterno));
+
         fonteAmbiente.volume = volumeAmbiente *
-            Mathf.Lerp(1f, proporcaoAmbienteNoCombate, crossfade);
-        fonteMusicaCombate.volume = volumeMusicaCombate * crossfade;
+            Mathf.Lerp(1f, proporcaoAmbienteNoCombate, crossfade) * fatorMusicaExterno;
+        fonteMusicaCombate.volume = volumeMusicaCombate *
+            crossfade * fatorMusicaExterno;
     }
 
     private void AtualizarRespiracao()

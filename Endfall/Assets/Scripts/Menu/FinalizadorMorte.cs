@@ -139,6 +139,18 @@ public sealed class FinalizadorMorte : MonoBehaviour
         if (foice == null)
             Debug.LogWarning("[EndFall] Foice_0 nao encontrada. A camera permanecera focada na Morte.", this);
 
+        // Inicia o grito com crescimento de volume junto da animacao
+        // mortemorre, antes do acompanhamento da foice pela camera.
+        MorteBossControllerGameplay controladorBoss =
+            boss.GetComponent<MorteBossControllerGameplay>();
+        if (controladorBoss == null)
+            controladorBoss = boss.GetComponentInChildren<MorteBossControllerGameplay>(true);
+        if (controladorBoss != null)
+        {
+            controladorBoss.IniciarMusicaMorteFinal(this);
+            controladorBoss.IniciarGritoFinal(this);
+        }
+
         StartCoroutine(Encerramento());
     }
 
