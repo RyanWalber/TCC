@@ -292,7 +292,7 @@ MonoBehaviour:
   desativarFuria: {fileID: 0}
   volumeDesativarFuria: 0.6
   respiracaoNormal: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
-  volumeRespiracaoNormal: 0.7
+  volumeRespiracaoNormal: 0.4
   respiracaoCansada: {fileID: 8300000, guid: 53ba2a5c9bd3efc47a398adf3cc17ea8, type: 3}
   volumeRespiracaoCansada: 1
   esperaAposCombate: 3

@@ -163,10 +163,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5631c096d55b8454e89ffda54d370079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthPickup
-  somColetaVida: {fileID: 0}
-  volumeColetaVida: 0.8
   quantidadeVida: 10
-  idUnico: 05c998c0-40cb-4594-b300-b4c7ba16f4f2
+  somColetaVida: {fileID: 8300000, guid: 2b1e4cfc417869d4fa0274f9890843bb, type: 3}
+  volumeColetaVida: 0.8
+  idUnico: 506a511363cc462abb29371ea41e5dbb
+  visualFlutuante: {fileID: 6669947760521341094}
+  alturaFlutuacao: 0.5
+  velocidadeFlutuacao: 2
 --- !u!58 &735302663767421035
 CircleCollider2D:
   m_ObjectHideFlags: 0
