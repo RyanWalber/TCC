@@ -471,7 +471,11 @@ public class KayaAudioManager : MonoBehaviour
     public void TocarAtivarFuria() => TocarEfeito(ativarFuria, volumeAtivarFuria);
     public void TocarDesativarFuria() => TocarEfeito(desativarFuria, volumeDesativarFuria);
 
-    public void TocarMorte()
+    // Assinatura original preservada para eventuais UnityEvents/animacoes.
+    public void TocarMorte() => TocarMorte(false);
+
+    // Durante a morte cinematografica, nao corta a musica de combate.
+    public void TocarMorte(bool manterMusicasTocando)
     {
         if (morreu) return;
         morreu = true;
@@ -479,7 +483,10 @@ public class KayaAudioManager : MonoBehaviour
         fonteRespiracaoNormal.Stop();
         fonteRespiracaoCansada.Stop();
         fontePassos.Stop();
-        if (fonteMusicaCombate != null) fonteMusicaCombate.Stop();
+        // Durante a morte cinematografica a musica continua SEM reiniciar;
+        // o PlayerHealth desacelera o pitch dela e de todos os efeitos.
+        if (!manterMusicasTocando && fonteMusicaCombate != null)
+            fonteMusicaCombate.Stop();
 
         // A cena pode recarregar imediatamente depois da morte.
         // Um objeto temporario conserva o som durante o renascimento.

@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
 
     private SistemaFuria sistemaFuria;
 
+    public bool EstaNoChao => estaNoChao;
     public bool EstaDandoDash => estaDandoDash;
     public bool EstaMovendoNoChao => estaNoChao && !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.1f;
     private KayaAudioManager audioKaya;

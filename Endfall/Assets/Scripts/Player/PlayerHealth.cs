@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -50,6 +51,10 @@ public class PlayerHealth : MonoBehaviour
     [Range(0.05f, 1f)] [SerializeField] private float velocidadeMundoNaMorte = 0.22f;
     [Tooltip("Tempo REAL para passar da velocidade normal para camera lenta.")]
     [Min(0.05f)] [SerializeField] private float tempoEntradaCameraLenta = 0.3f;
+    [Tooltip("Desacelera tambem a musica e os efeitos sonoros pelo pitch, sem reiniciar os AudioSources.")]
+    [SerializeField] private bool desacelerarMusicasESons = true;
+    [Tooltip("Quanto a velocidade de audio acompanha a camera lenta. 1 = segue exatamente a lentidao do mundo; 0 = nao altera audio.")]
+    [Range(0f, 1f)] [SerializeField] private float intensidadeCameraLentaAudio = 1f;
     [Tooltip("Velocidade da animacao kayamorrendo em tempo REAL. 0.75 = 75% da velocidade original; nao espera a animacao terminar.")]
     [Range(0.1f, 1.5f)] [SerializeField] private float velocidadeAnimacaoQueda = 0.75f;
     [Tooltip("Tempo REAL de queda visivel antes de o fade preto comecar.")]
@@ -62,6 +67,14 @@ public class PlayerHealth : MonoBehaviour
     private float passoFisicaAntesMorte = 0.02f;
     private AnimatorUpdateMode modoAnimatorAntesMorte;
     private float velocidadeAnimatorAntesMorte = 1f;
+
+    // A posicao dos pes so e travada quando a morte INICIA no chao.
+    // No ar, a queda real permanece sob o controle do Rigidbody2D.
+    private bool morreuApoiadaNoChao;
+    private RigidbodyConstraints2D restricoesRigidbodyAntesMorte;
+    private readonly Dictionary<AudioSource, float> pitchesOriginaisAudio =
+        new Dictionary<AudioSource, float>();
+    private float proximaBuscaAudioMorte;
 
     [Header("Estabilizacao visual durante a morte")]
     [Tooltip("Objeto visual que recebe a animacao. Se vazio, usa o objeto do Animator.")]
@@ -186,9 +199,11 @@ public class PlayerHealth : MonoBehaviour
         // O Animator atualiza as poses antes do LateUpdate. Compensamos
         // somente a posicao do objeto visual: nunca alteramos os ossos,
         // a rotacao da queda ou o Rigidbody2D do jogador.
-        // A nova cinematica usa somente o inicio de kayamorrendo e corta
-        // antes de a queda acabar. Nao prender os pes ao chao nesse modo.
-        if (fixarPesDuranteMorte && !usarMorteCinematografica &&
+        // O rig mexe os pes para frente/tras durante kayamorrendo.
+        // Se Kaya morreu no CHAO, compensar a posicao do visual para
+        // manter os pes exatamente no mesmo ponto do mundo.
+        // Se morreu no AR, nunca ancorar: o Rigidbody pode cair.
+        if (fixarPesDuranteMorte && morreuApoiadaNoChao &&
             (peMorte1 != null || peMorte2 != null))
         {
             if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
@@ -307,6 +322,11 @@ public class PlayerHealth : MonoBehaviour
         estaMorta = true;
         referenciaDosPesCapturada = false;
 
+        // Decide uma vez, no golpe fatal. Nenhum frame da animacao
+        // pode transformar uma morte no ar em morte fixa no chao.
+        PlayerController controle = GetComponent<PlayerController>();
+        morreuApoiadaNoChao = DetectarApoioNoChao(controle);
+
         // Impede que a rotina de invencibilidade altere as cores durante a morte.
         StopAllCoroutines();
         AplicarCorKaya(Color.white, true);
@@ -320,11 +340,19 @@ public class PlayerHealth : MonoBehaviour
             posicaoMorteCapturada = true;
         }
 
+        // Captura os pes ANTES da primeira pose de kayamorrendo para
+        // evitar que a mudanca inicial da animacao provoque um salto.
+        if (morreuApoiadaNoChao && fixarPesDuranteMorte &&
+            (peMorte1 != null || peMorte2 != null))
+        {
+            posicaoReferenciaDosPes = ObterCentroPesNoMundo();
+            referenciaDosPesCapturada = true;
+        }
+
         // Desativa toda a mira para nao disputar a rotacao com a animacao de morte.
         foreach (MiraMouse mira in GetComponentsInChildren<MiraMouse>(true))
             mira.enabled = false;
 
-        PlayerController controle = GetComponent<PlayerController>();
         if (controle != null) controle.enabled = false;
 
         TiroPlayer[] armas = GetComponentsInChildren<TiroPlayer>(true);
@@ -334,12 +362,33 @@ public class PlayerHealth : MonoBehaviour
         Rigidbody2D corpo = GetComponent<Rigidbody2D>();
         if (corpo != null)
         {
-            corpo.linearVelocity = Vector2.zero;
+            restricoesRigidbodyAntesMorte = corpo.constraints;
+            float velocidadeVertical = morreuApoiadaNoChao ? 0f :
+                Mathf.Min(0f, corpo.linearVelocity.y);
+            corpo.linearVelocity = new Vector2(0f, velocidadeVertical);
             corpo.angularVelocity = 0f;
-            corpo.constraints = RigidbodyConstraints2D.FreezeAll;
+
+            if (morreuApoiadaNoChao)
+            {
+                // No chao, trava raiz FISICA; o visual ainda pode mover
+                // ossos, com seus pes compensados no LateUpdate.
+                corpo.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+            else
+            {
+                // No ar, preserva a gravidade e as colisoes. Congela
+                // apenas o X fisico para Kaya nao ser arremessada.
+                corpo.constraints =
+                    (restricoesRigidbodyAntesMorte &
+                     ~RigidbodyConstraints2D.FreezePositionY) |
+                    RigidbodyConstraints2D.FreezePositionX;
+                corpo.WakeUp();
+            }
         }
 
-        if (audioKaya != null) audioKaya.TocarMorte();
+        // Nao parar ambiente nem trilha de combate durante o slow motion.
+        if (audioKaya != null)
+            audioKaya.TocarMorte(usarMorteCinematografica);
 
         if (usarMorteCinematografica)
         {
@@ -371,6 +420,78 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    private bool DetectarApoioNoChao(PlayerController controle)
+    {
+        if (controle != null && controle.EstaNoChao)
+            return true;
+
+        // Verificacao extra para morte no exato frame de aterrissagem
+        // ou cenas em que o PlayerController foi desabilitado antes.
+        Collider2D corpo = GetComponent<Collider2D>();
+        if (corpo == null) return false;
+        Bounds limites = corpo.bounds;
+        float alturaTeste = Mathf.Max(0.15f, limites.size.y * 0.08f);
+        float alcance = alturaTeste + 0.22f;
+
+        for (int i = -1; i <= 1; i++)
+        {
+            float x = limites.center.x + i * limites.extents.x * 0.6f;
+            Vector2 inicio = new Vector2(x, limites.min.y + alturaTeste);
+            RaycastHit2D[] acertos = Physics2D.RaycastAll(
+                inicio, Vector2.down, alcance);
+            foreach (RaycastHit2D acerto in acertos)
+            {
+                if (acerto.collider == null || acerto.collider.isTrigger ||
+                    acerto.collider.transform.IsChildOf(transform) ||
+                    acerto.normal.y < 0.7f)
+                    continue;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void AtualizarCameraLentaNosAudios(float velocidadeRelativa)
+    {
+        if (!desacelerarMusicasESons) return;
+
+        // AudioSource nao obedece a Time.timeScale. Alterar o pitch do
+        // proprio source desacelera tambem as musicas que JA estavam
+        // tocando, sem Stop, Play, reinicio ou descontinuidade de volume.
+        // Captura tambem tiros/corvos/SFX criados durante a cinematica.
+        if (Time.unscaledTime >= proximaBuscaAudioMorte)
+        {
+            AudioSource[] fontes = FindObjectsByType<AudioSource>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (AudioSource fonte in fontes)
+            {
+                if (fonte != null && !pitchesOriginaisAudio.ContainsKey(fonte))
+                    pitchesOriginaisAudio.Add(fonte, fonte.pitch);
+            }
+            proximaBuscaAudioMorte = Time.unscaledTime + 0.07f;
+        }
+
+        float fator = Mathf.Lerp(1f,
+            Mathf.Clamp(velocidadeRelativa, 0.05f, 1f),
+            Mathf.Clamp01(intensidadeCameraLentaAudio));
+        foreach (KeyValuePair<AudioSource, float> par in pitchesOriginaisAudio)
+        {
+            if (par.Key != null)
+                par.Key.pitch = Mathf.Clamp(par.Value * fator, -3f, 3f);
+        }
+    }
+
+    private void RestaurarPitchDosAudios()
+    {
+        foreach (KeyValuePair<AudioSource, float> par in pitchesOriginaisAudio)
+        {
+            if (par.Key != null)
+                par.Key.pitch = par.Value;
+        }
+        pitchesOriginaisAudio.Clear();
+        proximaBuscaAudioMorte = 0f;
+    }
+
     private IEnumerator ExecutarMorteCinematografica()
     {
         cinematicaMorteEmAndamento = true;
@@ -397,6 +518,10 @@ public class PlayerHealth : MonoBehaviour
             Time.fixedDeltaTime = passoFisicaAntesMorte * Mathf.Max(0.01f,
                 Time.timeScale / Mathf.Max(0.01f, escalaTempoAntesMorte));
 
+            // Musicas e tiros seguem a mesma curva de camera lenta.
+            AtualizarCameraLentaNosAudios(
+                Time.timeScale / Mathf.Max(0.01f, escalaTempoAntesMorte));
+
             float progressoFade = Mathf.Clamp01(
                 (tempoRealDecorrido - atraso) / duracaoFade);
             if (cortina != null)
@@ -416,6 +541,8 @@ public class PlayerHealth : MonoBehaviour
 
     private void RestaurarTempoDaMorte()
     {
+        // Restaurar os pitchs originais ANTES de trocar a cena.
+        RestaurarPitchDosAudios();
         Time.timeScale = Mathf.Max(0.01f, escalaTempoAntesMorte);
         Time.fixedDeltaTime = passoFisicaAntesMorte;
     }
