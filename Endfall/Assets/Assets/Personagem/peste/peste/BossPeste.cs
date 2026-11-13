@@ -36,6 +36,10 @@ public class BossPeste : MonoBehaviour, IAudioBoss
     [Tooltip("Tempo entre ataques com VIDA CRÍTICA (em segundos)")]
     public float tempoAtaqueVidaBaixa = 1f;
 
+    [Header("Frequencia do cuspe - ajuste no Inspector")]
+    [Tooltip("Multiplica os dois intervalos acima. 0.65 = 35% menos espera. Nao modifica a gosma, o ponto de disparo ou sua queda vertical.")]
+    [Range(0.2f, 2f)] [SerializeField] private float multiplicadorIntervaloCuspe = 0.65f;
+
     private Rigidbody2D rb;
     private Animator anim;
     private Transform playerTransform;
@@ -47,10 +51,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
     private float proximoIntervaloAtaque;
     private bool combatePeloGatilho;
     private float ataqueLiberadoEm = float.PositiveInfinity;
-
-    [Header("Perseguicao apos a intro")]
-    [Min(0f)] [SerializeField] private float distanciaPararPerseguicao = 2f;
-    [Min(0f)] [SerializeField] private float alturaSobreKaya = 3f;
 
     public void AtivarPeloGatilho(float espera)
     {
@@ -96,40 +96,20 @@ public class BossPeste : MonoBehaviour, IAudioBoss
 
     private void PatrulharEVoar()
     {
+        // Patrulha fixa entre os limites originais, inclusive em combate.
+        // O gatilho so ativa a luta; nao faz a Peste perseguir Kaya.
         float limiteDireita = posicaoInicial.x + distanciaPatrulha;
         float limiteEsquerda = posicaoInicial.x - distanciaPatrulha;
 
-        if (!combatePeloGatilho && indoParaDireita && transform.position.x >= limiteDireita)
-        {
+        if (indoParaDireita && transform.position.x >= limiteDireita)
             Virar(false);
-        }
-        else if (!combatePeloGatilho && !indoParaDireita && transform.position.x <= limiteEsquerda)
-        {
+        else if (!indoParaDireita && transform.position.x <= limiteEsquerda)
             Virar(true);
-        }
 
         float direcaoX = indoParaDireita ? 1f : -1f;
-        float novoX = transform.position.x + (direcaoX * velocidade * Time.deltaTime);
-        float novoY = posicaoInicial.y + (Mathf.Sin(Time.time * 3f) * balancoVertical);
-
-        if (combatePeloGatilho && playerTransform != null)
-        {
-            float deltaX = playerTransform.position.x - transform.position.x;
-            if (Mathf.Abs(deltaX) > distanciaPararPerseguicao)
-            {
-                bool direita = deltaX > 0f;
-                if (indoParaDireita != direita) Virar(direita);
-                novoX = Mathf.MoveTowards(transform.position.x,
-                    playerTransform.position.x, velocidade * Time.deltaTime);
-            }
-            else novoX = transform.position.x;
-
-            float yAlvo = Mathf.Max(posicaoInicial.y,
-                playerTransform.position.y + alturaSobreKaya);
-            novoY = Mathf.MoveTowards(transform.position.y,
-                yAlvo + Mathf.Sin(Time.time * 3f) * balancoVertical,
-                velocidade * Time.deltaTime);
-        }
+        float novoX = transform.position.x + direcaoX * velocidade * Time.deltaTime;
+        float novoY = posicaoInicial.y +
+            Mathf.Sin(Time.time * 3f) * balancoVertical;
 
         transform.position = new Vector3(novoX, novoY, transform.position.z);
     }
@@ -171,7 +151,12 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         float percentualVida = bossVida != null ? bossVida.ObterPercentualVida() : 1f;
         float tempoBase = Mathf.Lerp(tempoAtaqueVidaBaixa, tempoAtaqueVidaCheia, percentualVida);
 
-        proximoIntervaloAtaque = tempoBase * Random.Range(0.8f, 1.2f);
+        // Frequencia maior, com a mesma progressao de vida de antes.
+        // So altera o intervalo, preservando InstanciarGosma() e a
+        // queda vertical no ProjetilGosma original.
+        proximoIntervaloAtaque = Mathf.Max(0.2f,
+            tempoBase * Mathf.Clamp(multiplicadorIntervaloCuspe, 0.2f, 2f) *
+            Random.Range(0.8f, 1.2f));
     }
 
     // Chamado pelo Animation Event no clipe pesteatak
