@@ -43,6 +43,26 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private Animator animatorKaya;
     [SerializeField, Min(0.1f)] private float duracaoMorteFallback = 2.5f;
 
+    [Header("Morte cinematografica - queda em camera lenta")]
+    [Tooltip("Ao morrer, Kaya inicia a animacao de queda em camera lenta e a tela escurece ANTES de chegar ao chao.")]
+    [SerializeField] private bool usarMorteCinematografica = true;
+    [Tooltip("Velocidade do mundo no final da desaceleracao. 0.22 = 22% da velocidade normal.")]
+    [Range(0.05f, 1f)] [SerializeField] private float velocidadeMundoNaMorte = 0.22f;
+    [Tooltip("Tempo REAL para passar da velocidade normal para camera lenta.")]
+    [Min(0.05f)] [SerializeField] private float tempoEntradaCameraLenta = 0.3f;
+    [Tooltip("Velocidade da animacao kayamorrendo em tempo REAL. 0.75 = 75% da velocidade original; nao espera a animacao terminar.")]
+    [Range(0.1f, 1.5f)] [SerializeField] private float velocidadeAnimacaoQueda = 0.75f;
+    [Tooltip("Tempo REAL de queda visivel antes de o fade preto comecar.")]
+    [Min(0f)] [SerializeField] private float atrasoFadeNaMorte = 0.25f;
+    [Tooltip("Duracao REAL do fade ate a tela ficar preta e renascer. Diminua para cortar a queda mais cedo.")]
+    [Min(0.1f)] [SerializeField] private float duracaoFadeNaMorte = 1.8f;
+
+    private bool cinematicaMorteEmAndamento;
+    private float escalaTempoAntesMorte = 1f;
+    private float passoFisicaAntesMorte = 0.02f;
+    private AnimatorUpdateMode modoAnimatorAntesMorte;
+    private float velocidadeAnimatorAntesMorte = 1f;
+
     [Header("Estabilizacao visual durante a morte")]
     [Tooltip("Objeto visual que recebe a animacao. Se vazio, usa o objeto do Animator.")]
     [SerializeField] private Transform visualKaya;
@@ -166,7 +186,10 @@ public class PlayerHealth : MonoBehaviour
         // O Animator atualiza as poses antes do LateUpdate. Compensamos
         // somente a posicao do objeto visual: nunca alteramos os ossos,
         // a rotacao da queda ou o Rigidbody2D do jogador.
-        if (fixarPesDuranteMorte && (peMorte1 != null || peMorte2 != null))
+        // A nova cinematica usa somente o inicio de kayamorrendo e corta
+        // antes de a queda acabar. Nao prender os pes ao chao nesse modo.
+        if (fixarPesDuranteMorte && !usarMorteCinematografica &&
+            (peMorte1 != null || peMorte2 != null))
         {
             if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
                 return;
@@ -318,7 +341,24 @@ public class PlayerHealth : MonoBehaviour
 
         if (audioKaya != null) audioKaya.TocarMorte();
 
-        if (animatorKaya != null && animatorKaya.isActiveAndEnabled)
+        if (usarMorteCinematografica)
+        {
+            // O mundo inteiro fica lento via Time.timeScale. A animacao da
+            // Kaya usa tempo real, mas com velocidade reduzida, para que a
+            // queda seja VISIVEL antes do fade, sem chegar ao quadro final.
+            if (animatorKaya != null && animatorKaya.isActiveAndEnabled)
+            {
+                modoAnimatorAntesMorte = animatorKaya.updateMode;
+                velocidadeAnimatorAntesMorte = animatorKaya.speed;
+                animatorKaya.updateMode = AnimatorUpdateMode.UnscaledTime;
+                animatorKaya.speed = Mathf.Clamp(velocidadeAnimacaoQueda, 0.1f, 1.5f);
+                animatorKaya.ResetTrigger(TriggerMorrer);
+                animatorKaya.SetTrigger(TriggerMorrer);
+            }
+
+            StartCoroutine(ExecutarMorteCinematografica());
+        }
+        else if (animatorKaya != null && animatorKaya.isActiveAndEnabled)
         {
             animatorKaya.ResetTrigger(TriggerMorrer);
             animatorKaya.SetTrigger(TriggerMorrer);
@@ -326,9 +366,76 @@ public class PlayerHealth : MonoBehaviour
         }
         else
         {
-            // Sem Animator valido, conserva o comportamento antigo de renascimento.
+            // Modo classico sem Animator: respawn direto.
             RenascerDepoisDaMorte();
         }
+    }
+
+    private IEnumerator ExecutarMorteCinematografica()
+    {
+        cinematicaMorteEmAndamento = true;
+        escalaTempoAntesMorte = Time.timeScale;
+        passoFisicaAntesMorte = Time.fixedDeltaTime;
+
+        LevelLoader cortina = LevelLoader.GarantirInstancia();
+        float atraso = Mathf.Max(0f, atrasoFadeNaMorte);
+        float duracaoFade = Mathf.Max(0.1f, duracaoFadeNaMorte);
+        float duracaoDesaceleracao = Mathf.Max(0.05f, tempoEntradaCameraLenta);
+        float duracaoTotal = atraso + duracaoFade;
+        float tempoRealDecorrido = 0f;
+
+        while (tempoRealDecorrido < duracaoTotal)
+        {
+            // UnscaledDeltaTime: o fade nao congela quando o mundo desacelera.
+            tempoRealDecorrido += Mathf.Min(Time.unscaledDeltaTime, 0.1f);
+
+            float progressoLento = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(
+                tempoRealDecorrido / duracaoDesaceleracao));
+            Time.timeScale = Mathf.Lerp(
+                escalaTempoAntesMorte, Mathf.Clamp(velocidadeMundoNaMorte, 0.05f, 1f),
+                progressoLento);
+            Time.fixedDeltaTime = passoFisicaAntesMorte * Mathf.Max(0.01f,
+                Time.timeScale / Mathf.Max(0.01f, escalaTempoAntesMorte));
+
+            float progressoFade = Mathf.Clamp01(
+                (tempoRealDecorrido - atraso) / duracaoFade);
+            if (cortina != null)
+                cortina.DefinirEscurecimentoDeMorte(
+                    Mathf.SmoothStep(0f, 1f, progressoFade));
+
+            yield return null;
+        }
+
+        // O ultimo quadro da animacao fica coberto pela tela preta.
+        // Nao aguarda os 3 segundos do clipe kayamorrendo.
+        if (cortina != null) cortina.DefinirEscurecimentoDeMorte(1f);
+        RestaurarTempoDaMorte();
+        cinematicaMorteEmAndamento = false;
+        RenascerDepoisDaMorte();
+    }
+
+    private void RestaurarTempoDaMorte()
+    {
+        Time.timeScale = Mathf.Max(0.01f, escalaTempoAntesMorte);
+        Time.fixedDeltaTime = passoFisicaAntesMorte;
+    }
+
+    private void OnDisable()
+    {
+        // Se a cena ou Kaya for desativada durante a cinematica,
+        // o proximo Play/respawn nao pode permanecer em camera lenta.
+        if (!cinematicaMorteEmAndamento) return;
+        RestaurarTempoDaMorte();
+        cinematicaMorteEmAndamento = false;
+
+        if (animatorKaya != null)
+        {
+            animatorKaya.updateMode = modoAnimatorAntesMorte;
+            animatorKaya.speed = velocidadeAnimatorAntesMorte;
+        }
+
+        LevelLoader cortina = LevelLoader.Instance;
+        if (cortina != null) cortina.CancelarEscurecimentoDeMorte();
     }
 
     private IEnumerator AguardarAnimacaoMorte()

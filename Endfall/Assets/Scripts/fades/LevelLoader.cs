@@ -133,6 +133,35 @@ public class LevelLoader : MonoBehaviour
         cortinaGlobal.raycastTarget = true;
     }
 
+    // Usado somente pela morte cinematografica da Kaya. A cortina
+    // global ja fica acima do HUD, assim nenhum canvas novo e necessario.
+    // Este metodo nao inicia uma troca de cena: o respawn continua sendo
+    // responsabilidade do SaveManager e do fluxo de checkpoint.
+    public void DefinirEscurecimentoDeMorte(float alpha)
+    {
+        if (emTransicao) return;
+
+        if (cortinaGlobal == null)
+            CriarCortinaGlobal();
+
+        if (fadeInicial != null)
+        {
+            StopCoroutine(fadeInicial);
+            fadeInicial = null;
+        }
+
+        cortinaGlobal.raycastTarget = true;
+        DefinirAlpha(alpha);
+    }
+
+    // Seguranca caso a Kaya seja desativada antes da conclusao do fade.
+    public void CancelarEscurecimentoDeMorte()
+    {
+        if (emTransicao || cortinaGlobal == null) return;
+        DefinirAlpha(0f);
+        cortinaGlobal.raycastTarget = false;
+    }
+
     public void CarregarCena(string nomeCena)
     {
         if (emTransicao) return;
