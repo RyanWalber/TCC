@@ -72,6 +72,15 @@ public class BossIntroUniversal : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             jaDisparou = true;
+
+            // Inicia a trilha da batalha no gatilho da introducao, sem
+            // depender da distancia da Kaya ate o boss.
+            KayaAudioManager musica = collision.GetComponentInParent<KayaAudioManager>();
+            if (musica == null && playerTransform != null)
+                musica = playerTransform.GetComponentInParent<KayaAudioManager>();
+            if (musica != null && bossTransform != null)
+                musica.IniciarCombateBoss(bossTransform);
+
             StartCoroutine(RotinaApresentacaoBoss());
         }
     }

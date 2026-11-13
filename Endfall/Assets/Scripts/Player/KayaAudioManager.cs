@@ -87,6 +87,13 @@ public class KayaAudioManager : MonoBehaviour
     private float misturaCombate;
     private float proximaBuscaDeInimigos;
     private float ultimoInstanteInimigoPerto = float.NegativeInfinity;
+
+    // BossIntroUniversal inicia e mantem a trilha ate a derrota do chefe.
+    private bool combateBossAtivo;
+    private Transform bossDoGatilho;
+    private BossVida vidaBossDoGatilho;
+    private VidaBossGuerra vidaGuerraDoGatilho;
+
     private bool morreu;
 
     private void Awake()
@@ -273,6 +280,49 @@ public class KayaAudioManager : MonoBehaviour
             fontePassos.PlayOneShot(clip, volumePassos);
     }
 
+    public void IniciarCombateBoss(Transform boss)
+    {
+        if (morreu || boss == null) return;
+
+        BossVida vida = boss.GetComponent<BossVida>();
+        if (vida == null) vida = boss.GetComponentInParent<BossVida>();
+        if (vida == null) vida = boss.GetComponentInChildren<BossVida>(true);
+
+        VidaBossGuerra vidaGuerra = boss.GetComponent<VidaBossGuerra>();
+        if (vidaGuerra == null) vidaGuerra = boss.GetComponentInParent<VidaBossGuerra>();
+        if (vidaGuerra == null) vidaGuerra = boss.GetComponentInChildren<VidaBossGuerra>(true);
+
+        if (vida != null && vida.EstaMorto) return;
+        if (vidaGuerra != null && vidaGuerra.GetVidaAtual() <= 0f) return;
+
+        bossDoGatilho = boss;
+        vidaBossDoGatilho = vida;
+        vidaGuerraDoGatilho = vidaGuerra;
+        combateBossAtivo = true;
+
+        if (vida == null && vidaGuerra == null)
+            Debug.LogWarning("[AudioKaya] Boss do gatilho sem BossVida ou VidaBossGuerra. " +
+                "A musica encerrara quando esse boss desaparecer.", boss);
+    }
+
+    private void ConferirFimDoCombateBoss()
+    {
+        if (!combateBossAtivo) return;
+
+        bool terminou = bossDoGatilho == null ||
+            (vidaBossDoGatilho != null && vidaBossDoGatilho.EstaMorto) ||
+            (vidaGuerraDoGatilho != null && vidaGuerraDoGatilho.GetVidaAtual() <= 0f);
+
+        if (!terminou) return;
+
+        combateBossAtivo = false;
+        bossDoGatilho = null;
+        vidaBossDoGatilho = null;
+        vidaGuerraDoGatilho = null;
+        ultimoInstanteInimigoPerto = float.NegativeInfinity;
+        proximaBuscaDeInimigos = Time.time + Mathf.Max(0.1f, intervaloVerificacaoCombate);
+    }
+
     private bool ExisteAmeacaProxima()
     {
         // Collider do proprio inimigo; nao confunde paredes e plataformas
@@ -301,21 +351,8 @@ public class KayaAudioManager : MonoBehaviour
             InimigoParado parado = colisao.GetComponentInParent<InimigoParado>();
             if (parado != null && parado.isActiveAndEnabled) return true;
 
-            BossFomeController fome = colisao.GetComponentInParent<BossFomeController>();
-            if (fome != null && fome.isActiveAndEnabled) return true;
-
-            BossPeste peste = colisao.GetComponentInParent<BossPeste>();
-            if (peste != null && peste.isActiveAndEnabled) return true;
-
-            BossGuerraController guerra = colisao.GetComponentInParent<BossGuerraController>();
-            if (guerra != null && guerra.isActiveAndEnabled) return true;
-
-            MorteBossControllerGameplay bossMorte =
-                colisao.GetComponentInParent<MorteBossControllerGameplay>();
-            if (bossMorte != null && bossMorte.isActiveAndEnabled) return true;
-
-            CorvoBossProjectile corvo = colisao.GetComponentInParent<CorvoBossProjectile>();
-            if (corvo != null && corvo.isActiveAndEnabled) return true;
+            // Bosses somente com gatilho; corvos fazem parte da batalha
+            // do boss e nao devem manter a trilha apos a morte do chefe.
         }
         return false;
     }
@@ -324,7 +361,10 @@ public class KayaAudioManager : MonoBehaviour
     {
         if (fonteAmbiente == null || fonteMusicaCombate == null) return;
 
-        if (Time.time >= proximaBuscaDeInimigos)
+        ConferirFimDoCombateBoss();
+
+        // A proximidade so importa fora da luta iniciada pelo gatilho.
+        if (!combateBossAtivo && Time.time >= proximaBuscaDeInimigos)
         {
             proximaBuscaDeInimigos = Time.time +
                 Mathf.Max(0.1f, intervaloVerificacaoCombate);
@@ -332,8 +372,8 @@ public class KayaAudioManager : MonoBehaviour
                 ultimoInstanteInimigoPerto = Time.time;
         }
 
-        bool emCombate = musicaCombate != null &&
-            Time.time - ultimoInstanteInimigoPerto <= atrasoRetornoAmbiente;
+        bool combateComum = Time.time - ultimoInstanteInimigoPerto <= atrasoRetornoAmbiente;
+        bool emCombate = musicaCombate != null && (combateBossAtivo || combateComum);
 
         misturaCombate = Mathf.MoveTowards(misturaCombate,
             emCombate ? 1f : 0f,

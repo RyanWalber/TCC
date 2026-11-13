@@ -32,12 +32,12 @@ public sealed class AudioInimigo
     [SerializeField, Min(1f)] private float alcance = 350f;
     [Tooltip("Intervalo minimo entre hits do mesmo tipo para evitar spam.")]
     [SerializeField, Min(0f)] private float intervaloHits = 0.055f;
-    [Tooltip("Intervalo entre vozes espontaneas, se Som Proprio estiver preenchido. Zero desliga a repeticao.")]
-    [SerializeField, Min(0f)] private float intervaloSomProprio = 8f;
+    [Tooltip("Tempo do fade do loop do inimigo ao entrar ou sair de alcance.")]
+    [SerializeField, Min(0.05f)] private float tempoFadeSomProprio = 0.4f;
 
     [NonSerialized] private Transform kaya;
     [NonSerialized] private AudioSource fonte;
-    [NonSerialized] private float proximoSomProprio;
+    [NonSerialized] private AudioSource fonteSomProprio;
     [NonSerialized] private float ultimoHitCausado = float.NegativeInfinity;
     [NonSerialized] private float ultimoHitRecebido = float.NegativeInfinity;
     [NonSerialized] private bool morreu;
@@ -115,18 +115,62 @@ public sealed class AudioInimigo
     public bool TocarInvocacao(Component emissor, bool ignorarAlcance = false) =>
         TocarIndependente(emissor, somInvocacao, volumeInvocacao, true, ignorarAlcance);
 
+    // O som proprio e uma camada em loop INDEPENDENTE dos hits e ataques.
     public void Atualizar(Component emissor)
     {
-        if (morreu || somProprio == null || intervaloSomProprio <= 0f ||
-            Time.time < proximoSomProprio) return;
-        TocarSomProprio(emissor);
+        if (morreu || emissor == null || somProprio == null)
+        {
+            PararSomProprio();
+            return;
+        }
+
+        bool perto = EmAlcance(emissor.transform.position);
+        if (perto && fonteSomProprio == null)
+        {
+            GameObject filho = new GameObject("Audio - Som Proprio (Loop)");
+            filho.transform.SetParent(emissor.transform, false);
+            fonteSomProprio = filho.AddComponent<AudioSource>();
+            fonteSomProprio.playOnAwake = false;
+            fonteSomProprio.loop = true;
+            fonteSomProprio.spatialBlend = 0f;
+            fonteSomProprio.volume = 0f;
+            fonteSomProprio.clip = somProprio;
+        }
+
+        if (fonteSomProprio == null) return;
+        if (fonteSomProprio.clip != somProprio)
+        {
+            fonteSomProprio.Stop();
+            fonteSomProprio.clip = somProprio;
+        }
+        if (perto && !fonteSomProprio.isPlaying)
+            fonteSomProprio.Play();
+
+        float atenuacao = 0f;
+        if (perto && kaya != null)
+        {
+            float distancia = Vector2.Distance(emissor.transform.position, kaya.position);
+            atenuacao = Mathf.Lerp(1f, 0.2f,
+                Mathf.Clamp01(distancia / Mathf.Max(1f, alcance)));
+        }
+
+        float destino = perto ? Mathf.Clamp01(volumeProprio) * atenuacao : 0f;
+        float passo = Time.deltaTime * Mathf.Max(0.05f, volumeProprio) /
+            Mathf.Max(0.05f, tempoFadeSomProprio);
+        fonteSomProprio.volume = Mathf.MoveTowards(
+            fonteSomProprio.volume, destino, passo);
+
+        if (!perto && fonteSomProprio.isPlaying && fonteSomProprio.volume <= 0.001f)
+            fonteSomProprio.Stop();
     }
 
-    public void TocarSomProprio(Component emissor)
+    public void TocarSomProprio(Component emissor) => Atualizar(emissor);
+
+    private void PararSomProprio()
     {
-        if (Time.time < proximoSomProprio) return;
-        if (Tocar(emissor, somProprio, volumeProprio))
-            proximoSomProprio = Time.time + Mathf.Max(0.1f, intervaloSomProprio);
+        if (fonteSomProprio == null) return;
+        fonteSomProprio.Stop();
+        fonteSomProprio.volume = 0f;
     }
 
     public void TocarAtaque(Component emissor) =>
@@ -157,6 +201,7 @@ public sealed class AudioInimigo
     public void TocarMorte(Component emissor)
     {
         if (morreu) return;
+        PararSomProprio();
         bool audivel = emissor != null && morte != null &&
             EmAlcance(emissor.transform.position);
         morreu = true;
