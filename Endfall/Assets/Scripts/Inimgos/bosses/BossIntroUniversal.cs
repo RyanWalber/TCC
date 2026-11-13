@@ -12,6 +12,16 @@ public class BossIntroUniversal : MonoBehaviour
     [Tooltip("Tempo em segundos que a câmera fica parada focada no Boss")]
     public float tempoFocoNoBoss = 2f;
 
+    [Header("COMBATE POR GATILHO")]
+    [Tooltip("Quanto tempo depois de pisar no gatilho o boss pode atacar. A introducao da camera tem prioridade, para evitar ataques durante o foco.")]
+    [Min(0f)] public float atrasoParaAtacar = 3f;
+
+    [Header("BARRA DE VIDA DO BOSS")]
+    [Tooltip("Opcional. Arraste o painel INTEIRO da barra de vida. Se vazio, procura a UI associada a BossVida ou BossHealthBarController.")]
+    [SerializeField] private GameObject painelBarraVida;
+    [Min(0.05f)] [SerializeField] private float fadeEntradaBarra = 0.4f;
+    [Min(0.05f)] [SerializeField] private float fadeSaidaBarra = 0.5f;
+
     [Header("ÁREA DO GATILHO (GIZMO)")]
     public Vector2 tamanhoGatilho = new Vector2(4f, 6f);
     public Color corGizmo = Color.cyan;
@@ -20,6 +30,8 @@ public class BossIntroUniversal : MonoBehaviour
     private Transform playerTransform;
     private Component cinemachineCam;
     private bool jaDisparou = false;
+    private BossBarraFade fadeBarra;
+    private BossHealthBarController controleBarra;
 
     private void Awake()
     {
@@ -30,6 +42,8 @@ public class BossIntroUniversal : MonoBehaviour
 
     private void Start()
     {
+        PrepararBarraBoss();
+
         // 1. Localiza a Kaya pela Tag
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -81,8 +95,71 @@ public class BossIntroUniversal : MonoBehaviour
             if (musica != null && bossTransform != null)
                 musica.IniciarCombateBoss(bossTransform);
 
+            // O estado de combate fica no boss: este gatilho pode ser
+            // desativado ao fim da introducao sem cancelar os ataques.
+            AtivarChefeComAtraso();
+            if (fadeBarra == null) PrepararBarraBoss();
+            if (fadeBarra != null) fadeBarra.Mostrar(fadeEntradaBarra);
+            if (controleBarra != null)
+                controleBarra.AtivarPorGatilho(fadeEntradaBarra, fadeSaidaBarra);
+
             StartCoroutine(RotinaApresentacaoBoss());
         }
+    }
+
+
+    private static T EncontrarNoChefe<T>(Transform alvo) where T : Component
+    {
+        if (alvo == null) return null;
+        T componente = alvo.GetComponent<T>();
+        if (componente == null) componente = alvo.GetComponentInParent<T>();
+        if (componente == null) componente = alvo.GetComponentInChildren<T>(true);
+        return componente;
+    }
+
+    private void AtivarChefeComAtraso()
+    {
+        if (bossTransform == null) return;
+        // Quando a camera ainda estiver focada no boss, nao permitir
+        // dano antecipado. O atraso configurado comeca no gatilho.
+        float espera = Mathf.Max(Mathf.Max(0f, atrasoParaAtacar),
+            Mathf.Max(0f, tempoFocoNoBoss) + 1.2f);
+
+        BossFomeController fome = EncontrarNoChefe<BossFomeController>(bossTransform);
+        if (fome != null) fome.AtivarPeloGatilho(espera);
+
+        BossPeste peste = EncontrarNoChefe<BossPeste>(bossTransform);
+        if (peste != null) peste.AtivarPeloGatilho(espera);
+
+        BossGuerraController guerra = EncontrarNoChefe<BossGuerraController>(bossTransform);
+        if (guerra != null) guerra.AtivarPeloGatilho(espera);
+
+        MorteBossControllerGameplay morte = EncontrarNoChefe<MorteBossControllerGameplay>(bossTransform);
+        if (morte != null) morte.AtivarPeloGatilho(espera);
+    }
+
+    private void PrepararBarraBoss()
+    {
+        if (bossTransform == null) return;
+
+        BossVida vida = EncontrarNoChefe<BossVida>(bossTransform);
+        VidaBossGuerra vidaGuerra = EncontrarNoChefe<VidaBossGuerra>(bossTransform);
+        controleBarra = EncontrarNoChefe<BossHealthBarController>(bossTransform);
+        if (painelBarraVida == null && vida != null)
+            painelBarraVida = vida.ObterPainelBarra();
+        if (painelBarraVida == null && controleBarra != null)
+            painelBarraVida = controleBarra.barraVidaUI;
+
+        if (painelBarraVida == null)
+        {
+            Debug.LogWarning("[INTRO BOSS] Barra nao localizada automaticamente. " +
+                "Arraste o painel inteiro em 'Painel Barra Vida' no Inspector do gatilho.", this);
+            return;
+        }
+
+        fadeBarra = BossBarraFade.Garantir(painelBarraVida);
+        if (fadeBarra != null)
+            fadeBarra.VincularChefe(bossTransform, vida, vidaGuerra, fadeSaidaBarra);
     }
 
     private IEnumerator RotinaApresentacaoBoss()

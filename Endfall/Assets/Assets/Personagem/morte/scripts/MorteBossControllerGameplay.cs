@@ -144,6 +144,15 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     private float velocidadeAnimacaoAtual = 1f;
     private float multiplicadorVelocidadeMovimento = 1f;
     private bool emTransicaoDeEstagio;
+    private bool combatePeloGatilho;
+    private float ataqueLiberadoEm = float.PositiveInfinity;
+
+    public void AtivarPeloGatilho(float espera)
+    {
+        combatePeloGatilho = true;
+        ataqueLiberadoEm = Time.time + Mathf.Max(0f, espera);
+        proximoAtaque = Mathf.Max(proximoAtaque, ataqueLiberadoEm);
+    }
     private Coroutine rotinaTransicao;
     private bool tocandoRitual;
     private KayaAudioManager musicaKaya;
@@ -316,9 +325,9 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         if (emTransicaoDeEstagio) return;
 
         AtualizarOrientacao();
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         if (atacando || Time.time < proximoAtaque) return;
-        if (Vector2.Distance(transform.position, jogador.position) > distanciaDeteccao)
-            return;
+        // O State Pattern ja aproxima a Morte; distancia nao desativa a luta.
 
         PlayerHealth vidaKaya = jogador.GetComponentInParent<PlayerHealth>();
         if (vidaKaya == null)

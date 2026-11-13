@@ -45,6 +45,19 @@ public class BossPeste : MonoBehaviour, IAudioBoss
 
     private float timerAtaque;
     private float proximoIntervaloAtaque;
+    private bool combatePeloGatilho;
+    private float ataqueLiberadoEm = float.PositiveInfinity;
+
+    [Header("Perseguicao apos a intro")]
+    [Min(0f)] [SerializeField] private float distanciaPararPerseguicao = 2f;
+    [Min(0f)] [SerializeField] private float alturaSobreKaya = 3f;
+
+    public void AtivarPeloGatilho(float espera)
+    {
+        combatePeloGatilho = true;
+        ataqueLiberadoEm = Time.time + Mathf.Max(0f, espera);
+        timerAtaque = 0f;
+    }
 
     // Referência para o sistema de vida universal
     private BossVida bossVida;
@@ -86,11 +99,11 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         float limiteDireita = posicaoInicial.x + distanciaPatrulha;
         float limiteEsquerda = posicaoInicial.x - distanciaPatrulha;
 
-        if (indoParaDireita && transform.position.x >= limiteDireita)
+        if (!combatePeloGatilho && indoParaDireita && transform.position.x >= limiteDireita)
         {
             Virar(false);
         }
-        else if (!indoParaDireita && transform.position.x <= limiteEsquerda)
+        else if (!combatePeloGatilho && !indoParaDireita && transform.position.x <= limiteEsquerda)
         {
             Virar(true);
         }
@@ -99,11 +112,31 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         float novoX = transform.position.x + (direcaoX * velocidade * Time.deltaTime);
         float novoY = posicaoInicial.y + (Mathf.Sin(Time.time * 3f) * balancoVertical);
 
+        if (combatePeloGatilho && playerTransform != null)
+        {
+            float deltaX = playerTransform.position.x - transform.position.x;
+            if (Mathf.Abs(deltaX) > distanciaPararPerseguicao)
+            {
+                bool direita = deltaX > 0f;
+                if (indoParaDireita != direita) Virar(direita);
+                novoX = Mathf.MoveTowards(transform.position.x,
+                    playerTransform.position.x, velocidade * Time.deltaTime);
+            }
+            else novoX = transform.position.x;
+
+            float yAlvo = Mathf.Max(posicaoInicial.y,
+                playerTransform.position.y + alturaSobreKaya);
+            novoY = Mathf.MoveTowards(transform.position.y,
+                yAlvo + Mathf.Sin(Time.time * 3f) * balancoVertical,
+                velocidade * Time.deltaTime);
+        }
+
         transform.position = new Vector3(novoX, novoY, transform.position.z);
     }
 
     private void ChecarEExecutarAtaque()
     {
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         timerAtaque += Time.deltaTime;
 
         if (timerAtaque >= proximoIntervaloAtaque)
@@ -144,6 +177,7 @@ public class BossPeste : MonoBehaviour, IAudioBoss
     // Chamado pelo Animation Event no clipe pesteatak
     public void InstanciarGosma()
     {
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         if (prefabGosma != null && pontoBoca != null)
         {
             Instantiate(prefabGosma, pontoBoca.position, prefabGosma.transform.rotation);
@@ -182,6 +216,7 @@ public class BossPeste : MonoBehaviour, IAudioBoss
     private void ProcessarContatoPlayer(GameObject obj)
     {
         if (bossVida != null && bossVida.EstaMorto) return;
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
 
         if (obj.CompareTag("Player"))
         {

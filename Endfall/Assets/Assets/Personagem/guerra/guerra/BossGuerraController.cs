@@ -27,6 +27,19 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
     private float tempoProximoAtaque;
 
     private bool emCombate = false;
+    private bool combatePeloGatilho;
+    private float ataqueLiberadoEm = float.PositiveInfinity;
+
+    public void AtivarPeloGatilho(float espera)
+    {
+        combatePeloGatilho = true;
+        ataqueLiberadoEm = Time.time + Mathf.Max(0f, espera);
+        emCombate = true;
+        if (bossAnimation == null)
+            bossAnimation = GetComponentInChildren<BossAnimation>();
+        if (bossAnimation != null) bossAnimation.DefinirBravo(true);
+        tempoProximoAtaque = ataqueLiberadoEm;
+    }
 
     private void Start()
     {
@@ -48,38 +61,19 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
     private void Update()
     {
         audioInimigo.Atualizar(this);
-        if (jogador == null) return;
-
-        float distancia = Vector2.Distance(transform.position, jogador.position);
-
-        if (distancia <= distanciaDetecao)
+        if (!combatePeloGatilho) return;
+        if (jogador == null)
         {
-            if (!emCombate)
-            {
-                emCombate = true;
-                if (bossAnimation != null)
-                {
-                    bossAnimation.DefinirBravo(true);
-                }
-                tempoProximoAtaque = Time.time + 0.8f;
-            }
-
-            if (Time.time >= tempoProximoAtaque)
-            {
-                Atacar();
-                tempoProximoAtaque = Time.time + tempoEntreAtaques;
-            }
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) jogador = p.transform;
         }
-        else
+        if (jogador == null || Time.time < ataqueLiberadoEm) return;
+
+        // Barris continuam sendo lancados mesmo com a Kaya longe.
+        if (Time.time >= tempoProximoAtaque)
         {
-            if (emCombate)
-            {
-                emCombate = false;
-                if (bossAnimation != null)
-                {
-                    bossAnimation.DefinirBravo(false);
-                }
-            }
+            Atacar();
+            tempoProximoAtaque = Time.time + Mathf.Max(0.1f, tempoEntreAtaques);
         }
     }
 
@@ -94,6 +88,7 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
 
     public void InstanciarBarril()
     {
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         if (prefabBarril == null || jogador == null) return;
 
         Vector3 posSpawn = pontoSpawnBarril != null ? pontoSpawnBarril.position : transform.position;

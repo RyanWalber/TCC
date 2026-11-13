@@ -29,6 +29,10 @@ public class SistemaFuria : MonoBehaviour
     [SerializeField] private Outline luzNeonFuria;
     [SerializeField] private GameObject vinhetaTelaFuria;
 
+    [Header("Fade da vinheta de Furia")]
+    [SerializeField, Min(0.03f)] private float tempoFadeVinheta = 0.18f;
+    private CanvasGroup grupoVinheta;
+
     [Header("Controles")]
     [SerializeField] private KeyCode teclaFuria = KeyCode.Q;
 
@@ -55,6 +59,7 @@ public class SistemaFuria : MonoBehaviour
 
     private void Update()
     {
+        AtualizarFadeVinheta();
         // Nao alterna Furia com o menu de pausa aberto.
         if (Time.timeScale <= 0f) return;
 
@@ -134,6 +139,14 @@ public class SistemaFuria : MonoBehaviour
     {
         if (vinhetaTelaFuria == null) return;
 
+        vinhetaTelaFuria.SetActive(true);
+        grupoVinheta = vinhetaTelaFuria.GetComponent<CanvasGroup>();
+        if (grupoVinheta == null)
+            grupoVinheta = vinhetaTelaFuria.AddComponent<CanvasGroup>();
+        grupoVinheta.alpha = 0f;
+        grupoVinheta.blocksRaycasts = false;
+        grupoVinheta.interactable = false;
+
         foreach (Graphic grafico in vinhetaTelaFuria.GetComponentsInChildren<Graphic>(true))
             grafico.raycastTarget = false;
 
@@ -142,6 +155,14 @@ public class SistemaFuria : MonoBehaviour
             grupo.blocksRaycasts = false;
             grupo.interactable = false;
         }
+    }
+
+    private void AtualizarFadeVinheta()
+    {
+        if (grupoVinheta == null) return;
+        grupoVinheta.alpha = Mathf.MoveTowards(
+            grupoVinheta.alpha, estaEmFuria ? 1f : 0f,
+            Time.unscaledDeltaTime / Mathf.Max(0.03f, tempoFadeVinheta));
     }
 
     private void AtualizarRetratoHUD()
@@ -164,9 +185,6 @@ public class SistemaFuria : MonoBehaviour
             luzNeonFuria.enabled = estaEmFuria;
         }
 
-        if (vinhetaTelaFuria != null)
-        {
-            vinhetaTelaFuria.SetActive(estaEmFuria);
-        }
+        // O CanvasGroup realiza o fade sem desativar o painel.
     }
 }

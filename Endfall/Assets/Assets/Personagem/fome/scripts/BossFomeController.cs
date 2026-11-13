@@ -26,6 +26,15 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     [SerializeField] private bool olhandoDireita = false;
 
     private float cronometroAtaque;
+    private bool combatePeloGatilho;
+    private float ataqueLiberadoEm = float.PositiveInfinity;
+
+    public void AtivarPeloGatilho(float espera)
+    {
+        combatePeloGatilho = true;
+        ataqueLiberadoEm = Time.time + Mathf.Max(0f, espera);
+        cronometroAtaque = Mathf.Max(0f, tempoEntreAtaques);
+    }
 
     private static readonly int HashAtacar = Animator.StringToHash("Atacar");
 
@@ -44,13 +53,12 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
         }
 
         OlharParaJogador();
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
 
         cronometroAtaque += Time.deltaTime;
 
-        float distanciaQuadrada = (player.position - transform.position).sqrMagnitude;
-        float alcanceQuadrado = alcanceAtaque * alcanceAtaque;
-
-        if (distanciaQuadrada <= alcanceQuadrado && cronometroAtaque >= tempoEntreAtaques)
+        // Flechas podem alcancar Kaya independentemente de distancia apos o gatilho.
+        if (cronometroAtaque >= tempoEntreAtaques)
         {
             Atacar();
             cronometroAtaque = 0f;
@@ -103,6 +111,7 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     // Chamado pelo Evento de Animação quando o Boss solta a corda do arco
     public void DispararFlecha()
     {
+        if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         if (flechaVisualNaMao != null)
         {
             flechaVisualNaMao.SetActive(false);

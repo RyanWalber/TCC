@@ -76,6 +76,17 @@ public class BossVida : MonoBehaviour
         AtualizarBarraUI();
     }
 
+    public GameObject ObterPainelBarra()
+    {
+        if (conteinerBarraDeVida != null) return conteinerBarraDeVida;
+        if (barraDeVida != null)
+        {
+            Transform pai = barraDeVida.transform.parent;
+            return pai != null ? pai.gameObject : barraDeVida.gameObject;
+        }
+        return null;
+    }
+
     private void Start()
     {
         // Se o controlador ja definiu HP em Start, nao sobrescreve.
@@ -95,6 +106,11 @@ public class BossVida : MonoBehaviour
         }
 
         AtualizarBarraUI();
+
+        // Barra invisivel ate o Gatilho Intro Boss; continua ativa para
+        // manter o Slider e a configuracao original.
+        GameObject painel = ObterPainelBarra();
+        if (painel != null) BossBarraFade.Garantir(painel);
 
         // Cada boss possui seu proprio gerador (Fome, Peste, Guerra, Morte).
         // Nao inicia nada se o prefab opcional estiver vazio.
@@ -385,15 +401,17 @@ public class BossVida : MonoBehaviour
             if (script != this) script.enabled = false;
         }
 
-        // Destrói o objeto pai da barra de vida completa
-        if (conteinerBarraDeVida != null)
+        // Fade de saida em vez de apagar a barra instantaneamente.
+        // O componente de UI sobrevive ate o alpha chegar a zero.
+        GameObject painel = ObterPainelBarra();
+        if (painel != null)
         {
-            Destroy(conteinerBarraDeVida);
-        }
-        else if (barraDeVida != null)
-        {
-            Transform pai = barraDeVida.transform.parent;
-            Destroy(pai != null ? pai.gameObject : barraDeVida.gameObject);
+            BossBarraFade transicao = BossBarraFade.Garantir(painel);
+            if (transicao != null)
+            {
+                transicao.LiberarDaHierarquiaDoBoss(transform);
+                transicao.OcultarEDestruir(0.5f);
+            }
         }
 
         // Somente a Morte final permanece viva ate o ultimo frame
