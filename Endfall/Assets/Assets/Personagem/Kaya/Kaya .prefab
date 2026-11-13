@@ -260,7 +260,7 @@ MonoBehaviour:
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 1
   musicaCombate: {fileID: 8300000, guid: 9e4f70585d1dd8247986d1d2fdad2621, type: 3}
-  volumeMusicaCombate: 0.6
+  volumeMusicaCombate: 0.1
   raioDeteccaoCombate: 220
   intervaloVerificacaoCombate: 0.35
   duracaoTransicaoMusicas: 2

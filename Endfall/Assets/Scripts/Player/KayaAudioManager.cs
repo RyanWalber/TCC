@@ -20,7 +20,7 @@ public class KayaAudioManager : MonoBehaviour
     [Header("Musica de combate (crossfade com ambiente)")]
     [Tooltip("Arraste aqui a faixa de rock de combate (2.wav).")]
     [SerializeField] private AudioClip musicaCombate;
-    [SerializeField, Range(0f, 1f)] private float volumeMusicaCombate = 0.6f;
+    [SerializeField, Range(0f, 1f)] private float volumeMusicaCombate = 0.1f;
     [Tooltip("Inicia combate quando inimigo vivo chega a esta distancia da Kaya.")]
     [SerializeField, Min(1f)] private float raioDeteccaoCombate = 220f;
     [SerializeField, Min(0.1f)] private float intervaloVerificacaoCombate = 0.35f;
