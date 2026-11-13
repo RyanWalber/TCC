@@ -37,6 +37,26 @@ public class VidaBossGuerra : MonoBehaviour
     [Tooltip("Remove elixires temporarios gerados pela luta depois da derrota do chefe.")]
     [SerializeField] private bool removerElixiresQuandoBossMorrer = true;
 
+    [Header("Elixires do boss - posicao visivel na camera")]
+    [SerializeField] private bool usarSpawnNaCamera = true;
+    [Tooltip("Quantidade de pontos distribuidos na camera para escolher piso valido longe da Kaya.")]
+    [Range(4, 12)] [SerializeField] private int pontosVisiveisParaTestar = 8;
+    [Range(0.03f, 0.25f)] [SerializeField] private float margemLateralCamera = 0.1f;
+    [Range(0.03f, 0.25f)] [SerializeField] private float margemVerticalCamera = 0.12f;
+    [Range(0.1f, 0.75f)] [SerializeField] private float distanciaMinimaDaKayaNaTela = 0.35f;
+    [Min(0f)] [SerializeField] private float diferencaMaximaAlturaPlataforma = 45f;
+    [Range(0.05f, 0.5f)] [SerializeField] private float distanciaMinimaEntreElixiresNaTela = 0.18f;
+
+    [Header("Elixires do boss - tempo e reposicao")]
+    [Tooltip("So ativa depois do Gatilho Intro Boss.")]
+    [SerializeField] private bool iniciarElixiresPeloGatilho = true;
+    [Tooltip("Tempo que a vida fica disponivel. Zero = nao expira.")]
+    [Min(0f)] [SerializeField] private float tempoParaElixirSumir = 10f;
+    [Tooltip("Tempo do fade antes de sumir.")]
+    [Min(0f)] [SerializeField] private float fadeDesaparecimentoElixir = 0.75f;
+    [Tooltip("Se ativo, permite reposicoes ilimitadas ate derrotar Guerra, sem ultrapassar o maximo de vidas simultaneas.")]
+    [SerializeField] private bool reposicaoContinuaAteBossMorrer = true;
+
     private SpriteRenderer[] todosSprites;
     private Color[] coresOriginais;
     private Coroutine corrotinaFlash;
@@ -45,8 +65,12 @@ public class VidaBossGuerra : MonoBehaviour
     private int quantidadeGeradaArena;
     private Transform kayaNaArena;
     private Coroutine rotinaElixiresArena;
+    private bool lutaIniciadaPeloGatilho;
 
-
+    public void IniciarSpawnElixiresPeloGatilho()
+    {
+        lutaIniciadaPeloGatilho = true;
+    }
 
     private void Start()
     {
@@ -103,8 +127,10 @@ public class VidaBossGuerra : MonoBehaviour
 
             bool perto = kayaNaArena != null &&
                 kayaNaArena.gameObject.activeInHierarchy &&
-                Vector2.Distance(transform.position, kayaNaArena.position)
-                <= distanciaAtivacaoElixires;
+                (iniciarElixiresPeloGatilho
+                    ? lutaIniciadaPeloGatilho
+                    : Vector2.Distance(transform.position, kayaNaArena.position)
+                        <= distanciaAtivacaoElixires);
 
             if (perto && !iniciou) iniciou = true;
             if (perto && iniciou)
@@ -117,20 +143,30 @@ public class VidaBossGuerra : MonoBehaviour
 
                     bool podeGerar = elixiresArenaAtivos.Count <
                         Mathf.Max(1, maximoElixiresPresentes);
-                    bool naoAtingiuTotal = quantidadeTotalElixires == 0 ||
+                    bool naoAtingiuTotal = reposicaoContinuaAteBossMorrer ||
+                        quantidadeTotalElixires == 0 ||
                         quantidadeGeradaArena < quantidadeTotalElixires;
 
-                    if (podeGerar && naoAtingiuTotal && TentarEscolherLocalElixir(out Vector3 posicao))
+                    if (podeGerar && naoAtingiuTotal)
                     {
-                        HealthPickup novo = Instantiate(prefabElixirArena, posicao,
-                            Quaternion.identity);
-                        novo.ConfigurarComoElixirDeBoss(curaElixirArena);
-                        elixiresArenaAtivos.Add(novo);
-                        quantidadeGeradaArena++;
+                        bool encontrou = TentarEscolherLocalElixir(out Vector3 posicao);
+                        if (encontrou)
+                        {
+                            HealthPickup novo = Instantiate(prefabElixirArena, posicao,
+                                Quaternion.identity);
+                            novo.ConfigurarComoElixirDeBoss(curaElixirArena);
+                            novo.ConfigurarExpiracaoDeBoss(tempoParaElixirSumir,
+                                fadeDesaparecimentoElixir);
+                            elixiresArenaAtivos.Add(novo);
+                            quantidadeGeradaArena++;
+                        }
+                        cronometro = 0f;
+                        proximo = encontrou
+                            ? Mathf.Max(0.5f, intervaloSpawnElixires)
+                            : 1f;
                     }
-
-                    cronometro = 0f;
-                    proximo = Mathf.Max(0.5f, intervaloSpawnElixires);
+                    // No limite de vidas presentes, nao reinicia o
+                    // cronometro: a vaga expirada pode ser reutilizada.
                 }
             }
             yield return null;
@@ -140,6 +176,15 @@ public class VidaBossGuerra : MonoBehaviour
     private bool TentarEscolherLocalElixir(out Vector3 posicao)
     {
         posicao = transform.position;
+
+        if (usarSpawnNaCamera)
+            return LocalizadorElixirBoss.Escolher(
+                kayaNaArena, transform.position.z, chaoParaElixires,
+                alturaAcimaDoChaoElixires, pontosVisiveisParaTestar,
+                margemLateralCamera, margemVerticalCamera,
+                distanciaMinimaDaKayaNaTela, diferencaMaximaAlturaPlataforma,
+                distanciaMinimaEntreElixiresNaTela, elixiresArenaAtivos,
+                out posicao);
 
         if (pontosElixires != null && pontosElixires.Length > 0)
         {

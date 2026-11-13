@@ -28,6 +28,29 @@ public class HealthPickup : MonoBehaviour
     private float faseFlutuacao;
     // Elixires gerados DURANTE a luta nunca entram no save/checkpoint.
     private bool geradoDuranteBoss;
+    private bool expiraDuranteBoss;
+    private float instanteExpiracaoBoss;
+    private float duracaoFadeBoss;
+    private SpriteRenderer[] spritesExpiracao;
+    private float[] alfasOriginais;
+
+    public void ConfigurarExpiracaoDeBoss(float tempo, float fade)
+    {
+        if (!geradoDuranteBoss) return;
+
+        // Zero = nao expira; o comportamento dos coletaveis do mapa
+        // permanece exatamente como antes.
+        expiraDuranteBoss = tempo > 0f;
+        if (!expiraDuranteBoss) return;
+
+        instanteExpiracaoBoss = Time.time + Mathf.Max(0.01f, tempo);
+        duracaoFadeBoss = Mathf.Clamp(fade, 0f, tempo);
+        spritesExpiracao = GetComponentsInChildren<SpriteRenderer>(true);
+        alfasOriginais = new float[spritesExpiracao.Length];
+        for (int i = 0; i < spritesExpiracao.Length; i++)
+            alfasOriginais[i] = spritesExpiracao[i] != null
+                ? spritesExpiracao[i].color.a : 1f;
+    }
 
     public void ConfigurarComoElixirDeBoss(float cura)
     {
@@ -50,6 +73,29 @@ public class HealthPickup : MonoBehaviour
 
     private void Update()
     {
+        if (expiraDuranteBoss)
+        {
+            float restante = instanteExpiracaoBoss - Time.time;
+            if (restante <= 0f)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            if (duracaoFadeBoss > 0f && restante <= duracaoFadeBoss &&
+                spritesExpiracao != null)
+            {
+                float percentual = Mathf.Clamp01(restante / duracaoFadeBoss);
+                for (int i = 0; i < spritesExpiracao.Length; i++)
+                {
+                    if (spritesExpiracao[i] == null) continue;
+                    Color cor = spritesExpiracao[i].color;
+                    cor.a = alfasOriginais[i] * percentual;
+                    spritesExpiracao[i].color = cor;
+                }
+            }
+        }
+
         if (visualFlutuante != null && alturaFlutuacao > 0f && velocidadeFlutuacao > 0f)
         {
             float deslocamento = Mathf.Sin(Time.time * velocidadeFlutuacao + faseFlutuacao) * alturaFlutuacao;

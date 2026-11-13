@@ -95,6 +95,15 @@ public class BossIntroUniversal : MonoBehaviour
             if (musica != null && bossTransform != null)
                 musica.IniciarCombateBoss(bossTransform);
 
+            // A mesma entrada tambem libera o gerador de elixires,
+            // inclusive quando o boss estiver longe da Kaya.
+            BossVida vidaComum = EncontrarNoChefe<BossVida>(bossTransform);
+            if (vidaComum != null)
+                vidaComum.IniciarSpawnElixiresPeloGatilho();
+            VidaBossGuerra vidaGuerra = EncontrarNoChefe<VidaBossGuerra>(bossTransform);
+            if (vidaGuerra != null)
+                vidaGuerra.IniciarSpawnElixiresPeloGatilho();
+
             // O estado de combate fica no boss: este gatilho pode ser
             // desativado ao fim da introducao sem cancelar os ataques.
             AtivarChefeComAtraso();

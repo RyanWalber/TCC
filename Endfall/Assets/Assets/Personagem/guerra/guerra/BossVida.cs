@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 public class BossVida : MonoBehaviour
 {
@@ -44,9 +45,10 @@ public class BossVida : MonoBehaviour
     [Tooltip("Remove elixires temporarios gerados pela luta depois da derrota do chefe.")]
     [SerializeField] private bool removerElixiresQuandoBossMorrer = true;
 
-    [Header("ELIXIRES DA MORTE - SPAWN VISIVEL NA CAMERA")]
-    [Tooltip("Aplica SOMENTE ao boss da Morte. Cria vidas em lugares visiveis na camera da Kaya, longe dela.")]
-    [SerializeField] private bool usarSpawnNaCameraNaMorte = true;
+    [Header("Elixires do boss - posicao visivel na camera")]
+    [Tooltip("Vale para Fome, Peste e Morte. Escolhe uma plataforma distante da Kaya dentro da camera.")]
+    [FormerlySerializedAs("usarSpawnNaCameraNaMorte")]
+    [SerializeField] private bool usarSpawnNaCamera = true;
     [Tooltip("Quantos pontos distribuir horizontalmente na camera a cada tentativa (recomendado: 7 ou 8).")]
     [Range(4, 12)] [SerializeField] private int pontosVisiveisParaTestar = 8;
     [Tooltip("Margem nas laterais da tela para a vida nao nascer cortada.")]
@@ -59,6 +61,16 @@ public class BossVida : MonoBehaviour
     [Min(0f)] [SerializeField] private float diferencaMaximaAlturaPlataforma = 45f;
     [Tooltip("Distancia minima entre elixires vivos, como fracao da largura da tela.")]
     [Range(0.05f, 0.5f)] [SerializeField] private float distanciaMinimaEntreElixiresNaTela = 0.18f;
+
+    [Header("Elixires do boss - tempo e reposicao")]
+    [Tooltip("So gera elixires depois do Gatilho Intro Boss (recomendado). Desmarque se esta arena nao tiver gatilho.")]
+    [SerializeField] private bool iniciarElixiresPeloGatilho = true;
+    [Tooltip("Tempo que o elixir permanece no chao antes de sumir. Zero = permanente ate ser coletado ou o boss morrer.")]
+    [Min(0f)] [SerializeField] private float tempoParaElixirSumir = 10f;
+    [Tooltip("Duracao do desaparecimento gradual do elixir (fica transparente antes de sumir).")]
+    [Min(0f)] [SerializeField] private float fadeDesaparecimentoElixir = 0.75f;
+    [Tooltip("Se ativo, nao aplica Quantidade Total Elixires, permitindo reposicoes ate o fim da luta. O Maximo Elixires Presentes ainda vale.")]
+    [SerializeField] private bool reposicaoContinuaAteBossMorrer = true;
 
     [Header("Morte")]
     [SerializeField] private float tempoParaDestruir = 0.5f;
@@ -75,7 +87,12 @@ public class BossVida : MonoBehaviour
     private int quantidadeGeradaArena;
     private Transform kayaNaArena;
     private Coroutine rotinaElixiresArena;
-    private MorteBossControllerGameplay controladorMorte;
+    private bool lutaIniciadaPeloGatilho;
+
+    public void IniciarSpawnElixiresPeloGatilho()
+    {
+        lutaIniciadaPeloGatilho = true;
+    }
 
     public bool EstaMorto => estaMorto;
     public bool InvulneravelNaTransicao => invulneravelNaTransicao;
@@ -129,10 +146,6 @@ public class BossVida : MonoBehaviour
         GameObject painel = ObterPainelBarra();
         if (painel != null) BossBarraFade.Garantir(painel);
 
-        controladorMorte = GetComponentInChildren<MorteBossControllerGameplay>(true);
-        if (controladorMorte == null)
-            controladorMorte = GetComponentInParent<MorteBossControllerGameplay>();
-
         // Cada boss possui seu proprio gerador (Fome, Peste, Guerra, Morte).
         // Nao inicia nada se o prefab opcional estiver vazio.
         if (prefabElixirArena != null)
@@ -152,11 +165,10 @@ public class BossVida : MonoBehaviour
                 if (kaya != null) kayaNaArena = kaya.transform;
             }
 
-            bool usarCameraMorte = usarSpawnNaCameraNaMorte && controladorMorte != null;
             bool perto = kayaNaArena != null &&
                 kayaNaArena.gameObject.activeInHierarchy &&
-                (usarCameraMorte
-                    ? controladorMorte.CombateIniciadoPeloGatilho
+                (iniciarElixiresPeloGatilho
+                    ? lutaIniciadaPeloGatilho
                     : Vector2.Distance(transform.position, kayaNaArena.position)
                         <= distanciaAtivacaoElixires);
 
@@ -171,7 +183,8 @@ public class BossVida : MonoBehaviour
 
                     bool podeGerar = elixiresArenaAtivos.Count <
                         Mathf.Max(1, maximoElixiresPresentes);
-                    bool naoAtingiuTotal = quantidadeTotalElixires == 0 ||
+                    bool naoAtingiuTotal = reposicaoContinuaAteBossMorrer ||
+                        quantidadeTotalElixires == 0 ||
                         quantidadeGeradaArena < quantidadeTotalElixires;
 
                     bool encontrouLocal = false;
@@ -183,16 +196,22 @@ public class BossVida : MonoBehaviour
                             HealthPickup novo = Instantiate(prefabElixirArena, posicao,
                                 Quaternion.identity);
                             novo.ConfigurarComoElixirDeBoss(curaElixirArena);
+                            novo.ConfigurarExpiracaoDeBoss(tempoParaElixirSumir,
+                                fadeDesaparecimentoElixir);
                             elixiresArenaAtivos.Add(novo);
                             quantidadeGeradaArena++;
                         }
-                    }
 
-                    cronometro = 0f;
-                    // Se a camera estiver sem uma plataforma segura visivel,
-                    // tenta novamente rapidamente sem gastar a cota da arena.
-                    proximo = usarCameraMorte && podeGerar && naoAtingiuTotal && !encontrouLocal
-                        ? 1f : Mathf.Max(0.5f, intervaloSpawnElixires);
+                        // Contagem de intervalo so reinicia ao gerar uma
+                        // vida (ou ao tentar e nao achar piso visivel).
+                        cronometro = 0f;
+                        proximo = encontrouLocal
+                            ? Mathf.Max(0.5f, intervaloSpawnElixires)
+                            : 1f;
+                    }
+                    // Se ja ha maximo de vidas na tela, mantem o tempo
+                    // acumulado. Assim a expiracao libera a vaga logo
+                    // que o intervalo configurado ja tiver passado.
                 }
             }
             yield return null;
@@ -203,10 +222,15 @@ public class BossVida : MonoBehaviour
     {
         posicao = transform.position;
 
-        // Esta regra e exclusiva da luta contra a Morte. Mesmo com pontos
-        // manuais preenchidos, o elixir nao pode nascer fora da camera.
-        if (usarSpawnNaCameraNaMorte && controladorMorte != null)
-            return TentarSpawnVisivelNaCameraDaKaya(out posicao);
+        // Mesmo estilo de spawn para Fome, Peste e Morte.
+        if (usarSpawnNaCamera)
+            return LocalizadorElixirBoss.Escolher(
+                kayaNaArena, transform.position.z, chaoParaElixires,
+                alturaAcimaDoChaoElixires, pontosVisiveisParaTestar,
+                margemLateralCamera, margemVerticalCamera,
+                distanciaMinimaDaKayaNaTela, diferencaMaximaAlturaPlataforma,
+                distanciaMinimaEntreElixiresNaTela, elixiresArenaAtivos,
+                out posicao);
 
         if (pontosElixires != null && pontosElixires.Length > 0)
         {
@@ -243,131 +267,6 @@ public class BossVida : MonoBehaviour
         return false;
     }
 
-
-    private bool TentarSpawnVisivelNaCameraDaKaya(out Vector3 posicao)
-    {
-        posicao = Vector3.zero;
-        if (kayaNaArena == null) return false;
-
-        Camera cameraKaya = Camera.main;
-        if (cameraKaya == null || !cameraKaya.isActiveAndEnabled) return false;
-
-        // ViewportToWorldPoint usa a profundidade da Kaya; funciona com a
-        // Camera real controlada pela Cinemachine, mesmo com zoom/seguimento.
-        float profundidade = Vector3.Dot(
-            kayaNaArena.position - cameraKaya.transform.position,
-            cameraKaya.transform.forward);
-        if (profundidade <= 0f) return false;
-
-        float lateral = Mathf.Clamp(margemLateralCamera, 0.03f, 0.25f);
-        float vertical = Mathf.Clamp(margemVerticalCamera, 0.03f, 0.25f);
-        Vector3 cantoEsquerdo = cameraKaya.ViewportToWorldPoint(
-            new Vector3(lateral, 0.5f, profundidade));
-        Vector3 cantoDireito = cameraKaya.ViewportToWorldPoint(
-            new Vector3(1f - lateral, 0.5f, profundidade));
-
-        float larguraUtil = Mathf.Abs(cantoDireito.x - cantoEsquerdo.x);
-        if (larguraUtil <= 0.1f) return false;
-
-        float distanciaMinima = larguraUtil *
-            Mathf.Clamp(distanciaMinimaDaKayaNaTela, 0.1f, 0.75f);
-        float distanciaEntreElixires = larguraUtil *
-            Mathf.Clamp(distanciaMinimaEntreElixiresNaTela, 0.05f, 0.5f);
-
-        // Descobre a plataforma sob os pes da Kaya, para priorizar o mesmo
-        // piso e evitar colocar a cura em um andar inalcançavel.
-        Collider2D plataformaKaya = null;
-        float alturaChaoKaya = kayaNaArena.position.y;
-        RaycastHit2D[] chaoSobKaya = Physics2D.RaycastAll(
-            new Vector2(kayaNaArena.position.x, kayaNaArena.position.y + 1f),
-            Vector2.down, 160f, chaoParaElixires);
-        foreach (RaycastHit2D hit in chaoSobKaya)
-        {
-            if (hit.collider == null || hit.collider.isTrigger ||
-                hit.normal.y < 0.55f) continue;
-            plataformaKaya = hit.collider;
-            alturaChaoKaya = hit.point.y;
-            break;
-        }
-
-        float melhorPontuacao = float.NegativeInfinity;
-        bool encontrou = false;
-        int total = Mathf.Clamp(pontosVisiveisParaTestar, 4, 12);
-
-        // Ate 8 pontos (padrao), do lado esquerdo ao direito da camera.
-        // Cada X e procurado sobre uma plataforma real, nao no ar.
-        for (int i = 0; i < total; i++)
-        {
-            float percentual = (i + 0.5f) / total;
-            float xTela = Mathf.Lerp(lateral, 1f - lateral, percentual);
-            Vector3 teto = cameraKaya.ViewportToWorldPoint(
-                new Vector3(xTela, 1f - vertical, profundidade));
-            Vector3 baseTela = cameraKaya.ViewportToWorldPoint(
-                new Vector3(xTela, vertical, profundidade));
-            float yTopo = Mathf.Max(teto.y, baseTela.y);
-            float yBaixo = Mathf.Min(teto.y, baseTela.y);
-            float alcanceRaio = yTopo - yBaixo;
-            if (alcanceRaio <= 0f) continue;
-
-            RaycastHit2D[] plataformas = Physics2D.RaycastAll(
-                new Vector2(teto.x, yTopo), Vector2.down,
-                alcanceRaio, chaoParaElixires);
-            foreach (RaycastHit2D hit in plataformas)
-            {
-                if (hit.collider == null || hit.collider.isTrigger ||
-                    hit.normal.y < 0.55f) continue;
-
-                Vector3 candidato = new Vector3(hit.point.x,
-                    hit.point.y + alturaAcimaDoChaoElixires, transform.position.z);
-                Vector3 viewport = cameraKaya.WorldToViewportPoint(candidato);
-                if (viewport.z <= 0f ||
-                    viewport.x < lateral || viewport.x > 1f - lateral ||
-                    viewport.y < vertical || viewport.y > 1f - vertical)
-                    continue;
-
-                float distanciaHorizontal = Mathf.Abs(candidato.x - kayaNaArena.position.x);
-                if (distanciaHorizontal < distanciaMinima)
-                    continue;
-
-                bool mesmoPiso = plataformaKaya != null &&
-                    hit.collider == plataformaKaya;
-                float diferencaAltura = Mathf.Abs(hit.point.y - alturaChaoKaya);
-                // Tilemaps podem ter varias plataformas no MESMO collider.
-                // Nao permitir outro andar muito alto/baixo so porque
-                // o Collider2D da tilemap e compartilhado.
-                if (diferencaAltura > diferencaMaximaAlturaPlataforma)
-                    continue;
-
-                // Se existe outra vida visivel por perto, nao agrupa pickups.
-                bool ocupado = false;
-                foreach (HealthPickup ativo in elixiresArenaAtivos)
-                {
-                    if (ativo != null &&
-                        Vector2.Distance(ativo.transform.position, candidato) <
-                            distanciaEntreElixires)
-                    {
-                        ocupado = true;
-                        break;
-                    }
-                }
-                if (ocupado) continue;
-
-                // Mesmo chao vale mais; entre as opcoes validas, vence
-                // aquela mais longe da Kaya, sempre DENTRO da camera.
-                float pontuacao = distanciaHorizontal -
-                    diferencaAltura * 0.25f +
-                    (mesmoPiso ? larguraUtil * 2f : 0f);
-                if (pontuacao > melhorPontuacao)
-                {
-                    melhorPontuacao = pontuacao;
-                    posicao = candidato;
-                    encontrou = true;
-                }
-            }
-        }
-
-        return encontrou;
-    }
 
     private void EncerrarElixiresDaArena()
     {
