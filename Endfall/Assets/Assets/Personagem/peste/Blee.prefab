@@ -387,7 +387,7 @@ MonoBehaviour:
     morte: {fileID: 0}
     somProprio: {fileID: 0}
     somAtaque: {fileID: 0}
-    somInvocacao: {fileID: 0}
+    somInvocacao: {fileID: 8300000, guid: 7b0ea0f00b29c7a48aee38f5cb44a7aa, type: 3}
     volumeInvocacao: 0.65
     variacaoPitchInvocacao: 0.08
     volumeHitCausado: 0.75
