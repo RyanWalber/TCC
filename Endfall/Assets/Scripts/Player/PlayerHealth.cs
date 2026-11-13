@@ -81,8 +81,12 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private Transform visualKaya;
     [Tooltip("Trava a posicao visual X/Y/Z onde Kaya recebeu o golpe fatal, sem alterar a queda fisica se morreu no ar.")]
     [SerializeField] private bool travarPosicaoHorizontalNaMorte = true;
-    [Tooltip("Quanto a compensacao VERTICAL dos pes pode deslocar o visual do lugar da morte. Zero = corpo absolutamente fixo.")]
-    [Min(0f)] [SerializeField] private float limiteCorrecaoVerticalPes = 0f;
+    [Header("Fixacao dos pes na morte em solo")]
+    [Tooltip("Fixa os pes pelo esqueleto, sem transladar a Kaya inteira.")]
+    [SerializeField] private bool ancorarPesPelosOssos = true;
+    [Range(1, 10)] [SerializeField] private int iteracoesAncoragemPes = 5;
+    [Range(2f, 50f)] [SerializeField] private float maximoGrausPorArticulacao = 24f;
+    [Min(0.005f)] [SerializeField] private float toleranciaAncoragemPes = 0.04f;
 
     [Header("Pes fixos durante a queda")]
     [Tooltip("Mantem a posicao dos pes no mundo enquanto o corpo executa kayamorrendo.")]
@@ -100,6 +104,8 @@ public class PlayerHealth : MonoBehaviour
     private bool olhandoParaEsquerdaAoMorrer;
 
     private Vector3 posicaoReferenciaDosPes;
+    private Vector3 alvoMortePe1;
+    private Vector3 alvoMortePe2;
     private bool referenciaDosPesCapturada;
     private static readonly int EstadoMorrendo = Animator.StringToHash("kayamorrendo");
 
@@ -188,16 +194,13 @@ public class PlayerHealth : MonoBehaviour
     {
         if (!estaMorta || visualKaya == null) return;
 
-        // A animação kayamorrendo original gravava a POSICAO do rig:
-        // X -27.9 -> 47.8 e Y 7.4 -> -8.4. Mantemos a raiz do
-        // personagem no mesmo ponto em que morreu, em ambos os lados.
-        // Nao mexer no Transform do PLAYER: se morreu no ar, ele ainda
-        // pode cair normalmente pelo Rigidbody2D.
+        // A posicao do DESENHO fica no ponto da morte, enquanto o
+        // Rigidbody2D pode continuar caindo se o golpe ocorreu no ar.
         if (travarPosicaoHorizontalNaMorte && posicaoMorteCapturada)
             visualKaya.localPosition = posicaoLocalVisualNaMorte;
 
-        // Captura o Y da mira no golpe fatal e nunca usa o mouse de novo.
-        // Preserva o giro Z de queda, que e espelhado automaticamente.
+        // Cai para tras em ambos os lados: +Z quando olha direita;
+        // espelho no eixo Y quando olha esquerda (mira congelada).
         if (respeitarDirecaoAoMorrer)
         {
             Vector3 angulos = visualKaya.localEulerAngles;
@@ -205,26 +208,44 @@ public class PlayerHealth : MonoBehaviour
             visualKaya.localEulerAngles = angulos;
         }
 
-        // Na morte em solo, nao mover a Kaya horizontalmente para
-        // perseguir o centro dos pes: esse era o tranco que fazia o
-        // corpo deslizar para os lados enquanto o rig mudava de pose.
-        // So um ajuste vertical MINIMO mantem o contato com o chao.
-        // Limite 0 => posicao do visual absolutamente fixa.
+        // Morte no solo: corrigimos os OSSOS das pernas, nao a posicao
+        // do corpo todo. Isso evita o deslizamento e a mudanca de canto.
         if (!morreuApoiadaNoChao || !fixarPesDuranteMorte ||
-            !fixarAlturaDosPes || limiteCorrecaoVerticalPes <= 0f ||
-            !referenciaDosPesCapturada ||
-            (peMorte1 == null && peMorte2 == null))
+            !ancorarPesPelosOssos || !referenciaDosPesCapturada)
             return;
+        if (peMorte1 != null) FixarPeComIK2D(peMorte1, alvoMortePe1);
+        if (peMorte2 != null) FixarPeComIK2D(peMorte2, alvoMortePe2);
+    }
 
-        if (animatorKaya == null || !animatorKaya.isActiveAndEnabled)
-            return;
-        AnimatorStateInfo estado = animatorKaya.GetCurrentAnimatorStateInfo(0);
-        if (estado.shortNameHash != EstadoMorrendo) return;
+    private void FixarPeComIK2D(Transform pe, Vector3 destino)
+    {
+        // CCD em 2D, do tornozelo ate o quadril. A origem da
+        // Kaya nao se move e os pes sao ancorados no quadro do impacto.
+        Vector2 alvo = destino;
+        if (!fixarAlturaDosPes) alvo.y = pe.position.y;
+        int iteracoes = Mathf.Clamp(iteracoesAncoragemPes, 1, 10);
+        float anguloMaximo = Mathf.Clamp(maximoGrausPorArticulacao, 2f, 50f);
+        float tolerancia = Mathf.Max(0.005f, toleranciaAncoragemPes);
+        for (int i = 0; i < iteracoes; i++)
+        {
+            if (Vector2.Distance(pe.position, alvo) <= tolerancia) break;
+            Transform articulacao = pe.parent;
+            for (int j = 0; j < 3 && articulacao != null;
+                 j++, articulacao = articulacao.parent)
+            {
+                Vector2 atual = (Vector2)pe.position - (Vector2)articulacao.position;
+                Vector2 destinoRelativo = alvo - (Vector2)articulacao.position;
+                if (atual.sqrMagnitude < 0.000001f ||
+                    destinoRelativo.sqrMagnitude < 0.000001f)
+                    continue;
 
-        float deltaY = posicaoReferenciaDosPes.y - ObterCentroPesNoMundo().y;
-        float correcaoY = Mathf.Clamp(deltaY,
-            -limiteCorrecaoVerticalPes, limiteCorrecaoVerticalPes);
-        visualKaya.position += Vector3.up * correcaoY;
+                float diferenca = Vector2.SignedAngle(atual, destinoRelativo);
+                articulacao.Rotate(Vector3.forward,
+                    Mathf.Clamp(diferenca, -anguloMaximo, anguloMaximo),
+                    Space.World);
+                if (Vector2.Distance(pe.position, alvo) <= tolerancia) break;
+            }
+        }
     }
 
     private Vector3 ObterCentroPesNoMundo()
@@ -337,6 +358,8 @@ public class PlayerHealth : MonoBehaviour
             (peMorte1 != null || peMorte2 != null))
         {
             posicaoReferenciaDosPes = ObterCentroPesNoMundo();
+            if (peMorte1 != null) alvoMortePe1 = peMorte1.position;
+            if (peMorte2 != null) alvoMortePe2 = peMorte2.position;
             referenciaDosPesCapturada = true;
         }
 
