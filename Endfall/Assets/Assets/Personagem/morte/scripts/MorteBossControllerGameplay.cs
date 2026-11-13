@@ -145,6 +145,7 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     private float multiplicadorVelocidadeMovimento = 1f;
     private bool emTransicaoDeEstagio;
     private bool combatePeloGatilho;
+    public bool CombateIniciadoPeloGatilho => combatePeloGatilho;
     private float ataqueLiberadoEm = float.PositiveInfinity;
 
     public void AtivarPeloGatilho(float espera)
