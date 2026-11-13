@@ -5122,8 +5122,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -55.8, y: 1.8}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -78.965, y: -0.000015259}
+  m_SizeDelta: {x: 157.9302, y: 157.9302}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &896057718
 MonoBehaviour:
@@ -5145,7 +5145,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3338141327896329606, guid: 43d99ff0f88f9c14ab8db1b9e98011c9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4e6452be1c9d0ff4984f05bc79b732f0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -22199,6 +22199,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PanelPause
       objectReference: {fileID: 0}
+    - target: {fileID: 215408940600973636, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1621334966606405424, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -22296,7 +22300,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 341915305}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5606198058149462665, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
+    - {fileID: 1649020614155851050, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
+    - {fileID: 5392915292433060905, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
+    - {fileID: 4593964792309918762, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3cb623e4c459b1d4da56d86029fd164f, type: 3}
@@ -22774,10 +22782,10 @@ MonoBehaviour:
   volumeInvestida: 0.7
   musicaTransicaoEstagio: {fileID: 8300000, guid: 84a9ad9f3056ab540ba427f022e77fae, type: 3}
   fonteMusicaTransicao: {fileID: 0}
-  volumeMusicaTransicao: 0.84
+  volumeMusicaTransicao: 0.5
   volumeTrilhasDuranteTransicao: 0.08
   fadeEntradaMusicaTransicao: 0.15
-  fadeSaidaMusicaTransicao: 0.25
+  fadeSaidaMusicaTransicao: 0.05
   gritoFinal: {fileID: 8300000, guid: 840b420b385d1764eaae140c03b50b00, type: 3}
   musicaMorteFinal: {fileID: 0}
   volumeMusicaMorteFinal: 0
@@ -22825,6 +22833,7 @@ MonoBehaviour:
   inicioColisaoFoice: 1.06
   fimColisaoFoice: 1.75
   limitarFoiceAteKaya: 1
+  distanciaExtraDepoisDaKaya: 80
   inicioOriginalFoiceLocalX: -67.4
   distanciaAnimadaFoice: 605.7
 --- !u!70 &1433506105
@@ -23813,6 +23822,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossIntroUniversal
   bossTransform: {fileID: 1433506103}
   tempoFocoNoBoss: 2
+  atrasoParaAtacar: 3
+  painelBarraVida: {fileID: 0}
+  fadeEntradaBarra: 0.4
+  fadeSaidaBarra: 0.5
   tamanhoGatilho: {x: 21.8, y: 100}
   corGizmo: {r: 0, g: 1, b: 1, a: 1}
 --- !u!61 &1655421892
@@ -275371,7 +275384,7 @@ MonoBehaviour:
   intervaloSpawnElixires: 2
   maximoElixiresPresentes: 4
   quantidadeTotalElixires: 6
-  curaElixirArena: 25
+  curaElixirArena: 10
   pontosElixires:
   - {fileID: 591135882}
   - {fileID: 537910320}
@@ -275402,7 +275415,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarController
   barraVidaUI: {fileID: 421269861}
   jogador: {fileID: 1805055711}
+  ativarPorDistanciaSemGatilho: 0
   distanciaAtivacao: 1500
+  fadeEntrada: 0.4
+  fadeSaida: 0.5
 --- !u!4 &2005524402 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5750693430429887954, guid: 37e66bce4beb4754b94bdf7eaf5f4ab3, type: 3}
