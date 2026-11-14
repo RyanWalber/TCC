@@ -1,25 +1,22 @@
 fileFormatVersion: 2
-guid: 5b095eac6746090459bf7acaa26c0d52
+guid: cba2b5e52b29a9042849675ed43a5236
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2828989552474486286
-    second: S3_0
+      213: -5746111499590715240
+    second: slot2_0
   - first:
-      213: -3144168630049914624
-    second: S3_1
+      213: 2080908763663765986
+    second: slot2_1
   - first:
-      213: 584255097254047170
-    second: S3_2
+      213: -8270598344533806506
+    second: slot2_2
   - first:
-      213: -3106335621927495338
-    second: S3_3
+      213: 7086072892310836769
+    second: slot2_3
   - first:
-      213: -5126858286560947676
-    second: S3_4
-  - first:
-      213: -171360117524874884
-    second: S3_5
+      213: -3972467257922509750
+    second: slot2_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -99,85 +96,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: VisionOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: tvOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WindowsStoreApps
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -193,13 +112,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: S3_0
+      name: slot2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 166
-        height: 290
+        width: 510
+        height: 898
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -208,20 +127,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0678846207924720800000000000000
-      internalID: 2828989552474486286
+      spriteID: 898bb1b0906b140b0800000000000000
+      internalID: -5746111499590715240
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: S3_1
+      name: slot2_1
       rect:
         serializedVersion: 2
-        x: 163
-        y: 25
-        width: 134
-        height: 213
+        x: 513
+        y: 83
+        width: 406
+        height: 653
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -230,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 001c2fb1a4bad54d0800000000000000
-      internalID: -3144168630049914624
+      spriteID: 2e11d24de7fd0ec10800000000000000
+      internalID: 2080908763663765986
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: S3_2
+      name: slot2_2
       rect:
         serializedVersion: 2
-        x: 293
-        y: 42
-        width: 185
-        height: 198
+        x: 919
+        y: 136
+        width: 566
+        height: 606
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -252,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2cde90a5ae0bb1800800000000000000
-      internalID: 584255097254047170
+      spriteID: 652f02a00aee83d80800000000000000
+      internalID: -8270598344533806506
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: S3_3
+      name: slot2_3
       rect:
         serializedVersion: 2
-        x: 474
-        y: 41
-        width: 147
-        height: 213
+        x: 1484
+        y: 131
+        width: 446
+        height: 657
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -274,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6599eddb53414e4d0800000000000000
-      internalID: -3106335621927495338
+      spriteID: 12656be70c9c65260800000000000000
+      internalID: 7086072892310836769
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: S3_4
+      name: slot2_4
       rect:
         serializedVersion: 2
-        x: 617
-        y: 0
-        width: 159
-        height: 292
+        x: 2256
+        y: 6
+        width: 524
+        height: 890
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -296,30 +215,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 42254c73d8db9d8b0800000000000000
-      internalID: -5126858286560947676
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: S3_5
-      rect:
-        serializedVersion: 2
-        x: 774
-        y: 16
-        width: 70
-        height: 252
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c79b24a81e43f9df0800000000000000
-      internalID: -171360117524874884
+      spriteID: a44a8a17316fed8c0800000000000000
+      internalID: -3972467257922509750
       vertices: []
       indices: 
       edges: []
@@ -338,12 +235,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      S3_0: 2828989552474486286
-      S3_1: -3144168630049914624
-      S3_2: 584255097254047170
-      S3_3: -3106335621927495338
-      S3_4: -5126858286560947676
-      S3_5: -171360117524874884
+      slot2_0: -5746111499590715240
+      slot2_1: 2080908763663765986
+      slot2_2: -8270598344533806506
+      slot2_3: 7086072892310836769
+      slot2_4: -3972467257922509750
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
