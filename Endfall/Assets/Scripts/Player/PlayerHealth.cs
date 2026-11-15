@@ -13,8 +13,8 @@ public class PlayerHealth : MonoBehaviour
     public float VidaMaxima => vidaMaxima;
 
     [Header("Imagens da UI")]
-    [SerializeField] private Image fillVida;          // Barra Vermelha (vida)
-    [SerializeField] private Image fillVidaFantasma;  // Barra Amarela/Branca (vidaFantasma)
+    [SerializeField] private Image fillVida;
+    [SerializeField] private Image fillVidaFantasma;
 
     [Header("Velocidade da Barra Fantasma")]
     [SerializeField] private float velocidadeFantasma = 1.5f;
@@ -32,7 +32,6 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField, Min(0.03f)] private float tempoFlashVermelho = 0.12f;
     [SerializeField, Range(1, 5)] private int quantidadePiscadas = 2;
 
-    // Lista de todos os Sprites do corpo fatiado da Kaya
     private SpriteRenderer[] todosSprites;
     private Color[] coresOriginais;
 
@@ -68,8 +67,6 @@ public class PlayerHealth : MonoBehaviour
     private AnimatorUpdateMode modoAnimatorAntesMorte;
     private float velocidadeAnimatorAntesMorte = 1f;
 
-    // A posicao dos pes so e travada quando a morte INICIA no chao.
-    // No ar, a queda real permanece sob o controle do Rigidbody2D.
     private bool morreuApoiadaNoChao;
     private RigidbodyConstraints2D restricoesRigidbodyAntesMorte;
     private readonly Dictionary<AudioSource, float> pitchesOriginaisAudio =
@@ -125,8 +122,6 @@ public class PlayerHealth : MonoBehaviour
         if (visualKaya == null && animatorKaya != null)
             visualKaya = animatorKaya.transform;
 
-        // Os dois caminhos pertencem ao rig original de Ani Kaya.
-        // Se alguma cena usar outro rig, os campos continuam editaveis no Inspector.
         if (visualKaya != null)
         {
             if (peMorte1 == null)
@@ -143,12 +138,9 @@ public class PlayerHealth : MonoBehaviour
             : vidaMaxima;
         vidaAtual = Mathf.Clamp(vidaSalva, 1f, vidaMaxima);
 
-        // A nova Kaya já leu a vida salva (cheia após a morte). Só agora liberamos
-        // a sincronização de vida/Fúria para os próximos Updates.
         if (SaveManager.Instance != null)
             SaveManager.Instance.ConfirmarRenascimentoInicializado();
 
-        // Pega todos os sprites do corpo da Kaya
         todosSprites = GetComponentsInChildren<SpriteRenderer>(true);
         if (todosSprites != null && todosSprites.Length > 0)
         {
@@ -169,7 +161,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void Update()
     {
-        // Depois de morrer, não continue gravando vida 0 durante o carregamento da cena.
         if (estaMorta) return;
 
         if (fillVidaFantasma != null && fillVida != null)
@@ -180,7 +171,6 @@ public class PlayerHealth : MonoBehaviour
             }
         }
 
-        // Mantém o estado atual pronto para salvamentos manuais/autosaves.
         if (SaveManager.Instance != null)
         {
             float furiaAtual = sistemaFuria != null
@@ -194,13 +184,9 @@ public class PlayerHealth : MonoBehaviour
     {
         if (!estaMorta || visualKaya == null) return;
 
-        // A posicao do DESENHO fica no ponto da morte, enquanto o
-        // Rigidbody2D pode continuar caindo se o golpe ocorreu no ar.
         if (travarPosicaoHorizontalNaMorte && posicaoMorteCapturada)
             visualKaya.localPosition = posicaoLocalVisualNaMorte;
 
-        // Cai para tras em ambos os lados: +Z quando olha direita;
-        // espelho no eixo Y quando olha esquerda (mira congelada).
         if (respeitarDirecaoAoMorrer)
         {
             Vector3 angulos = visualKaya.localEulerAngles;
@@ -208,8 +194,6 @@ public class PlayerHealth : MonoBehaviour
             visualKaya.localEulerAngles = angulos;
         }
 
-        // Morte no solo: corrigimos os OSSOS das pernas, nao a posicao
-        // do corpo todo. Isso evita o deslizamento e a mudanca de canto.
         if (!morreuApoiadaNoChao || !fixarPesDuranteMorte ||
             !ancorarPesPelosOssos || !referenciaDosPesCapturada)
             return;
@@ -219,8 +203,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void FixarPeComIK2D(Transform pe, Vector3 destino)
     {
-        // CCD em 2D, do tornozelo ate o quadril. A origem da
-        // Kaya nao se move e os pes sao ancorados no quadro do impacto.
         Vector2 alvo = destino;
         if (!fixarAlturaDosPes) alvo.y = pe.position.y;
         int iteracoes = Mathf.Clamp(iteracoesAncoragemPes, 1, 10);
@@ -289,7 +271,6 @@ public class PlayerHealth : MonoBehaviour
     {
         if (estaMorta || estaInvencivel || quantidadeDano <= 0f) return;
 
-        // Soma a Fúria antes do dano, assim até um golpe fatal conta como dano recebido.
         if (sistemaFuria != null)
             sistemaFuria.AdicionarFuria(furiaPorDanoTomado);
 
@@ -331,29 +312,20 @@ public class PlayerHealth : MonoBehaviour
         estaMorta = true;
         referenciaDosPesCapturada = false;
 
-        // Decide uma vez, no golpe fatal. Nenhum frame da animacao
-        // pode transformar uma morte no ar em morte fixa no chao.
         PlayerController controle = GetComponent<PlayerController>();
         morreuApoiadaNoChao = DetectarApoioNoChao(controle);
 
-        // Impede que a rotina de invencibilidade altere as cores durante a morte.
         StopAllCoroutines();
         AplicarCorKaya(Color.white, true);
 
         if (visualKaya != null)
         {
-            // A orientacao da MiraMouse e Y=180 para a esquerda e Y=0
-            // para a direita. Captura o lado ANTES de desativar a mira.
-            // O MiraMouse usa Y=180 para a esquerda; o Dot com o
-            // vetor right variava conforme a rotacao Z da mira.
             olhandoParaEsquerdaAoMorrer =
                 Mathf.Abs(Mathf.DeltaAngle(visualKaya.localEulerAngles.y, 180f)) < 90f;
             posicaoLocalVisualNaMorte = visualKaya.localPosition;
             posicaoMorteCapturada = true;
         }
 
-        // Captura os pes ANTES da primeira pose de kayamorrendo para
-        // evitar que a mudanca inicial da animacao provoque um salto.
         if (morreuApoiadaNoChao && fixarPesDuranteMorte &&
             (peMorte1 != null || peMorte2 != null))
         {
@@ -363,7 +335,6 @@ public class PlayerHealth : MonoBehaviour
             referenciaDosPesCapturada = true;
         }
 
-        // Desativa toda a mira para nao disputar a rotacao com a animacao de morte.
         foreach (MiraMouse mira in GetComponentsInChildren<MiraMouse>(true))
             mira.enabled = false;
 
@@ -384,14 +355,10 @@ public class PlayerHealth : MonoBehaviour
 
             if (morreuApoiadaNoChao)
             {
-                // No chao, trava raiz FISICA; o visual ainda pode mover
-                // ossos, com seus pes compensados no LateUpdate.
                 corpo.constraints = RigidbodyConstraints2D.FreezeAll;
             }
             else
             {
-                // No ar, preserva a gravidade e as colisoes. Congela
-                // apenas o X fisico para Kaya nao ser arremessada.
                 corpo.constraints =
                     (restricoesRigidbodyAntesMorte &
                      ~RigidbodyConstraints2D.FreezePositionY) |
@@ -400,15 +367,11 @@ public class PlayerHealth : MonoBehaviour
             }
         }
 
-        // Nao parar ambiente nem trilha de combate durante o slow motion.
         if (audioKaya != null)
             audioKaya.TocarMorte(usarMorteCinematografica);
 
         if (usarMorteCinematografica)
         {
-            // O mundo inteiro fica lento via Time.timeScale. A animacao da
-            // Kaya usa tempo real, mas com velocidade reduzida, para que a
-            // queda seja VISIVEL antes do fade, sem chegar ao quadro final.
             if (animatorKaya != null && animatorKaya.isActiveAndEnabled)
             {
                 modoAnimatorAntesMorte = animatorKaya.updateMode;
@@ -429,7 +392,6 @@ public class PlayerHealth : MonoBehaviour
         }
         else
         {
-            // Modo classico sem Animator: respawn direto.
             RenascerDepoisDaMorte();
         }
     }
@@ -439,8 +401,6 @@ public class PlayerHealth : MonoBehaviour
         if (controle != null && controle.EstaNoChao)
             return true;
 
-        // Verificacao extra para morte no exato frame de aterrissagem
-        // ou cenas em que o PlayerController foi desabilitado antes.
         Collider2D corpo = GetComponent<Collider2D>();
         if (corpo == null) return false;
         Bounds limites = corpo.bounds;
@@ -469,10 +429,6 @@ public class PlayerHealth : MonoBehaviour
     {
         if (!desacelerarMusicasESons) return;
 
-        // AudioSource nao obedece a Time.timeScale. Alterar o pitch do
-        // proprio source desacelera tambem as musicas que JA estavam
-        // tocando, sem Stop, Play, reinicio ou descontinuidade de volume.
-        // Captura tambem tiros/corvos/SFX criados durante a cinematica.
         if (Time.unscaledTime >= proximaBuscaAudioMorte)
         {
             AudioSource[] fontes = FindObjectsByType<AudioSource>(
@@ -521,7 +477,6 @@ public class PlayerHealth : MonoBehaviour
 
         while (tempoRealDecorrido < duracaoTotal)
         {
-            // UnscaledDeltaTime: o fade nao congela quando o mundo desacelera.
             tempoRealDecorrido += Mathf.Min(Time.unscaledDeltaTime, 0.1f);
 
             float progressoLento = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(
@@ -532,7 +487,6 @@ public class PlayerHealth : MonoBehaviour
             Time.fixedDeltaTime = passoFisicaAntesMorte * Mathf.Max(0.01f,
                 Time.timeScale / Mathf.Max(0.01f, escalaTempoAntesMorte));
 
-            // Musicas e tiros seguem a mesma curva de camera lenta.
             AtualizarCameraLentaNosAudios(
                 Time.timeScale / Mathf.Max(0.01f, escalaTempoAntesMorte));
 
@@ -545,8 +499,6 @@ public class PlayerHealth : MonoBehaviour
             yield return null;
         }
 
-        // O ultimo quadro da animacao fica coberto pela tela preta.
-        // Nao aguarda os 3 segundos do clipe kayamorrendo.
         if (cortina != null) cortina.DefinirEscurecimentoDeMorte(1f);
         RestaurarTempoDaMorte();
         cinematicaMorteEmAndamento = false;
@@ -555,7 +507,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void RestaurarTempoDaMorte()
     {
-        // Restaurar os pitchs originais ANTES de trocar a cena.
         RestaurarPitchDosAudios();
         Time.timeScale = Mathf.Max(0.01f, escalaTempoAntesMorte);
         Time.fixedDeltaTime = passoFisicaAntesMorte;
@@ -563,8 +514,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void OnDisable()
     {
-        // Se a cena ou Kaya for desativada durante a cinematica,
-        // o proximo Play/respawn nao pode permanecer em camera lenta.
         if (!cinematicaMorteEmAndamento) return;
         RestaurarTempoDaMorte();
         cinematicaMorteEmAndamento = false;
@@ -581,7 +530,6 @@ public class PlayerHealth : MonoBehaviour
 
     private IEnumerator AguardarAnimacaoMorte()
     {
-        // O Animator pode processar o Trigger apenas no proximo frame.
         float tempoEsperaEstado = 0f;
         while (tempoEsperaEstado < 1f)
         {
@@ -595,7 +543,6 @@ public class PlayerHealth : MonoBehaviour
         if (animatorKaya != null &&
             animatorKaya.GetCurrentAnimatorStateInfo(0).IsName("kayamorrendo"))
         {
-            // Aguarda o fim do estado real, mesmo que a duracao da animacao mude.
             float seguranca = 0f;
             float limite = Mathf.Max(duracaoMorteFallback, 0.5f) + 30f;
             while (seguranca < limite)
@@ -619,7 +566,6 @@ public class PlayerHealth : MonoBehaviour
 
     private void RenascerDepoisDaMorte()
     {
-        // Mantem o save e o checkpoint existentes, apenas adiando a chamada.
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.RenascerNoCheckpoint();

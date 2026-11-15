@@ -8,7 +8,6 @@ public class SistemaFuria : MonoBehaviour
     [SerializeField] private float consumoPorSegundo = 20f;
     [SerializeField] private float furiaAtual = 0f;
 
-    // Propriedade pública para leitura externa (Solução para o erro CS0122)
     public float FuriaAtual => furiaAtual;
     public float FuriaMaxima => furiaMaxima;
 
@@ -50,7 +49,6 @@ public class SistemaFuria : MonoBehaviour
         controleKaya = GetComponent<PlayerController>();
         saudeKaya = GetComponent<PlayerHealth>();
         ConfigurarPainelDecorativo();
-        // Carrega a Fúria escolhida no slot ou preservada pelo renascimento.
         if (SaveManager.Instance != null)
             furiaAtual = Mathf.Clamp(SaveManager.Instance.GetFuriaKaya(), 0f, furiaMaxima);
         AtualizarUI();
@@ -60,7 +58,6 @@ public class SistemaFuria : MonoBehaviour
     private void Update()
     {
         AtualizarFadeVinheta();
-        // Nao alterna Furia com o menu de pausa aberto.
         if (Time.timeScale <= 0f) return;
 
         if ((controleKaya == null || !controleKaya.ControlesBloqueadosPorDialogo) &&
@@ -98,7 +95,6 @@ public class SistemaFuria : MonoBehaviour
         AtualizarUI();
     }
 
-    // Define a quantidade exata ao carregar um save (não soma ao valor atual).
     public void DefinirFuria(float valor)
     {
         furiaAtual = Mathf.Clamp(valor, 0f, furiaMaxima);
@@ -133,8 +129,6 @@ public class SistemaFuria : MonoBehaviour
         }
     }
 
-    // A vinheta da Furia ocupa a tela inteira, mas e puramente visual.
-    // Desativa raycasts para que ela nunca capture interacoes do mouse.
     private void ConfigurarPainelDecorativo()
     {
         if (vinhetaTelaFuria == null) return;
@@ -185,6 +179,5 @@ public class SistemaFuria : MonoBehaviour
             luzNeonFuria.enabled = estaEmFuria;
         }
 
-        // O CanvasGroup realiza o fade sem desativar o painel.
     }
 }

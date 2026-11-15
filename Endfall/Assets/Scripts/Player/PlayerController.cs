@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField, Min(0.01f)] private float groundCheckRaio = 0.12f;
-    [SerializeField] private LayerMask chaoLayers = 1 << 3; 
+    [SerializeField] private LayerMask chaoLayers = 1 << 3;
     [SerializeField] private bool desenharGroundCheck = true;
 
     [Header("Protecao do pulo e das quinas")]
@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
     private float inputHorizontal;
     private bool estaNoChao = false;
     private int pulosRestantes;
-    private int maxPulos = 2; // Total: 1 do chão + 1 no ar
+    private int maxPulos = 2;
 
     private float contadorCoyote;
     private bool podeDarDash = true;
@@ -54,8 +54,6 @@ public class PlayerController : MonoBehaviour
     private bool controlesBloqueadosPorDialogo;
     private bool controlesBloqueadosPelaIntroBoss;
 
-    // O mesmo estado e consultado por TiroPlayer e SistemaFuria:
-    // a intro tambem bloqueia tiro e Furia, sem afetar a trava dos dialogos.
     public bool ControlesBloqueadosPorDialogo =>
         controlesBloqueadosPorDialogo || controlesBloqueadosPelaIntroBoss;
 
@@ -67,7 +65,6 @@ public class PlayerController : MonoBehaviour
         AtualizarEstadoBloqueio(estavaBloqueado);
     }
 
-    // Desativa somente os comandos: PlayerController, gravidade e Animator continuam ativos.
     public void DefinirBloqueioDialogo(bool bloquear)
     {
         if (controlesBloqueadosPorDialogo == bloquear) return;
@@ -93,8 +90,6 @@ public class PlayerController : MonoBehaviour
                     playerAnimation.DefinirDash(false);
             }
 
-            // Para na horizontal e cancela a subida do pulo, sem congelar
-            // a fisica. Kaya continua podendo cair sobre a plataforma.
             float velocidadeVertical = Mathf.Min(0f, rb.linearVelocity.y);
             rb.linearVelocity = new Vector2(0f, velocidadeVertical);
             rb.WakeUp();
@@ -104,7 +99,6 @@ public class PlayerController : MonoBehaviour
             AtualizarAnimacoes();
     }
 
-    // Chamado apenas quando os pes estao em contato com o topo da plataforma.
     public void DefinirPlataformaMovel(PlataformaMovel plataforma)
     {
         if (plataforma != null && !estaSubindoPulo)
@@ -141,7 +135,6 @@ public class PlayerController : MonoBehaviour
             playerAnimation = GetComponentInChildren<PlayerAnimation>();
         }
 
-        // --- CARREGA STATUS SALVO ---
         CarregarStatusDoSaveManager();
     }
 
@@ -204,12 +197,10 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Detecção contínua abaixo dos pés: mais estável nas junções entre plataformas.
         estaNoChao = VerificarChao() || (plataformaSuporte != null && !estaSubindoPulo);
 
         if (ControlesBloqueadosPorDialogo)
         {
-            // Sem input, mas preservando gravidade e movimento das plataformas.
             float movimentoPlataforma = plataformaSuporte != null && estaNoChao
                 ? plataformaSuporte.VelocidadeAtual.x : 0f;
             rb.linearVelocity = new Vector2(movimentoPlataforma, rb.linearVelocity.y);
@@ -235,16 +226,11 @@ public class PlayerController : MonoBehaviour
         if (!estaSubindoPulo && velocidadeY > 0f)
             velocidadeY = Mathf.Max(0f, velocidadePlataforma.y);
 
-        // Protecao global: qualquer impulso vertical inesperado da fisica
-        // (por exemplo, na quina de um collider) respeita o limite do pulo.
-        // O limite acompanha a Furia e a heranca permitida da plataforma.
         float limitePulo = forcaDoPulo;
         if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
             limitePulo *= Mathf.Max(1f, sistemaFuria.multPulo);
         limitePulo += impulsoVerticalExtraPlataforma;
 
-        // Aplica tambem fora do salto: um contato lateral nao pode lancar a
-        // Kaya acima da velocidade que o proprio pulo permitiria.
         if (velocidadeY > limitePulo)
             velocidadeY = limitePulo;
 
@@ -257,13 +243,8 @@ public class PlayerController : MonoBehaviour
         if (playerAnimation == null) return;
 
         bool estaMovimentando = !estaDandoDash && Mathf.Abs(inputHorizontal) > 0.01f;
-        // O tempo de coyote serve apenas para permitir o pulo, não para
-        // manter a animação de chão quando a Kaya já está no ar.
         bool noChaoParaAnimacao = estaNoChao;
 
-        // Atualiza os três parâmetros juntos e detecta a aterrissagem.
-        // AtualizarEstados força a transição para andar/ociosa ao tocar o chão,
-        // evitando que a Kaya fique presa no estado de pulo em determinadas fases.
         playerAnimation.AtualizarEstados(
             estaMovimentando,
             noChaoParaAnimacao,
@@ -273,7 +254,7 @@ public class PlayerController : MonoBehaviour
 
     void Pular()
     {
-        
+
         if (pulosRestantes <= 0) return;
 
         bool puloDoChao = contadorCoyote > 0f && pulosRestantes == maxPulos;
@@ -326,8 +307,6 @@ public class PlayerController : MonoBehaviour
     {
         if (colliderJogador == null) return false;
 
-        // Durante a subida, o GroundCheck ainda pode estar encostado no
-        // chao por alguns frames; isso NAO deve recarregar o pulo duplo.
         if (estaSubindoPulo && rb.linearVelocity.y > 0.1f)
             return false;
 
@@ -340,12 +319,9 @@ public class PlayerController : MonoBehaviour
             xCentro = groundCheck.position.x;
         }
 
-        // Procura apenas um pouco abaixo dos pes, nao nas laterais da Kaya.
         float distancia = yOrigem - corpo.min.y + Mathf.Max(0.25f, groundCheckRaio * 0.2f);
         float lateral = corpo.extents.x * 0.6f;
 
-        // Tres raios mantem o pulo responsivo nas bordas das plataformas.
-        // Apenas superficies com normal voltada para CIMA valem como chao.
         for (int i = -1; i <= 1; i++)
         {
             Vector2 origem = new Vector2(xCentro + i * lateral, yOrigem);
@@ -407,8 +383,6 @@ public class PlayerController : MonoBehaviour
 
         foreach (ContactPoint2D contato in collision.contacts)
         {
-            // A quina/lateral da plataforma nao deve contar como aterrissagem.
-            // Exige normal principalmente vertical E contato na sola dos pes.
             if (contato.normal.y >= 0.7f && contato.point.y <= limiteDosPes)
             {
                 if (!estaNoChao && !estaDandoDash && audioKaya != null)

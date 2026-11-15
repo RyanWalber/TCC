@@ -32,7 +32,6 @@ public class PlataformaDeQueda : MonoBehaviour
 
         if (!collision.gameObject.CompareTag("Player")) return;
 
-        // Usa todos os contatos: o primeiro nem sempre corresponde aos pes.
         foreach (ContactPoint2D contato in collision.contacts)
         {
             if (contato.normal.y < -0.5f)
@@ -49,8 +48,6 @@ public class PlataformaDeQueda : MonoBehaviour
         AudioObjeto2D.Tocar(somTremor, volumeAudio, transform.position, "Plataforma tremendo");
 
         float tempo = 0f;
-        // Move o corpo cinemático usando a física, sem teleportar o Transform
-        // a cada frame. Mantém a intensidade configurada no Inspector intacta.
         while (tempo < tempoParaCair)
         {
             Vector2 deslocamento = Random.insideUnitCircle * intensidadeTreme;
