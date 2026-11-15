@@ -1,8 +1,6 @@
 using System;
 using UnityEngine;
 
-// Configuracao serializavel: aparece no Inspector DO PROPRIO inimigo/boss.
-// Nao precisa colocar outro componente em prefabs nem referenciar a Kaya.
 [Serializable]
 public sealed class AudioInimigo
 {
@@ -62,7 +60,7 @@ public sealed class AudioInimigo
         fonte = filho.AddComponent<AudioSource>();
         fonte.playOnAwake = false;
         fonte.loop = false;
-        fonte.spatialBlend = 0f; // a distancia e calculada manualmente em 2D
+        fonte.spatialBlend = 0f;
         return fonte;
     }
 
@@ -79,8 +77,6 @@ public sealed class AudioInimigo
         return true;
     }
 
-    // Uma fonte TEMPORARIA por invocacao. O som pertence a este personagem,
-    // continua mesmo que o projetil seja destruido e permite varios corvos simultaneos.
     private bool TocarIndependente(Component emissor, AudioClip clip, float volume,
         bool variarPitch = false, bool ignorarAlcance = false)
     {
@@ -88,8 +84,6 @@ public sealed class AudioInimigo
         Vector3 origem = emissor.transform.position;
         if (!ignorarAlcance && !EmAlcance(origem)) return false;
 
-        // Sons de invocados (ex.: corvos) sao 2D, audiveis por instancia
-        // e nao devem perder volume por estarem distantes da Kaya.
         float fator = 1f;
         if (!ignorarAlcance)
         {
@@ -115,7 +109,6 @@ public sealed class AudioInimigo
     public bool TocarInvocacao(Component emissor, bool ignorarAlcance = false) =>
         TocarIndependente(emissor, somInvocacao, volumeInvocacao, true, ignorarAlcance);
 
-    // O som proprio e uma camada em loop INDEPENDENTE dos hits e ataques.
     public void Atualizar(Component emissor)
     {
         if (morreu || emissor == null || somProprio == null)
@@ -166,9 +159,6 @@ public sealed class AudioInimigo
 
     public void TocarSomProprio(Component emissor) => Atualizar(emissor);
 
-    // Utilizado SOMENTE pelo Cavaleiro da Fome. Os demais inimigos
-    // continuam usando Atualizar() com seus loops e fades habituais.
-    // Reaproveita o Som Proprio, Volume Proprio e Alcance do Inspector.
     public bool TocarSomProprioUmaVez(Component emissor) =>
         Tocar(emissor, somProprio, volumeProprio);
 
@@ -203,7 +193,6 @@ public sealed class AudioInimigo
         if (tocou) ultimoHitRecebido = Time.unscaledTime;
     }
 
-    // Sons exclusivos: cuspida da Peste, corvos e foice da Morte, etc.
     public void TocarEspecial(Component emissor, AudioClip clip, float volume, Vector3? origem = null) =>
         Tocar(emissor, clip, volume, origem);
 
@@ -216,7 +205,6 @@ public sealed class AudioInimigo
         morreu = true;
         if (!audivel) return;
 
-        // O inimigo pode ser destruido imediatamente; o clip continua tocando.
         GameObject temporario = new GameObject("Audio - Morte " + emissor.gameObject.name);
         AudioSource saida = temporario.AddComponent<AudioSource>();
         saida.playOnAwake = false;
@@ -228,7 +216,6 @@ public sealed class AudioInimigo
         UnityEngine.Object.Destroy(temporario, morte.length + 0.2f);
     }
 
-    // BossVida e VidaBossGuerra localizam os clips no controller do proprio boss.
     public static void NotificarVidaBoss(Component componenteVida, bool morreu)
     {
         if (componenteVida == null) return;

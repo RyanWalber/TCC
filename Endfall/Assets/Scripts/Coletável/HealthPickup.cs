@@ -26,7 +26,6 @@ public class HealthPickup : MonoBehaviour
 
     private Vector3 posicaoVisualInicial;
     private float faseFlutuacao;
-    // Elixires gerados DURANTE a luta nunca entram no save/checkpoint.
     private bool geradoDuranteBoss;
     private bool expiraDuranteBoss;
     private float instanteExpiracaoBoss;
@@ -38,8 +37,6 @@ public class HealthPickup : MonoBehaviour
     {
         if (!geradoDuranteBoss) return;
 
-        // Zero = nao expira; o comportamento dos coletaveis do mapa
-        // permanece exatamente como antes.
         expiraDuranteBoss = tempo > 0f;
         if (!expiraDuranteBoss) return;
 
@@ -60,8 +57,6 @@ public class HealthPickup : MonoBehaviour
 
     private void Awake()
     {
-        // O pai fica parado: assim cada elixir conserva sua posicao no mapa.
-        // Apenas o visual filho se movimenta para cima e para baixo.
         if (visualFlutuante == null && transform.childCount > 0)
             visualFlutuante = transform.GetChild(0);
 
@@ -109,7 +104,6 @@ public class HealthPickup : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(idUnico))
         {
-            // Um ID aleatorio em Start mudaria a cada partida e quebraria o save.
             Debug.LogError("[HealthPickup] Elixir sem ID persistente. Salve a cena no Editor para gerar IDs unicos.", this);
             return;
         }
@@ -140,8 +134,6 @@ public class HealthPickup : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // Valida apos o Unity terminar duplicacoes e carregamentos de cena.
-    // OnValidate pode ocorrer durante desserializacao: nao modifique a cena nele.
     private void OnValidate()
     {
         AgendarValidacao();
@@ -180,8 +172,6 @@ public class HealthPickup : MonoBehaviour
             elixiresDaCena.Add(elixir);
         }
 
-        // Mantem um ID antigo por grupo: salva o maior numero possivel
-        // de compatibilidades com os saves ja existentes.
         elixiresDaCena.Sort((a, b) =>
             string.CompareOrdinal(
                 GlobalObjectId.GetGlobalObjectIdSlow(a).ToString(),
@@ -191,9 +181,6 @@ public class HealthPickup : MonoBehaviour
 
         foreach (HealthPickup elixir in elixiresDaCena)
         {
-            // Um prefab duplicado pode herdar o mesmo ID em cenas DIFERENTES.
-            // Nao basta procurar duplicatas so na cena atualmente aberta:
-            // IDs herdados do asset precisam virar overrides exclusivos.
             HealthPickup origem = PrefabUtility.GetCorrespondingObjectFromSource(elixir);
             bool idHerdadoDoPrefab = origem != null &&
                 !string.IsNullOrWhiteSpace(elixir.idUnico) &&

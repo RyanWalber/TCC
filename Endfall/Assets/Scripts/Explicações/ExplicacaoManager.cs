@@ -3,14 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Uma unica cena de narrativa para os quatro momentos da campanha.
-// Novo Jogo passa pelo fragmento 1; Continuar, Carregar e respawn nao passam.
 public class ExplicacaoManager : MonoBehaviour
 {
     private const string CenaExplicacao = "Explicação";
 
-    // Dados temporarios da transicao, NUNCA incluidos no SaveData.
-    // Assim o save sempre aponta para a fase verdadeira, nao para a narrativa.
     private static int fragmentoPendente = -1;
     private static string proximaCenaPendente;
     private static bool apresentacaoPendente;
@@ -82,13 +78,11 @@ public class ExplicacaoManager : MonoBehaviour
         CancelarFragmentoPendente();
     }
 
-    // Novo Jogo: Bem-vindo -> Fragmento I -> FaseFome.
     public static void ExibirIntroducaoNovoJogo()
     {
         ExibirAntesDaFaseInterno("FaseFome", true);
     }
 
-    // Entre as fases: somente o fragmento correspondente.
     public static void ExibirAntesDaFase(string nomeCenaDestino)
     {
         ExibirAntesDaFaseInterno(nomeCenaDestino, false);
@@ -195,8 +189,6 @@ public class ExplicacaoManager : MonoBehaviour
         digitacao = StartCoroutine(RevelarTexto());
     }
 
-    // Um AudioSource proprio impede que o som de teclado interfira
-    // em musicas e outros efeitos do projeto.
     private void ConfigurarSomDigitacao()
     {
         if (somDigitacao == null) return;
@@ -234,7 +226,6 @@ public class ExplicacaoManager : MonoBehaviour
 
     private void OnDisable()
     {
-        // Nada de audio tocando depois que a cena termina.
         PararSomDigitacao();
     }
 
@@ -282,7 +273,7 @@ public class ExplicacaoManager : MonoBehaviour
 
     private IEnumerator AnimarPagina(float inicial, float final)
     {
-        PararSomDigitacao(); // Silencio durante os fades.
+        PararSomDigitacao();
         if (cortinaEntrePaginas == null) yield break;
         cortinaEntrePaginas.raycastTarget = true;
         float tempo = 0f;
@@ -302,13 +293,11 @@ public class ExplicacaoManager : MonoBehaviour
         trocandoPagina = true;
         if (cortinaEntrePaginas == null) CriarCortinaPagina();
 
-        // Fade Out da apresentacao: tela toda preta antes de trocar o texto.
         yield return AnimarPagina(0f, 1f);
         apresentacaoAtual = false;
         PrepararTexto(FragmentoAtual());
         yield return null;
 
-        // Fade In do Fragmento I; texto comeca a surgir depois da abertura.
         yield return AnimarPagina(1f, 0f);
         if (cortinaEntrePaginas != null)
             cortinaEntrePaginas.raycastTarget = false;
@@ -319,7 +308,6 @@ public class ExplicacaoManager : MonoBehaviour
     private IEnumerator RevelarTexto()
     {
         yield return null;
-        // Nao perde caracteres enquanto o LevelLoader abre a cena.
         while (LevelLoader.Instance != null && LevelLoader.Instance.EstaEmTransicao)
             yield return null;
 
@@ -327,7 +315,6 @@ public class ExplicacaoManager : MonoBehaviour
         textoTela.ForceMeshUpdate();
         int total = textoTela.textInfo.characterCount;
 
-        // Inicia somente quando as letras vao comecar a aparecer.
         if (total > 0) IniciarSomDigitacao();
 
         for (int i = 1; i <= total; i++)
@@ -350,7 +337,6 @@ public class ExplicacaoManager : MonoBehaviour
 
         if (!terminouTexto)
         {
-            // Primeiro clique revela tudo na pagina atual.
             if (digitacao != null) StopCoroutine(digitacao);
             digitacao = null;
             PararSomDigitacao();
@@ -360,12 +346,10 @@ public class ExplicacaoManager : MonoBehaviour
         }
         else if (apresentacaoAtual)
         {
-            // Segundo clique: Bem-vindo -> Fade Out -> Fragmento I -> Fade In.
             StartCoroutine(ApresentacaoParaFragmento());
         }
         else
         {
-            // Depois do fragmento: Fade Out -> fase -> Fade In global.
             trocandoCena = true;
             PararSomDigitacao();
             StartCoroutine(ExibirTituloDominio());
@@ -399,7 +383,6 @@ public class ExplicacaoManager : MonoBehaviour
         PararSomDigitacao();
         if (cortinaEntrePaginas == null) CriarCortinaPagina();
 
-        // Fecha o fragmento antes de mostrar o anuncio.
         yield return AnimarPagina(0f, 1f);
         if (textoTela == null)
         {
@@ -429,7 +412,6 @@ public class ExplicacaoManager : MonoBehaviour
             Mathf.Max(Mathf.Max(0f, permanenciaTitulo), clipe != null ? clipe.length : 0f));
 
         yield return AnimarPagina(0f, 1f);
-        // O LevelLoader faz a passagem preta para a fase e o Fade In.
         textoTela.text = textoAnterior;
         textoTela.fontSize = tamanhoAnterior;
         textoTela.alignment = alinhamentoAnterior;
