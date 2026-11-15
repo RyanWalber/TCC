@@ -8,12 +8,12 @@ public class PlayerController : MonoBehaviour
 
     [Header("Pulo e Pulo Duplo")]
     [SerializeField] private float forcaDoPulo = 12f;
-    [SerializeField] private float tempoCoyote = 0.15f; // Tolerância para imperfeições do chão (em segundos)
+    [SerializeField] private float tempoCoyote = 0.15f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField, Min(0.01f)] private float groundCheckRaio = 0.12f;
-    [SerializeField] private LayerMask chaoLayers = 1 << 3; // Layer "Ground" do projeto
+    [SerializeField] private LayerMask chaoLayers = 1 << 3; 
     [SerializeField] private bool desenharGroundCheck = true;
 
     [Header("Protecao do pulo e das quinas")]
@@ -273,8 +273,7 @@ public class PlayerController : MonoBehaviour
 
     void Pular()
     {
-        // Mesmo com o coyote time ativo, um salto sem cargas restantes
-        // nunca deve aplicar outro impulso.
+        
         if (pulosRestantes <= 0) return;
 
         bool puloDoChao = contadorCoyote > 0f && pulosRestantes == maxPulos;
@@ -299,9 +298,6 @@ public class PlayerController : MonoBehaviour
         float puloEfetivo = forcaDoPulo;
         if (sistemaFuria != null && sistemaFuria.EstaEmFuria)
             puloEfetivo *= Mathf.Max(1f, sistemaFuria.multPulo);
-
-        // Preserva o pulo de plataformas moveis, mas limita o adicional:
-        // uma plataforma muito rapida jamais deve arremessar a Kaya.
         float velocidadeSuporte = plataformaSuporte != null
             ? Mathf.Max(0f, plataformaSuporte.VelocidadeAtual.y) : 0f;
         impulsoVerticalExtraPlataforma = Mathf.Min(
@@ -326,7 +322,6 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x,
             puloEfetivo + impulsoVerticalExtraPlataforma);
     }
-
     private bool VerificarChao()
     {
         if (colliderJogador == null) return false;
