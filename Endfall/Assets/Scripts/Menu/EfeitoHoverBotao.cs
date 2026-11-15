@@ -5,10 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-// Realce amarelo ao passar o mouse sobre botoes UI.
-// Automatico: muda o fundo quando visivel; se ele for transparente,
-// muda o texto (Text ou TextMeshPro). Tambem suporta botoes-imagem.
-// Nao altera os metodos OnClick nem os sons de clique.
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Button))]
 public class EfeitoHoverBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -51,8 +47,6 @@ public class EfeitoHoverBotao : MonoBehaviour, IPointerEnterHandler, IPointerExi
             tipoRealce == TipoRealce.TextoEImagem ||
             (tipoRealce == TipoRealce.Automatico && !fundoVisivel);
 
-        // A Unity ja controla transicoes de cor para o Graphic alvo do
-        // Button. Usar Highlighted Color evita conflitos com Color Tint.
         if (botao.transition == Selectable.Transition.ColorTint &&
             alvoDoBotao != null && alvoDoBotao.color.a > 0.05f &&
             ((escolherImagem && !(alvoDoBotao is Text) && !(alvoDoBotao is TMP_Text)) ||
@@ -71,7 +65,6 @@ public class EfeitoHoverBotao : MonoBehaviour, IPointerEnterHandler, IPointerExi
             if (graphic == null || graphic.color.a < 0.05f)
                 continue;
 
-            // Nao recolorir elementos que pertencem a outro botao filho.
             Button dono = graphic.GetComponentInParent<Button>(true);
             if (dono != botao) continue;
 
@@ -79,17 +72,12 @@ public class EfeitoHoverBotao : MonoBehaviour, IPointerEnterHandler, IPointerExi
             bool incluir = eTexto ? escolherTexto : escolherImagem;
             if (!incluir) continue;
 
-            // Evita dois sistemas disputando a cor do mesmo objeto.
             if (graphic == alvoDoBotao && destacarPeloButton) continue;
 
-            // No automatico, se o fundo visivel ja for destacado, nao
-            // muda tambem a cor das letras (mantem contraste dos rotulos).
             visuais.Add(graphic);
             coresOriginais.Add(graphic.color);
         }
 
-        // Alguns botoes de imagem possuem alvo invisivel, com Sprite
-        // visivel no filho; esses tambem sao tratados pela lista acima.
         if (tipoRealce == TipoRealce.Automatico && visuais.Count == 0 &&
             !destacarPeloButton)
         {
@@ -165,7 +153,6 @@ public class EfeitoHoverBotao : MonoBehaviour, IPointerEnterHandler, IPointerExi
     private Color CorAlvo(int indice, bool destacar)
     {
         Color original = coresOriginais[indice];
-        // Preserva transparencia da arte original.
         return destacar ? new Color(amarelo.r, amarelo.g, amarelo.b, original.a) : original;
     }
 

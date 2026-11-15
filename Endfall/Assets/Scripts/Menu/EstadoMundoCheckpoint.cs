@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Objetos nativos de cada cena, com IDs calculados pela hierarquia da cena.
-// O primeiro checkpoint consolida o que ficou para tras.
 public static class EstadoMundoCheckpoint
 {
     private class Registro
@@ -80,7 +78,7 @@ public static class EstadoMundoCheckpoint
         if (dados.inimigosEliminadosIDs == null)
             dados.inimigosEliminadosIDs = new List<string>();
         HashSet<string> removidos = new HashSet<string>(dados.inimigosEliminadosIDs);
-        float limite = posicao.x + 4f; // margem para nao renascer encostado em inimigos
+        float limite = posicao.x + 4f;
         foreach (Registro r in inimigos)
         {
             if (r.obj == null) continue;

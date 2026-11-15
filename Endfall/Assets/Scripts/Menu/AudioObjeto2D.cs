@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Toca um som do proprio objeto ate o fim, mesmo que o coletavel seja desativado.
 public static class AudioObjeto2D
 {
     public static void Tocar(AudioClip clip, float volume, Vector3 posicao, string nome)

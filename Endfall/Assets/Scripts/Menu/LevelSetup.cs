@@ -20,8 +20,6 @@ public class LevelSetup : MonoBehaviour
 
     void Start()
     {
-        // Garante a leitura do save mesmo se o SaveManager tiver inicializado
-        // depois do LevelSetup no Awake desta cena.
         SaveData saveInicial = SaveManager.Instance != null ? SaveManager.Instance.GetDadosAtuais() : null;
         EstadoMundoCheckpoint.PrepararCena(saveInicial, margemInimigosCheckpoint);
 

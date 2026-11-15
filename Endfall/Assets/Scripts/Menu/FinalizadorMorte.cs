@@ -3,8 +3,6 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Cinematica final exclusiva da FaseMorte.
-// Mantem a boss e sua animacao vivas ate o fim da fuga da foice.
 public sealed class FinalizadorMorte : MonoBehaviour
 {
     private const string CenaFinal = "VitoriaFinal";
@@ -19,7 +17,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
     [Range(0.5f, 1.2f)] [SerializeField] private float zoomAoSeguirFoice = 0.95f;
 
     [Header("Sincronia com a animacao")]
-    // mortemorre.anim tem 10s. A foice_0 comeca sua fuga por volta de 4.5s.
     [Min(0f)] [SerializeField] private float iniciarSeguimentoFoice = 4.7f;
     [Min(0.05f)] [SerializeField] private float transicaoParaFoice = 0.9f;
     [Min(0.2f)] [SerializeField] private float iniciarFadeAntesDoFim = 1.1f;
@@ -73,7 +70,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
         if (animatorMorte != null)
             foice = animatorMorte.transform.Find(NomeFoice);
 
-        // Evita que projeteis ainda vivos causem dano durante o encerramento.
         foreach (CorvoBossProjectile corvo in
                  FindObjectsByType<CorvoBossProjectile>(FindObjectsSortMode.None))
         {
@@ -90,7 +86,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
                 controlesKaya.DefinirBloqueioDialogo(true);
         }
 
-        // Nao congela Time.timeScale: a animacao e a fisica continuam.
         Time.timeScale = 1f;
         AudioListener.pause = false;
 
@@ -106,8 +101,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
             if (cerebro != null)
             {
                 cerebroEstavaAtivo = cerebro.enabled;
-                // Controle temporario exclusivo durante o encerramento.
-                // Nenhum prefab ou configuracao permanente de Cinemachine muda.
                 cerebro.enabled = false;
             }
             zoomInicial = cameraReal.orthographicSize;
@@ -139,8 +132,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
         if (foice == null)
             Debug.LogWarning("[EndFall] Foice_0 nao encontrada. A camera permanecera focada na Morte.", this);
 
-        // Inicia o grito com crescimento de volume junto da animacao
-        // mortemorre, antes do acompanhamento da foice pela camera.
         MorteBossControllerGameplay controladorBoss =
             boss.GetComponent<MorteBossControllerGameplay>();
         if (controladorBoss == null)
@@ -165,13 +156,11 @@ public sealed class FinalizadorMorte : MonoBehaviour
             }
         }
 
-        // Duracao verificada em Assets/Personagem/morte/mortemorre.anim.
         return 10f;
     }
 
     private static Vector3 CentroVisualMorte(Transform raiz)
     {
-        // Exclui a foice: ela se desloca muito longe do corpo na animacao.
         bool encontrou = false;
         Bounds limites = new Bounds();
         foreach (SpriteRenderer sprite in raiz.GetComponentsInChildren<SpriteRenderer>(true))
@@ -240,8 +229,6 @@ public sealed class FinalizadorMorte : MonoBehaviour
         {
             tempoDecorrido += Time.unscaledDeltaTime;
 
-            // A animacao original esta marcada como loop. Pausamos no
-            // ultimo quadro para evitar voltar ao primeiro durante o fade.
             if (animatorMorte != null &&
                 tempoDecorrido >= duracaoAnimacao - 0.06f)
                 animatorMorte.speed = 0f;

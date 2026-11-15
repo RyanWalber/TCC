@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Preferencias locais do jogador; independentes dos slots de save.
 public static class ConfiguracoesJogo
 {
     private const string ChaveVolume = "EndFall.Config.VolumeGeral";
@@ -29,7 +28,6 @@ public static class ConfiguracoesJogo
         }
     }
 
-    // No EndFall 2D, influencia a resposta da mira, nao o cursor do Windows.
     public static float SensibilidadeMira
     {
         get => Mathf.Clamp(PlayerPrefs.GetFloat(ChaveMira, 1f), 0.5f, 2f);
