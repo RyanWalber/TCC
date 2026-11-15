@@ -19,11 +19,6 @@ public class FalaDialogo
     public string texto = "";
 }
 
-/// <summary>
-/// Controle reutilizavel do painel de dialogo. Nao tem escolhas.
-/// Pode ser anexado ao proprio painel, mesmo que esteja desativado
-/// na Hierarchy: o gatilho o ativa quando a conversa comeca.
-/// </summary>
 [DisallowMultipleComponent]
 public class PainelDialogo : MonoBehaviour
 {
@@ -88,29 +83,20 @@ public class PainelDialogo : MonoBehaviour
             IniciarDialogo();
     }
 
-    /// <summary>Abre as falas configuradas no proprio painel.</summary>
     public void IniciarDialogo()
     {
         IniciarDialogo(null);
     }
 
-    /// <summary>
-    /// Permite que diferentes gatilhos reutilizem o MESMO painel com suas
-    /// proprias falas e retratos. Array vazio usa as falas padrao.
-    /// </summary>
     public void IniciarDialogo(FalaDialogo[] falasDoGatilho)
     {
         if (dialogoAberto)
             return;
 
-        // O gatilho consegue chamar este metodo mesmo que o componente
-        // esteja em um GameObject desativado. Reativa antes de iniciar a
-        // coroutine, pois Unity nao executa coroutines em objetos inativos.
         GameObject objetoPainel = painel != null ? painel : gameObject;
         if (!objetoPainel.activeSelf)
             objetoPainel.SetActive(true);
 
-        // O Canvas pai deve continuar ativo, e o componente habilitado.
         if (!isActiveAndEnabled)
         {
             Debug.LogWarning(
@@ -187,7 +173,6 @@ public class PainelDialogo : MonoBehaviour
 
     private IEnumerator Digitar()
     {
-        // maxVisibleCharacters respeita a formatacao rich text do TMP.
         int quantidade = textoFala.textInfo.characterCount;
         for (int i = 1; i <= quantidade; i++)
         {
@@ -218,10 +203,6 @@ public class PainelDialogo : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Tambem pode ser ligado ao OnClick de um Button.
-    /// Evita que o mesmo clique seja contado pelo Button e pelo Update.
-    /// </summary>
     public void AvancarDialogo()
     {
         if (!dialogoAberto || ultimoFrameDeAvanco == Time.frameCount)
@@ -272,9 +253,6 @@ public class PainelDialogo : MonoBehaviour
         AjustarVisibilidade(false);
         LiberarControlesKaya();
 
-        // O usuario pode deixar o painel desmarcado na Hierarchy. Ao final,
-        // ele volta exatamente a esse estado, sem precisar de CanvasGroup
-        // permanentemente visivel nem de um segundo script de controle.
         GameObject objetoPainel = painel != null ? painel : gameObject;
         if (objetoPainel.activeSelf)
             objetoPainel.SetActive(false);

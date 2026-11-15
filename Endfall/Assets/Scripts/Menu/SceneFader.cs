@@ -9,7 +9,6 @@ public class SceneFader : MonoBehaviour
 
     private void Start()
     {
-        // A cortina global ja executa o FadeIn; evita uma segunda cortina.
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;

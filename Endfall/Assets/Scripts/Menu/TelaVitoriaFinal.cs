@@ -4,8 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Encerramento cinematografico auto suficiente: carta -> titulo -> creditos -> menu.
-// A interface e criada na propria cena, sem exigir Canvas montado manualmente.
 public sealed class TelaVitoriaFinal : MonoBehaviour
 {
     [Header("Identidade visual da abertura")]
@@ -111,8 +109,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
 
         if (musica != null && musica.clip != null) musica.Play();
 
-        // Antes de QUALQUER Fade In, a carta ja esta com zero caracteres
-        // visiveis. Evita o flash de texto completo na entrada da cena.
         corpoCarta.maxVisibleCharacters = 0;
         corpoCarta.ForceMeshUpdate();
         rodapeCarta.text = "";
@@ -154,7 +150,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
 
         etapa = Etapa.Creditos;
         yield return AnimarAlpha(grupoCreditos, 0f, 1f, 0.65f);
-        // O texto entra POR CIMA e DESCE, como solicitado.
         float altura = blocoCreditos.sizeDelta.y;
         float inicio = altura * 0.5f + 620f;
         float fim = -altura * 0.5f - 620f;
@@ -192,7 +187,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
         imagemFundo.color = Color.black;
         imagemFundo.raycastTarget = false;
 
-        // Carta diretamente no fundo preto, sem painel, moldura ou filetes.
         grupoCarta = Grupo("CartaFinalDeCael", objetoCanvas.transform);
         Texto(grupoCarta.transform, "Cabecalho", "UMA ÚLTIMA CARTA",
             49f, new Color(0.88f, 0.74f, 0.53f), new Vector2(1250f, 70f),
@@ -206,8 +200,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
         corpoCarta.fontSizeMin = 25f;
         corpoCarta.fontSizeMax = 37f;
 
-        // Esconde as letras AGORA, antes do primeiro frame renderizado.
-        // Na versao anterior elas apareciam completas durante o Fade In.
         corpoCarta.maxVisibleCharacters = 0;
         corpoCarta.ForceMeshUpdate();
 
@@ -225,8 +217,6 @@ public sealed class TelaVitoriaFinal : MonoBehaviour
 
         grupoCreditos = Grupo("CreditosDescendo", objetoCanvas.transform);
         string[] linhas = textoCreditos.Split(new[] { '\n' }, StringSplitOptions.None);
-        // Ao descer, a ultima linha entra primeiro no topo. Invertemos
-        // a ordem fisica para o publico ler os creditos na ordem correta.
         Array.Reverse(linhas);
         string invertido = string.Join("\n", linhas);
         textoCreditosUI = Texto(grupoCreditos.transform, "TextoRolante",

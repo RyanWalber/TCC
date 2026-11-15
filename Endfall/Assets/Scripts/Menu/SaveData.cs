@@ -25,7 +25,6 @@ public class SaveData
     public float vidaKaya = 100f;
     public float furiaKaya = 0f;
 
-    // Estado separado para que morrer restaure os atributos do último checkpoint.
     public string nomeCenaCheckpoint = "";
     public float vidaKayaCheckpoint = 100f;
     public float furiaKayaCheckpoint = 0f;

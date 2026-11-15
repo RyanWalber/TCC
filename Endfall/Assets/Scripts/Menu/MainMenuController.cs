@@ -31,7 +31,6 @@ public class MainMenuController : MonoBehaviour
     {
         MostrarPainelPrincipal();
 
-        // A faixa ja esta tocando se viemos da Splash. Nunca reiniciar o loop.
         bool audioJaExistia = AudioManagerGlobal.Instance != null;
         AudioManagerGlobal audioGlobal = AudioManagerGlobal.Garantir();
         audioGlobal.PreencherClipsAusentes(musicaMenuTeste, somCliqueTeste);
@@ -39,7 +38,6 @@ public class MainMenuController : MonoBehaviour
 
         if (painelConfiguracoes != null)
         {
-            // Nao cria elementos visuais; so garante o script controlador.
             if (painelConfiguracoes.GetComponent<PainelConfiguracoes>() == null)
                 painelConfiguracoes.AddComponent<PainelConfiguracoes>();
             painelConfiguracoes.SetActive(false);

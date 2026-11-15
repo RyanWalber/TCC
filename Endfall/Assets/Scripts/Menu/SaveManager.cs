@@ -14,11 +14,9 @@ public class SaveManager : MonoBehaviour
     private int moedasColetadasAtual = 0;
     private int totalMoedasNaFase = 0;
     private bool aplicarPosicaoSalvaAoCarregar = false;
-    // Bloqueia atualizações da cena antiga durante o recarregamento pós-morte.
     private bool renascimentoPendente = false;
 
-    // --- Bônus: Controle de Vida e Fúria ---
-    private float vidaKayaAtual = 100f; // Ajuste o valor inicial/máximo padrão
+    private float vidaKayaAtual = 100f;
     private float furiaKayaAtual = 0f;
 
     public SaveData DadosAtuais => dadosAtuais;
@@ -41,7 +39,6 @@ public class SaveManager : MonoBehaviour
     public SaveData GetDadosAtuais() => dadosAtuais;
     public bool TemAutosave() => fileDataHandler.SlotExists(0);
 
-    // Lê os valores reais dos componentes antes de um salvamento importante.
     private void SincronizarStatusKayaDoJogador()
     {
         PlayerHealth saude = FindFirstObjectByType<PlayerHealth>();
@@ -67,14 +64,12 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.nomeCena = "FaseFome";
         dadosAtuais.faseAtual = 1;
 
-        // Reseta dados no Novo Jogo
         moedasColetadasAtual = 0;
         dadosAtuais.moedasNoCheckpoint = 0;
         dadosAtuais.moedasAtuais = 0;
         dadosAtuais.temPosicaoSalvamento = false;
         aplicarPosicaoSalvaAoCarregar = false;
 
-        // Reseta Vida e Fúria para os valores padrão no Novo Jogo
         ResetarStatusKaya();
 
         if (slot != 0)
@@ -83,8 +78,6 @@ public class SaveManager : MonoBehaviour
         }
         fileDataHandler.Save(dadosAtuais, 0);
 
-        // Apenas Novo Jogo mostra Bem-vindo e depois Fragmento I.
-        // O save continua apontando diretamente para FaseFome.
         renascimentoPendente = true;
         ExplicacaoManager.ExibirIntroducaoNovoJogo();
     }
@@ -98,7 +91,6 @@ public class SaveManager : MonoBehaviour
         ExplicacaoManager.CancelarFragmentoPendente();
         dadosAtuais = dados;
 
-        // Compatibilidade com salvamentos antigos que não guardavam posição exata.
         if (dadosAtuais.versaoDados < 2)
         {
             dadosAtuais.moedasAtuais = dadosAtuais.moedasNoCheckpoint;
@@ -116,10 +108,8 @@ public class SaveManager : MonoBehaviour
         if (dadosAtuais.inimigosEliminadosIDs == null) dadosAtuais.inimigosEliminadosIDs = new List<string>();
         if (dadosAtuais.inimigosEliminadosIDsCheckpoint == null) dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
 
-        // Tanto saves antigos quanto novos retornam ao ultimo checkpoint.
-        // Nunca utiliza a posicao ou os coletaveis obtidos depois dele.
         dadosAtuais = CriarSnapshotDoUltimoCheckpoint(dadosAtuais);
-        renascimentoPendente = true; // Bloqueia a Kaya da cena anterior durante a troca.
+        renascimentoPendente = true;
 
         moedasColetadasAtual = dadosAtuais.moedasAtuais;
         vidaKayaAtual = dadosAtuais.vidaKaya;
@@ -148,16 +138,11 @@ public class SaveManager : MonoBehaviour
     {
         if (dadosAtuais == null) dadosAtuais = new SaveData();
 
-        // Salvar pelo menu NAO ativa checkpoint, nem consolida moedas ou
-        // atributos obtidos depois dele. O jogo em andamento segue intacto.
         SaveData dadosCheckpoint = CriarSnapshotDoUltimoCheckpoint(dadosAtuais);
         fileDataHandler.Save(dadosCheckpoint, slot);
         fileDataHandler.Save(dadosCheckpoint, 0);
     }
 
-    // Copia somente o progresso consolidado no ultimo checkpoint (ou o
-    // estado inicial da fase se ainda nao houve checkpoint nesta fase).
-    // Nunca modifica o estado vivo da partida durante um save manual.
     private static SaveData CriarSnapshotDoUltimoCheckpoint(SaveData origem)
     {
         if (origem == null) return new SaveData();
@@ -171,7 +156,6 @@ public class SaveManager : MonoBehaviour
 
         List<string> inimigosConfirmados = origem.inimigosEliminadosIDsCheckpoint != null ? new List<string>(origem.inimigosEliminadosIDsCheckpoint) : new List<string>();
         bool checkpointAtivo = origem.passouCheckpoint;
-        // Saves antigos podem nao ter capturado vida/furia do checkpoint.
         bool temStatusCheckpoint = origem.checkpointStatusRegistrado;
 
         SaveData copia = new SaveData
@@ -187,8 +171,6 @@ public class SaveManager : MonoBehaviour
             vidaKayaCheckpoint = origem.vidaKayaCheckpoint,
             furiaKayaCheckpoint = origem.furiaKayaCheckpoint,
 
-            // Nao grava posicao arbitraria: LevelSetup usa posicaoCheckpoint
-            // se houver, caso contrario utiliza o inicio da fase.
             temPosicaoSalvamento = false,
             posicaoSalvamento = Vector3.zero,
 
@@ -201,9 +183,6 @@ public class SaveManager : MonoBehaviour
             inimigosEliminadosIDs = new List<string>(inimigosConfirmados),
             inimigosEliminadosIDsCheckpoint = inimigosConfirmados,
 
-            // Em cenas sem checkpoint usa a linha de base da fase,
-            // atualizada nas transicoes. Em saves antigos com checkpoint
-            // sem snapshot de status, preserva os valores gravados.
             vidaKaya = temStatusCheckpoint || !checkpointAtivo
                 ? origem.vidaKayaCheckpoint : origem.vidaKaya,
             furiaKaya = temStatusCheckpoint || !checkpointAtivo
@@ -272,9 +251,6 @@ public class SaveManager : MonoBehaviour
         if (!dadosAtuais.elixiresVidaColetadosIDs.Contains(id))
             dadosAtuais.elixiresVidaColetadosIDs.Add(id);
 
-        // O elixir permanece coletado nesta tentativa, mas so sera
-        // persistido quando a Kaya ativar o proximo checkpoint.
-        // Nao salva a posicao do jogador nem sobrescreve o autosave.
     }
 
     public int GetMoedasAtuais() => moedasColetadasAtual;
@@ -294,11 +270,8 @@ public class SaveManager : MonoBehaviour
 
     public int GetTotalMoedasFase() => totalMoedasNaFase;
 
-    // --- MÉTODOS PARA VIDA E FÚRIA ---
     public void AtualizarStatusKaya(float vida, float furia)
     {
-        // A cena antiga ainda pode executar Update durante o fade/reload.
-        // Nunca permita que ela sobrescreva a vida cheia já preparada para o respawn.
         if (renascimentoPendente) return;
 
         vidaKayaAtual = vida;
@@ -308,7 +281,6 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.furiaKaya = furia;
     }
 
-    // A nova instância do jogador chama este método depois de ler a vida salva em Start.
     public void ConfirmarRenascimentoInicializado()
     {
         renascimentoPendente = false;
@@ -320,10 +292,7 @@ public class SaveManager : MonoBehaviour
         if (LevelManager.Instance != null)
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
 
-        // A Kaya da fase anterior nao pode sobrescrever o estado preparado
-        // enquanto o fragmento da historia estiver na tela.
         renascimentoPendente = true;
-        // Usa o valor explicito calculado antes da troca.
         vidaKayaAtual = Mathf.Clamp(vidaDepoisDaRecuperacao, 1f, 100000f);
         dadosAtuais.vidaKaya = vidaKayaAtual;
         SistemaFuria furia = FindFirstObjectByType<SistemaFuria>();
@@ -333,8 +302,6 @@ public class SaveManager : MonoBehaviour
 
         dadosAtuais.versaoDados = 2;
         dadosAtuais.nomeCena = nomeProximaCena;
-        // Mantem o indice de progresso coerente tanto nas zonas de transicao
-        // quanto no fluxo VictoryZone.AvancarFase().
         switch (nomeProximaCena)
         {
             case "FaseFome": dadosAtuais.faseAtual = 1; break;
@@ -350,8 +317,6 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.posicaoSalvamento = Vector3.zero;
         dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
         dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
-        // Cada cena inicia seu proprio conjunto de moedas; IDs e contagem
-        // da fase anterior jamais devem desativar moedas na fase seguinte.
         ReiniciarMoedasParaNovaFase();
         dadosAtuais.inimigosEliminadosIDs = new List<string>();
         dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
@@ -380,9 +345,6 @@ public class SaveManager : MonoBehaviour
     }
     public float GetFuriaKaya() => furiaKayaAtual;
 
-    // Usado quando a Kaya morre: restaura o snapshot do checkpoint e recarrega
-    // a cena correspondente, sem abrir o painel de Game Over.
-    // Se uma nova fase for carregada diretamente, descarta o checkpoint da fase anterior.
     public void DescartarCheckpointDeOutraCena(string cenaAtual)
     {
         if (dadosAtuais == null || !dadosAtuais.passouCheckpoint)
@@ -406,13 +368,11 @@ public class SaveManager : MonoBehaviour
 
     public void RenascerNoCheckpoint()
     {
-        // Vale tanto para morte por inimigo quanto para queda na ZonaMorte.
         renascimentoPendente = true;
         Time.timeScale = 1f;
         AudioListener.pause = false;
         if (dadosAtuais == null) dadosAtuais = new SaveData();
 
-        // Morte: restaura a vida máxima real configurada na Kaya e preserva a Fúria.
         PlayerHealth hpAtual = Object.FindFirstObjectByType<PlayerHealth>();
         SistemaFuria furiaAtual = Object.FindFirstObjectByType<SistemaFuria>();
         float vidaMaximaReal = hpAtual != null ? hpAtual.VidaMaxima : 100f;
@@ -428,7 +388,6 @@ public class SaveManager : MonoBehaviour
                 cenaDestino = dadosAtuais.nomeCena;
         }
 
-        // Reverte coletáveis e moedas para o snapshot do checkpoint/estado-base da fase.
         moedasColetadasAtual = Mathf.Max(0, dadosAtuais.moedasNoCheckpoint);
         dadosAtuais.moedasAtuais = moedasColetadasAtual;
         if (dadosAtuais.moedasColetadasIDsCheckpoint != null)
@@ -459,7 +418,7 @@ public class SaveManager : MonoBehaviour
 
     private void ResetarStatusKaya()
     {
-        vidaKayaAtual = 100f; // Altere se o HP máximo for diferente
+        vidaKayaAtual = 100f;
         furiaKayaAtual = 0f;
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
@@ -467,9 +426,6 @@ public class SaveManager : MonoBehaviour
 
     public void AvancarFase()
     {
-        // A conclusao da fase consolida moedas pendentes antes de avancar.
-        // Sem isso, o autosave da vitoria perderia moedas depois da mudanca
-        // que faz o botao Salvar respeitar exclusivamente checkpoints.
         if (LevelManager.Instance != null)
             LevelManager.Instance.RegistrarColetaveisPendentesNoSave();
 
@@ -484,16 +440,12 @@ public class SaveManager : MonoBehaviour
         dadosAtuais.vidaKayaCheckpoint = vidaKayaAtual;
         dadosAtuais.furiaKayaCheckpoint = furiaKayaAtual;
 
-        // Ao entrar na proxima fase, contador e IDs das moedas iniciam zerados.
-        // Assim uma moeda com ID repetido em outra cena nao desaparece por engano.
         ReiniciarMoedasParaNovaFase();
         dadosAtuais.inimigosEliminadosIDs = new List<string>();
         dadosAtuais.inimigosEliminadosIDsCheckpoint = new List<string>();
         dadosAtuais.elixiresVidaColetadosIDsCheckpoint = new List<string>(dadosAtuais.elixiresVidaColetadosIDs);
 
-        // Preserva os demais dados da Kaya, como vida e Furia.
 
-        // Salva o status de vida e fúria para a próxima fase
         dadosAtuais.vidaKaya = vidaKayaAtual;
         dadosAtuais.furiaKaya = furiaKayaAtual;
 
@@ -509,7 +461,6 @@ public class SaveManager : MonoBehaviour
 
         if (Application.CanStreamedLevelBeLoaded(dadosAtuais.nomeCena))
         {
-            // A historia aparece so ao avancar, nunca em CarregarDados().
             ExplicacaoManager.ExibirAntesDaFase(dadosAtuais.nomeCena);
         }
         else
@@ -530,7 +481,6 @@ public class SaveManager : MonoBehaviour
 
     private void CarregarCenaComFade(string nomeCena)
     {
-        // Inclui carregar slot, inicio de fase e renascimento no checkpoint.
         LevelLoader.CarregarComFade(nomeCena);
     }
 }

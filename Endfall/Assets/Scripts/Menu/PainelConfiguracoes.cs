@@ -2,10 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Este componente NAO cria interface: todos os elementos visuais sao
-// montados livremente pelo desenvolvedor no Canvas do Menu.
-// Arraste Sliders/Toggle/Textos no Inspector. As preferencias sao salvas
-// imediatamente em PlayerPrefs, sem modificar slots de progresso.
 public class PainelConfiguracoes : MonoBehaviour
 {
     [Header("Controles (criados por voce na Unity)")]
@@ -23,8 +19,6 @@ public class PainelConfiguracoes : MonoBehaviour
     [SerializeField] private TMP_Text textoSensibilidade;
     [SerializeField] private TMP_Text textoEstadoMusica;
 
-    // Detecta os dois Sliders criados no painel, mesmo sem arrastar referencias.
-    // Na hierarquia do EndFall: primeiro Slider = Volume, segundo = Sensibilidade.
     private void GarantirSliders()
     {
         Slider[] encontrados = GetComponentsInChildren<Slider>(true);
@@ -58,8 +52,6 @@ public class PainelConfiguracoes : MonoBehaviour
             Debug.LogWarning("[Configuracoes] Dois Sliders filhos nao encontrados. " +
                 "Arraste Volume e Sensibilidade no Inspector.", this);
 
-        // Configura limites ANTES de registrar eventos. Assim a posicao
-        // visual inicial do Editor nao sobrescreve os valores salvos.
         if (sliderVolumeGeral != null)
         {
             sliderVolumeGeral.minValue = 0f;
@@ -82,8 +74,6 @@ public class PainelConfiguracoes : MonoBehaviour
     private void OnEnable()
     {
         GarantirSliders();
-        // Quando o painel abre, recupera os ajustes anteriores sem disparar
-        // callbacks nem substituir as preferencias por valores do Inspector.
         SincronizarInterface();
 
         if (sliderVolumeGeral != null)
@@ -98,7 +88,6 @@ public class PainelConfiguracoes : MonoBehaviour
 
     private void OnDisable()
     {
-        // Evita acumular listeners em varias aberturas do painel.
         if (sliderVolumeGeral != null)
             sliderVolumeGeral.onValueChanged.RemoveListener(DefinirVolumeGeral);
 
@@ -126,9 +115,6 @@ public class PainelConfiguracoes : MonoBehaviour
         AtualizarTextos();
     }
 
-    // Estes metodos tambem podem ser usados diretamente no On Value Changed
-    // de um Slider, caso voce prefira nao arrastar o controle neste script.
-    // Nao conecte os dois jeitos ao mesmo tempo.
     public void DefinirVolumeGeral(float valor)
     {
         ConfiguracoesJogo.VolumeGeral = valor;
@@ -147,7 +133,6 @@ public class PainelConfiguracoes : MonoBehaviour
         AtualizarTextos();
     }
 
-    // Use no OnClick de um botao personalizado de musica, caso nao queira Toggle.
     public void AlternarMusica()
     {
         ConfiguracoesJogo.MusicaAtiva = !ConfiguracoesJogo.MusicaAtiva;
@@ -156,7 +141,6 @@ public class PainelConfiguracoes : MonoBehaviour
         AtualizarTextos();
     }
 
-    // Botao opcional de restaurar configuracoes padrao.
     [ContextMenu("Restaurar padroes: volume 100% e mira 1x")]
     public void RestaurarPadroes()
     {
