@@ -7,7 +7,7 @@ public class FlechaBoss : MonoBehaviour
 
     [Header("Configurações da Flecha")]
     [SerializeField] private float velocidade = 12f;
-    [SerializeField] private float dano = 20f; // <--- Esta variável vai criar o campo no Inspector
+    [SerializeField] private float dano = 20f;
     [SerializeField] private float tempoVida = 5f;
 
     [Header("Ajuste de Rotação")]
@@ -34,10 +34,8 @@ public class FlechaBoss : MonoBehaviour
             rb.linearVelocity = direcao.normalized * velocidade;
         }
 
-        // Calcula o ângulo em direção ao jogador
         float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
 
-        // Aplica a rotação corrigida pelo offset do sprite
         transform.rotation = Quaternion.Euler(0, 0, angulo + offsetAngulo);
     }
 

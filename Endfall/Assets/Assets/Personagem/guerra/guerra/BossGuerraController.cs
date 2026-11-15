@@ -69,7 +69,6 @@ public class BossGuerraController : MonoBehaviour, IAudioBoss
         }
         if (jogador == null || Time.time < ataqueLiberadoEm) return;
 
-        // Barris continuam sendo lancados mesmo com a Kaya longe.
         if (Time.time >= tempoProximoAtaque)
         {
             Atacar();

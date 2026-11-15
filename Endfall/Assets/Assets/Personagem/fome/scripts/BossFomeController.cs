@@ -73,7 +73,6 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
 
         cronometroAtaque += Time.deltaTime;
 
-        // Flechas podem alcancar Kaya independentemente de distancia apos o gatilho.
         if (cronometroAtaque >= tempoEntreAtaques)
         {
             Atacar();
@@ -85,8 +84,6 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
     {
         if (Time.time < proximoSomProprioEm) return;
 
-        // Se estiver fora do alcance da Kaya ou sem clip, nao toca.
-        // Ao voltar para o alcance, tenta de novo sem iniciar um loop.
         bool tocou = audioInimigo.TocarSomProprioUmaVez(this);
         if (!tocou)
         {
@@ -94,8 +91,6 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
             return;
         }
 
-        // A pausa comeca depois do fim do clip: os sons nao se
-        // sobrepoem, mesmo que o usuario escolha uma pausa curta.
         float minimo = Mathf.Max(0.1f, pausaMinimaSomProprio);
         float maximo = Mathf.Max(minimo, pausaMaximaSomProprio);
         proximoSomProprioEm = Time.time + audioInimigo.DuracaoSomProprio +
@@ -145,7 +140,6 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
         }
     }
 
-    // Chamado pelo Evento de Animação quando o Boss solta a corda do arco
     public void DispararFlecha()
     {
         if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
@@ -156,15 +150,11 @@ public class BossFomeController : MonoBehaviour, IAudioBoss
 
         if (prefabFlecha != null && pontoDisparo != null && player != null)
         {
-            // Instancia a flecha na posição do pontoDisparo
             GameObject flechaObj = Instantiate(prefabFlecha, pontoDisparo.position, Quaternion.identity);
 
-            // A hiena gargalha NO MOMENTO do disparo, nao ao comecar
-            // a puxar o arco. Clip e volume escolhidos no Inspector.
             audioInimigo.TocarEspecial(this, risadaHienaAoDisparar,
                 volumeRisadaHiena, pontoDisparo.position);
 
-            // Calcula o vetor direto do Ponto de Disparo até a posição do Player
             Vector2 direcao = (player.position - pontoDisparo.position).normalized;
 
             if (flechaObj.TryGetComponent<FlechaBoss>(out FlechaBoss flecha))

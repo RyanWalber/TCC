@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Movimento e impacto do corvo lancado pela Morte.
-/// Coloque este componente no prefab Corvo para editar o audio de CADA corvo no Inspector.
-/// </summary>
 [DisallowMultipleComponent]
 public class CorvoBossProjectile : MonoBehaviour
 {
@@ -25,8 +21,6 @@ public class CorvoBossProjectile : MonoBehaviour
 
     private void Start()
     {
-        // Iniciar apos o Instantiate/Configurar. Cada instancia do prefab
-        // tem seu proprio clip e reproduz UMA vez, sem depender da boss Morte.
         if (audioCorvo == null || !audioCorvo.TocarInvocacao(this, true))
             Debug.LogWarning("[Corvo] Som de invocacao nao reproduzido. Confira Som Invocacao no prefab Corvo.", this);
     }
@@ -51,7 +45,6 @@ public class CorvoBossProjectile : MonoBehaviour
         transform.localScale = new Vector3(Mathf.Abs(escalaOriginal.x) * sinalX,
                                             escalaOriginal.y, escalaOriginal.z);
 
-        // Evita que o corvo colida com a própria Morte assim que for criado.
         if (collidersDono != null)
         {
             foreach (Collider2D colDono in collidersDono)
@@ -111,8 +104,6 @@ public class CorvoBossProjectile : MonoBehaviour
             return;
         }
 
-        // Gatilhos não bloqueiam o corvo. Colisões físicas com chão, parede ou plataforma
-        // encerram o projétil para ele não ficar preso no cenário.
         if (colidirComCenarioDestrui)
             DestruirCorvo();
     }
