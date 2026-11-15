@@ -1,149 +1,46 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System;
 using System.Collections.Generic;
 
 namespace DragonBones
 {
-    /// <summary>
-    /// - The slot attached to the armature, controls the display status and properties of the display object.
-    /// A bone can contain multiple slots.
-    /// A slot can contain multiple display objects, displaying only one of the display objects at a time,
-    /// but you can toggle the display object into frame animation while the animation is playing.
-    /// The display object can be a normal texture, or it can be a display of a child armature, a grid display object,
-    /// and a custom other display object.
-    /// </summary>
-    /// <see cref="DragonBones.Armature"/>
-    /// <see cref="DragonBones.Bone"/>
-    /// <see cref="DragonBones.SlotData"/>
-    /// <version>DragonBones 3.0</version>
-    /// <language>en_US</language>
 
-    /// <summary>
-    /// - 插槽附着在骨骼上，控制显示对象的显示状态和属性。
-    /// 一个骨骼上可以包含多个插槽。
-    /// 一个插槽中可以包含多个显示对象，同一时间只能显示其中的一个显示对象，但可以在动画播放的过程中切换显示对象实现帧动画。
-    /// 显示对象可以是普通的图片纹理，也可以是子骨架的显示容器，网格显示对象，还可以是自定义的其他显示对象。
-    /// </summary>
-    /// <see cref="DragonBones.Armature"/>
-    /// <see cref="DragonBones.Bone"/>
-    /// <see cref="DragonBones.SlotData"/>
-    /// <version>DragonBones 3.0</version>
-    /// <language>zh_CN</language>
     public abstract class Slot : TransformObject
     {
-        /// <summary>
-        /// - Displays the animated state or mixed group name controlled by the object, set to null to be controlled by all animation states.
-        /// </summary>
-        /// <default>null</default>
-        /// <see cref="DragonBones.AnimationState.displayControl"/>
-        /// <see cref="DragonBones.AnimationState.name"/>
-        /// <see cref="DragonBones.AnimationState.group"/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 显示对象受到控制的动画状态或混合组名称，设置为 null 则表示受所有的动画状态控制。
-        /// </summary>
-        /// <default>null</default>
-        /// <see cref="DragonBones.AnimationState.displayControl"/>
-        /// <see cref="DragonBones.AnimationState.name"/>
-        /// <see cref="DragonBones.AnimationState.group"/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public string displayController;
-        /// <private/>
         protected bool _displayDirty;
-        /// <private/>
         protected bool _zOrderDirty;
-        /// <private/>
         protected bool _visibleDirty;
-        /// <private/>
         protected bool _blendModeDirty;
-        /// <internal/>
-        /// <private/>
         internal bool _colorDirty;
-        /// <private/>
         internal bool _transformDirty;
-        /// <private/>
         protected bool _visible;
-        /// <private/>
         internal BlendMode _blendMode;
-        /// <private/>
         protected int _displayIndex;
-        /// <private/>
         protected int _animationDisplayIndex;
-        /// <internal/>
-        /// <private/>
         internal int _zOrder;
-        /// <private/>
         protected int _cachedFrameIndex;
-        /// <internal/>
-        /// <private/>
         internal float _pivotX;
-        /// <internal/>
-        /// <private/>
         internal float _pivotY;
-        /// <private/>
         protected readonly Matrix _localMatrix = new Matrix();
-        /// <internal/>
-        /// <private/>
         internal readonly ColorTransform _colorTransform = new ColorTransform();
-        /// <private/>
         internal readonly List<DisplayData> _displayDatas = new List<DisplayData>();
-        /// <private/>
         protected readonly List<object> _displayList = new List<object>();
-        /// <internal/>
-        /// <private/>
         internal SlotData _slotData;
-        /// <private/>
         protected List<DisplayData> _rawDisplayDatas;
-        /// <internal/>
-        /// <private/>
         protected DisplayData _displayData;
-        /// <private/>
         protected BoundingBoxData _boundingBoxData;
-        /// <private/>
         protected TextureData _textureData;
-        /// <internal/>
         public DeformVertices _deformVertices;
-        /// <private/>
         protected object _rawDisplay;
-        /// <private/>
         protected object _meshDisplay;
-        /// <private/>
         protected object _display;
-        /// <private/>
         protected Armature _childArmature;
-        /// <private/>
         protected Bone _parent;
-        /// <internal/>
-        /// <private/>
         internal List<int> _cachedFrameIndices = new List<int>();
         public Slot()
         {
         }
-        /// <inheritDoc/>
         protected override void _OnClear()
         {
             base._OnClear();
@@ -178,7 +75,6 @@ namespace DragonBones
 
             if (this._meshDisplay != null && this._meshDisplay != this._rawDisplay)
             {
-                // May be _meshDisplay and _rawDisplay is the same one.
                 this._DisposeDisplay(this._meshDisplay, false);
             }
 
@@ -206,8 +102,8 @@ namespace DragonBones
             this._colorTransform.Identity();
             this._displayList.Clear();
             this._displayDatas.Clear();
-            this._slotData = null; //
-            this._rawDisplayDatas = null; //
+            this._slotData = null;
+            this._rawDisplayDatas = null;
             this._displayData = null;
             this._boundingBoxData = null;
             this._textureData = null;
@@ -220,39 +116,21 @@ namespace DragonBones
             this._cachedFrameIndices = null;
         }
 
-        /// <private/>
         protected abstract void _InitDisplay(object value, bool isRetain);
-        /// <private/>
         protected abstract void _DisposeDisplay(object value, bool isRelease);
-        /// <private/>
         protected abstract void _OnUpdateDisplay();
-        /// <private/>
         protected abstract void _AddDisplay();
-        /// <private/>
         protected abstract void _ReplaceDisplay(object value);
-        /// <private/>
         protected abstract void _RemoveDisplay();
-        /// <private/>
         protected abstract void _UpdateZOrder();
-        /// <private/>
         internal abstract void _UpdateVisible();
-        /// <private/>
         internal abstract void _UpdateBlendMode();
-        /// <private/>
         protected abstract void _UpdateColor();
-        /// <private/>
         protected abstract void _UpdateFrame();
-        /// <private/>
         protected abstract void _UpdateMesh();
-        /// <private/>
         protected abstract void _UpdateTransform();
-        /// <private/>
         protected abstract void _IdentityTransform();
 
-        /// <summary>
-        /// - Support default skin data.
-        /// </summary>
-        /// <private/>
         protected DisplayData _GetDefaultRawDisplayData(int displayIndex)
         {
             var defaultSkin = this._armature._armatureData.defaultSkin;
@@ -268,7 +146,6 @@ namespace DragonBones
             return null;
         }
 
-        /// <private/>
         protected void _UpdateDisplayData()
         {
             var prevDisplayData = this._displayData;
@@ -300,7 +177,6 @@ namespace DragonBones
                 }
             }
 
-            // Update texture and mesh data.
             if (this._displayData != null)
             {
                 if (this._displayData.type == DisplayType.Mesh)
@@ -347,7 +223,6 @@ namespace DragonBones
 
             if (this._displayData != prevDisplayData || currentVerticesData != prevVerticesData || this._textureData != prevTextureData)
             {
-                // Update pivot offset.
                 if (currentVerticesData == null && this._textureData != null)
                 {
                     var imageDisplayData = this._displayData as ImageDisplayData;
@@ -376,7 +251,6 @@ namespace DragonBones
                         this._pivotY += frame.y * scale;
                     }
 
-                    // Update replace pivot. TODO
                     if (this._displayData != null && rawDisplayData != null && this._displayData != rawDisplayData)
                     {
                         rawDisplayData.transform.ToMatrix(Slot._helpMatrix);
@@ -403,15 +277,12 @@ namespace DragonBones
                     this._pivotY = 0.0f;
                 }
 
-                // Update original transform.
                 if (rawDisplayData != null)
                 {
-                    // Compatible.
                     this.origin = rawDisplayData.transform;
                 }
                 else if (this._displayData != null)
                 {
-                    // Compatible.
                     this.origin = this._displayData.transform;
                 }
                 else
@@ -419,7 +290,6 @@ namespace DragonBones
                     this.origin = null;
                 }
 
-                // Update vertices.
                 if (currentVerticesData != prevVerticesData)
                 {
                     if (this._deformVertices == null)
@@ -431,7 +301,6 @@ namespace DragonBones
                 }
                 else if (this._deformVertices != null && this._textureData != prevTextureData)
                 {
-                    // Update mesh after update frame.
                     this._deformVertices.verticesDirty = true;
                 }
 
@@ -440,13 +309,11 @@ namespace DragonBones
             }
         }
 
-        /// <private/>
         protected void _UpdateDisplay()
         {
             var prevDisplay = this._display != null ? this._display : this._rawDisplay;
             var prevChildArmature = this._childArmature;
 
-            // Update display and child armature.
             if (this._displayIndex >= 0 && this._displayIndex < this._displayList.Count)
             {
                 this._display = this._displayList[this._displayIndex];
@@ -466,7 +333,6 @@ namespace DragonBones
                 this._childArmature = null;
             }
 
-            // Update display.
             var currentDisplay = this._display != null ? this._display : this._rawDisplay;
             if (currentDisplay != prevDisplay)
             {
@@ -479,18 +345,15 @@ namespace DragonBones
                 this._colorDirty = true;
             }
 
-            // Update frame.
             if (currentDisplay == this._rawDisplay || currentDisplay == this._meshDisplay)
             {
                 this._UpdateFrame();
             }
 
-            // Update child armature.
             if (this._childArmature != prevChildArmature)
             {
                 if (prevChildArmature != null)
                 {
-                    // Update child armature parent.
                     prevChildArmature._parent = null;
                     prevChildArmature.clock = null;
                     if (prevChildArmature.inheritAnimation)
@@ -501,12 +364,10 @@ namespace DragonBones
 
                 if (this._childArmature != null)
                 {
-                    // Update child armature parent.
                     this._childArmature._parent = this;
                     this._childArmature.clock = this._armature.clock;
                     if (this._childArmature.inheritAnimation)
                     {
-                        // Set child armature cache frameRate.
                         if (this._childArmature.cacheFrameRate == 0)
                         {
                             var cacheFrameRate = this._armature.cacheFrameRate;
@@ -516,7 +377,6 @@ namespace DragonBones
                             }
                         }
 
-                        // Child armature action.
                         List<ActionData> actions = null;
                         if (this._displayData != null && this._displayData.type == DisplayType.Armature)
                         {
@@ -556,7 +416,6 @@ namespace DragonBones
             }
         }
 
-        /// <private/>
         protected void _UpdateGlobalTransformMatrix(bool isCache)
         {
             this.globalTransformMatrix.CopyFrom(this._localMatrix);
@@ -570,8 +429,6 @@ namespace DragonBones
                 this._globalDirty = true;
             }
         }
-        /// <internal/>
-        /// <private/>
         internal bool _SetDisplayIndex(int value, bool isAnimation = false)
         {
             if (isAnimation)
@@ -597,13 +454,10 @@ namespace DragonBones
             return this._displayDirty;
         }
 
-        /// <internal/>
-        /// <private/>
         internal bool _SetZorder(int value)
         {
             if (this._zOrder == value)
             {
-                //return false;
             }
 
             this._zOrder = value;
@@ -612,8 +466,6 @@ namespace DragonBones
             return this._zOrderDirty;
         }
 
-        /// <internal/>
-        /// <private/>
         internal bool _SetColor(ColorTransform value)
         {
             this._colorTransform.CopyFrom(value);
@@ -621,8 +473,6 @@ namespace DragonBones
 
             return this._colorDirty;
         }
-        /// <internal/>
-        /// <private/>
         internal bool _SetDisplayList(List<object> value)
         {
             if (value != null && value.Count > 0)
@@ -634,7 +484,6 @@ namespace DragonBones
 
                 for (int i = 0, l = value.Count; i < l; ++i)
                 {
-                    // Retain input render displays.
                     var eachDisplay = value[i];
                     if (eachDisplay != null &&
                         eachDisplay != this._rawDisplay &&
@@ -666,8 +515,6 @@ namespace DragonBones
             return this._displayDirty;
         }
 
-        /// <internal/>
-        /// <private/>
         internal virtual void Init(SlotData slotData, Armature armatureValue, object rawDisplay, object meshDisplay)
         {
             if (this._slotData != null)
@@ -676,7 +523,6 @@ namespace DragonBones
             }
 
             this._slotData = slotData;
-            //
             this._visibleDirty = true;
             this._blendModeDirty = true;
             this._colorDirty = true;
@@ -695,12 +541,10 @@ namespace DragonBones
             }
             else
             {
-                // Never;
             }
 
             this._armature._AddSlot(this);
 
-            //
             this._InitDisplay(this._rawDisplay, false);
             if (this._rawDisplay != this._meshDisplay)
             {
@@ -710,12 +554,8 @@ namespace DragonBones
             this._OnUpdateDisplay();
             this._AddDisplay();
 
-            //
-            // this.rawDisplayDatas = displayDatas; // TODO
         }
 
-        /// <internal/>
-        /// <private/>
         internal void Update(int cacheFrameIndex)
         {
             if (this._displayDirty)
@@ -723,10 +563,8 @@ namespace DragonBones
                 this._displayDirty = false;
                 this._UpdateDisplay();
 
-                // TODO remove slot
                 if (this._transformDirty)
                 {
-                    // Update local matrix. (Only updated when both display and transform are dirty.)
                     if (this.origin != null)
                     {
                         this.global.CopyFrom(this.origin).Add(this.offset).ToMatrix(this._localMatrix);
@@ -750,37 +588,31 @@ namespace DragonBones
 
                 if (cachedFrameIndex >= 0 && this._cachedFrameIndex == cachedFrameIndex)
                 {
-                    // Same cache.
                     this._transformDirty = false;
                 }
                 else if (cachedFrameIndex >= 0)
                 {
-                    // Has been Cached.
                     this._transformDirty = true;
                     this._cachedFrameIndex = cachedFrameIndex;
                 }
                 else if (this._transformDirty || this._parent._childrenTransformDirty)
                 {
-                    // Dirty.
                     this._transformDirty = true;
                     this._cachedFrameIndex = -1;
                 }
                 else if (this._cachedFrameIndex >= 0)
                 {
-                    // Same cache, but not set index yet.
                     this._transformDirty = false;
                     this._cachedFrameIndices[cacheFrameIndex] = this._cachedFrameIndex;
                 }
                 else
                 {
-                    // Dirty.
                     this._transformDirty = true;
                     this._cachedFrameIndex = -1;
                 }
             }
             else if (this._transformDirty || this._parent._childrenTransformDirty)
             {
-                // Dirty.
                 cacheFrameIndex = -1;
                 this._transformDirty = true;
                 this._cachedFrameIndex = -1;
@@ -822,7 +654,6 @@ namespace DragonBones
 
                 if (isSkinned)
                 {
-                    // Compatible.
                     return;
                 }
             }
@@ -850,7 +681,6 @@ namespace DragonBones
             }
         }
 
-        /// <private/>
         public void UpdateTransformAndMatrix()
         {
             if (this._transformDirty)
@@ -860,7 +690,6 @@ namespace DragonBones
             }
         }
 
-        /// <private/>
         internal void ReplaceDisplayData(DisplayData value, int displayIndex = -1)
         {
             if (displayIndex < 0)
@@ -881,7 +710,6 @@ namespace DragonBones
 
                 for (int i = 0, l = this._displayDatas.Count; i < l; ++i)
                 {
-                    // Clean undefined.
                     this._displayDatas[i] = null;
                 }
             }
@@ -889,25 +717,7 @@ namespace DragonBones
             this._displayDatas[displayIndex] = value;
         }
 
-        /// <summary>
-        /// - Check whether a specific point is inside a custom bounding box in the slot.
-        /// The coordinate system of the point is the inner coordinate system of the armature.
-        /// Custom bounding boxes need to be customized in Dragonbones Pro.
-        /// </summary>
-        /// <param name="x">- The horizontal coordinate of the point.</param>
-        /// <param name="y">- The vertical coordinate of the point.</param>
-        /// <version>DragonBones 5.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 检查特定点是否在插槽的自定义边界框内。
-        /// 点的坐标系为骨架内坐标系。
-        /// 自定义边界框需要在 DragonBones Pro 中自定义。
-        /// </summary>
-        /// <param name="x">- 点的水平坐标。</param>
-        /// <param name="y">- 点的垂直坐标。</param>
-        /// <version>DragonBones 5.0</version>
-        /// <language>zh_CN</language>
         public bool ContainsPoint(float x, float y)
         {
             if (this._boundingBoxData == null)
@@ -924,37 +734,7 @@ namespace DragonBones
             return this._boundingBoxData.ContainsPoint(Slot._helpPoint.x, Slot._helpPoint.y);
         }
 
-        /// <summary>
-        /// - Check whether a specific segment intersects a custom bounding box for the slot.
-        /// The coordinate system of the segment and intersection is the inner coordinate system of the armature.
-        /// Custom bounding boxes need to be customized in Dragonbones Pro.
-        /// </summary>
-        /// <param name="xA">- The horizontal coordinate of the beginning of the segment.</param>
-        /// <param name="yA">- The vertical coordinate of the beginning of the segment.</param>
-        /// <param name="xB">- The horizontal coordinate of the end point of the segment.</param>
-        /// <param name="yB">- The vertical coordinate of the end point of the segment.</param>
-        /// <param name="intersectionPointA">- The first intersection at which a line segment intersects the bounding box from the beginning to the end. (If not set, the intersection point will not calculated)</param>
-        /// <param name="intersectionPointB">- The first intersection at which a line segment intersects the bounding box from the end to the beginning. (If not set, the intersection point will not calculated)</param>
-        /// <param name="normalRadians">- The normal radians of the tangent of the intersection boundary box. [x: Normal radian of the first intersection tangent, y: Normal radian of the second intersection tangent] (If not set, the normal will not calculated)</param>
-        /// <returns>Intersection situation. [1: Disjoint and segments within the bounding box, 0: Disjoint, 1: Intersecting and having a nodal point and ending in the bounding box, 2: Intersecting and having a nodal point and starting at the bounding box, 3: Intersecting and having two intersections, N: Intersecting and having N intersections]</returns>
-        /// <version>DragonBones 5.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 检查特定线段是否与插槽的自定义边界框相交。
-        /// 线段和交点的坐标系均为骨架内坐标系。
-        /// 自定义边界框需要在 DragonBones Pro 中自定义。
-        /// </summary>
-        /// <param name="xA">- 线段起点的水平坐标。</param>
-        /// <param name="yA">- 线段起点的垂直坐标。</param>
-        /// <param name="xB">- 线段终点的水平坐标。</param>
-        /// <param name="yB">- 线段终点的垂直坐标。</param>
-        /// <param name="intersectionPointA">- 线段从起点到终点与边界框相交的第一个交点。 （如果未设置，则不计算交点）</param>
-        /// <param name="intersectionPointB">- 线段从终点到起点与边界框相交的第一个交点。 （如果未设置，则不计算交点）</param>
-        /// <param name="normalRadians">- 交点边界框切线的法线弧度。 [x: 第一个交点切线的法线弧度, y: 第二个交点切线的法线弧度] （如果未设置，则不计算法线）</param>
-        /// <returns>相交的情况。 [-1: 不相交且线段在包围盒内, 0: 不相交, 1: 相交且有一个交点且终点在包围盒内, 2: 相交且有一个交点且起点在包围盒内, 3: 相交且有两个交点, N: 相交且有 N 个交点]</returns>
-        /// <version>DragonBones 5.0</version>
-        /// <language>zh_CN</language>
         public int IntersectsSegment(float xA, float yA, float xB, float yB,
                                     Point intersectionPointA = null,
                                     Point intersectionPointB = null,
@@ -1021,35 +801,13 @@ namespace DragonBones
             return intersectionCount;
         }
 
-        /// <summary>
-        /// - Forces the slot to update the state of the display object in the next frame.
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 强制插槽在下一帧更新显示对象的状态。
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public void InvalidUpdate()
         {
             this._displayDirty = true;
             this._transformDirty = true;
         }
-        /// <summary>
-        /// - The visible of slot's display object.
-        /// </summary>
-        /// <default>true</default>
-        /// <version>DragonBones 5.6</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽的显示对象的可见。
-        /// </summary>
-        /// <default>true</default>
-        /// <version>DragonBones 5.6</version>
-        /// <language>zh_CN</language>
         public bool visible
         {
             get { return this._visible; }
@@ -1064,33 +822,7 @@ namespace DragonBones
                 this._UpdateVisible();
             }
         }
-        /// <summary>
-        /// - The index of the display object displayed in the display list.
-        /// </summary>
-        /// <example>
-        /// TypeScript style, for reference only.
-        /// <pre>
-        ///     let slot = armature.getSlot("weapon");
-        ///     slot.displayIndex = 3;
-        ///     slot.displayController = "none";
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 此时显示的显示对象在显示列表中的索引。
-        /// </summary>
-        /// <example>
-        /// TypeScript 风格，仅供参考。
-        /// <pre>
-        ///     let slot = armature.getSlot("weapon");
-        ///     slot.displayIndex = 3;
-        ///     slot.displayController = "none";
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public int displayIndex
         {
             get { return this._displayIndex; }
@@ -1103,41 +835,19 @@ namespace DragonBones
             }
         }
 
-        /// <summary>
-        /// - The slot name.
-        /// </summary>
-        /// <see cref="DragonBones.SlotData.name"/>
-        /// <version>DragonBones 3.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽名称。
-        /// </summary>
-        /// <see cref="DragonBones.SlotData.name"/>
-        /// <version>DragonBones 3.0</version>
-        /// <language>zh_CN</language>
         public string name
         {
             get { return this._slotData.name; }
         }
 
-        /// <summary>
-        /// - Contains a display list of display objects or child armatures.
-        /// </summary>
-        /// <version>DragonBones 3.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 包含显示对象或子骨架的显示列表。
-        /// </summary>
-        /// <version>DragonBones 3.0</version>
-        /// <language>zh_CN</language>
         public List<object> displayList
         {
             get { return new List<object>(_displayList.ToArray()); }
             set
             {
-                var backupDisplayList = _displayList.ToArray(); // Copy.
+                var backupDisplayList = _displayList.ToArray();
                 var disposeDisplayList = new List<object>();
 
                 if (this._SetDisplayList(value))
@@ -1145,7 +855,6 @@ namespace DragonBones
                     this.Update(-1);
                 }
 
-                // Release replaced displays.
                 foreach (var eachDisplay in backupDisplayList)
                 {
                     if (eachDisplay != null &&
@@ -1162,7 +871,6 @@ namespace DragonBones
                 {
                     if (eachDisplay is Armature)
                     {
-                        // (eachDisplay as Armature).Dispose();
                     }
                     else
                     {
@@ -1171,25 +879,12 @@ namespace DragonBones
                 }
             }
         }
-        /// <summary>
-        /// - The slot data.
-        /// </summary>
-        /// <see cref="DragonBones.SlotData"/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽数据。
-        /// </summary>
-        /// <see cref="DragonBones.SlotData"/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public SlotData slotData
         {
             get { return this._slotData; }
         }
 
-        /// <private/>
         public List<DisplayData> rawDisplayDatas
         {
             get { return this._rawDisplayDatas; }
@@ -1224,57 +919,21 @@ namespace DragonBones
                 }
             }
         }
-        /// <summary>
-        /// - The custom bounding box data for the slot at current time.
-        /// </summary>
-        /// <version>DragonBones 5.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽此时的自定义包围盒数据。
-        /// </summary>
-        /// <version>DragonBones 5.0</version>
-        /// <language>zh_CN</language>
         public BoundingBoxData boundingBoxData
         {
             get { return this._boundingBoxData; }
         }
-        /// <private/>
         public object rawDisplay
         {
             get { return this._rawDisplay; }
         }
 
-        /// <private/>
         public object meshDisplay
         {
             get { return this._meshDisplay; }
         }
-        /// <summary>
-        /// - The display object that the slot displays at this time.
-        /// </summary>
-        /// <example>
-        /// TypeScript style, for reference only.
-        /// <pre>
-        ///     let slot = armature.getSlot("text");
-        ///     slot.display = new yourEngine.TextField();
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 3.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽此时显示的显示对象。
-        /// </summary>
-        /// <example>
-        /// TypeScript 风格，仅供参考。
-        /// <pre>
-        ///     let slot = armature.getSlot("text");
-        ///     slot.display = new yourEngine.TextField();
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 3.0</version>
-        /// <language>zh_CN</language>
         public object display
         {
             get { return this._display; }
@@ -1288,7 +947,6 @@ namespace DragonBones
                 var displayListLength = this._displayList.Count;
                 if (this._displayIndex < 0 && displayListLength == 0)
                 {
-                    // Emprty.
                     this._displayIndex = 0;
                 }
 
@@ -1298,7 +956,7 @@ namespace DragonBones
                 }
                 else
                 {
-                    var replaceDisplayList = this.displayList; // Copy.
+                    var replaceDisplayList = this.displayList;
                     if (displayListLength <= this._displayIndex)
                     {
                         replaceDisplayList.ResizeList(this._displayIndex + 1);
@@ -1309,40 +967,7 @@ namespace DragonBones
                 }
             }
         }
-        /// <summary>
-        /// - The child armature that the slot displayed at current time.
-        /// </summary>
-        /// <example>
-        /// TypeScript style, for reference only.
-        /// <pre>
-        ///     let slot = armature.getSlot("weapon");
-        /// let prevChildArmature = slot.childArmature;
-        /// if (prevChildArmature) {
-        /// prevChildArmature.dispose();
-        ///     }
-        ///     slot.childArmature = factory.buildArmature("weapon_blabla", "weapon_blabla_project");
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 3.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 插槽此时显示的子骨架。
-        /// 注意，被替换的对象并不会被回收，根据语言和引擎的不同，需要额外处理。
-        /// </summary>
-        /// <example>
-        /// TypeScript 风格，仅供参考。
-        /// <pre>
-        ///     let slot = armature.getSlot("weapon");
-        /// let prevChildArmature = slot.childArmature;
-        /// if (prevChildArmature) {
-        /// prevChildArmature.dispose();
-        ///     }
-        ///     slot.childArmature = factory.buildArmature("weapon_blabla", "weapon_blabla_project");
-        /// </pre>
-        /// </example>
-        /// <version>DragonBones 3.0</version>
-        /// <language>zh_CN</language>
         public Armature childArmature
         {
             get { return this._childArmature; }
@@ -1357,17 +982,7 @@ namespace DragonBones
             }
         }
 
-        /// <summary>
-        /// - The parent bone to which it belongs.
-        /// </summary>
-        /// <version>DragonBones 3.0</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// - 所属的父骨骼。
-        /// </summary>
-        /// <version>DragonBones 3.0</version>
-        /// <language>zh_CN</language>
         public Bone parent
         {
             get { return this._parent; }

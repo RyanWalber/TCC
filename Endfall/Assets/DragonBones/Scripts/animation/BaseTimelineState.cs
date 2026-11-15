@@ -1,43 +1,17 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System;
 using System.Collections.Generic;
 
 namespace DragonBones
 {
-    /// <internal/>
-    /// <private/>
     internal enum TweenState
     {
         None,
         Once,
         Always
     }
-    /// <internal/>
-    /// <private/>
     internal abstract class TimelineState : BaseObject
     {
-        public int playState; // -1: start, 0: play, 1: complete;
+        public int playState;
         public int currentPlayTimes;
         public float currentTime;
 
@@ -82,17 +56,17 @@ namespace DragonBones
             this._duration = 0.0f;
             this._timeScale = 1.0f;
             this._timeOffset = 0.0f;
-            this._dragonBonesData = null; //
-            this._animationData = null; //
-            this._timelineData = null; //
-            this._armature = null; //
-            this._animationState = null; //
-            this._actionTimeline = null; //
-            this._frameArray = null; //
-            this._frameIntArray = null; //
-            this._frameFloatArray = null; //
-            this._timelineArray = null; //
-            this._frameIndices = null; //
+            this._dragonBonesData = null;
+            this._animationData = null;
+            this._timelineData = null;
+            this._armature = null;
+            this._animationState = null;
+            this._actionTimeline = null;
+            this._frameArray = null;
+            this._frameIntArray = null;
+            this._frameFloatArray = null;
+            this._timelineArray = null;
+            this._frameIndices = null;
         }
 
         protected abstract void _OnArriveAtFrame();
@@ -106,7 +80,6 @@ namespace DragonBones
 
             if (this._actionTimeline != null && this._frameCount <= 1)
             {
-                // No frame or only one frame.
                 this.playState = this._actionTimeline.playState >= 0 ? 1 : -1;
                 this.currentPlayTimes = 1;
                 this.currentTime = this._actionTimeline.currentTime;
@@ -136,7 +109,7 @@ namespace DragonBones
                     }
                     else
                     {
-                        this.currentTime = this._duration + 0.000001f; // Precision problem
+                        this.currentTime = this._duration + 0.000001f;
                     }
                 }
                 else
@@ -163,7 +136,6 @@ namespace DragonBones
             }
             else
             {
-                // Multi frames.
                 this.playState = this._actionTimeline.playState;
                 this.currentPlayTimes = this._actionTimeline.currentPlayTimes;
                 this.currentTime = this._actionTimeline.currentTime;
@@ -174,7 +146,6 @@ namespace DragonBones
                 return false;
             }
 
-            // Clear frame flag when timeline start or loopComplete.
             if ((prevState < 0 && this.playState != prevState) || (this.playState <= 0 && this.currentPlayTimes != prevPlayTimes))
             {
                 this._frameIndex = -1;
@@ -192,7 +163,7 @@ namespace DragonBones
 
             if (this == this._actionTimeline)
             {
-                this._actionTimeline = null; //
+                this._actionTimeline = null;
             }
 
             this._frameRate = this._armature.armatureData.frameRate;
@@ -229,7 +200,7 @@ namespace DragonBones
             {
                 if (this._frameCount > 1)
                 {
-                    int timelineFrameIndex = (int)Math.Floor(this.currentTime * this._frameRate); // uint
+                    int timelineFrameIndex = (int)Math.Floor(this.currentTime * this._frameRate);
                     var frameIndex = this._frameIndices[(int)(this._timelineData as TimelineData).frameIndicesOffset + timelineFrameIndex];
                     if (this._frameIndex != frameIndex)
                     {
@@ -244,7 +215,6 @@ namespace DragonBones
                     this._frameIndex = 0;
                     if (this._timelineData != null)
                     {
-                        // May be pose timeline.
                         this._frameOffset = this._animationData.frameOffset + this._timelineArray[this._timelineData.offset + (int)BinaryOffset.TimelineFrameOffset];
                     }
 
@@ -259,8 +229,6 @@ namespace DragonBones
         }
     }
 
-    /// <internal/>
-    /// <private/>
     internal abstract class TweenTimelineState : TimelineState
     {
         private static float _GetEasingValue(TweenType tweenType, float progress, float easing)
@@ -296,7 +264,7 @@ namespace DragonBones
                 return 1.0f;
             }
 
-            var segmentCount = count + 1; // + 2 - 1
+            var segmentCount = count + 1;
             var valueIndex = (int)Math.Floor(progress * segmentCount);
             var fromValue = valueIndex == 0 ? 0.0f : samples[offset + valueIndex - 1];
 
@@ -331,7 +299,7 @@ namespace DragonBones
                 this._animationState.playTimes == 0 ||
                 this._animationState.currentPlayTimes < this._animationState.playTimes - 1))
             {
-                this._tweenType = (TweenType)this._frameArray[this._frameOffset + (int)BinaryOffset.FrameTweenType]; // TODO recode ture tween type.
+                this._tweenType = (TweenType)this._frameArray[this._frameOffset + (int)BinaryOffset.FrameTweenType];
                 this._tweenState = this._tweenType == TweenType.None ? TweenState.Once : TweenState.Always;
 
                 if (this._tweenType == TweenType.Curve)
@@ -389,8 +357,6 @@ namespace DragonBones
             }
         }
     }
-    /// <internal/>
-    /// <private/>
     internal abstract class BoneTimelineState : TweenTimelineState
     {
         public Bone bone;
@@ -400,8 +366,8 @@ namespace DragonBones
         {
             base._OnClear();
 
-            this.bone = null; //
-            this.bonePose = null; //
+            this.bone = null;
+            this.bonePose = null;
         }
 
         public void Blend(int state)
@@ -444,8 +410,6 @@ namespace DragonBones
             }
         }
     }
-    /// <internal/>
-    /// <private/>
     internal abstract class SlotTimelineState : TweenTimelineState
     {
         public Slot slot;
@@ -454,12 +418,10 @@ namespace DragonBones
         {
             base._OnClear();
 
-            this.slot = null; //
+            this.slot = null;
         }
     }
 
-    /// <internal/>
-    /// <private/>
     internal abstract class ConstraintTimelineState : TweenTimelineState
     {
         public Constraint constraint;
@@ -468,7 +430,7 @@ namespace DragonBones
         {
             base._OnClear();
 
-            this.constraint = null; //
+            this.constraint = null;
         }
     }
 }
