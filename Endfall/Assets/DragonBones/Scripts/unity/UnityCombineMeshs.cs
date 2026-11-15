@@ -1,25 +1,3 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -84,7 +62,6 @@ namespace DragonBones
             {
                 return;
             }
-            //
             foreach (UnitySlot slot in armature.GetSlots())
             {
                 if (slot.childArmature == null)
@@ -129,12 +106,10 @@ namespace DragonBones
             {
                 return;
             }
-            //
             this._verticeOffset = 0;
             this._subSlotCount = 0;
             this.slotNames.Clear();
 
-            //
             if (this.meshBuffers != null)
             {
                 for (var i = 0; i < this.meshBuffers.Length; i++)
@@ -147,16 +122,12 @@ namespace DragonBones
             }
 
             List<CombineMeshInfo> combineSlots = new List<CombineMeshInfo>();
-            //
             this.CollectMesh(this._unityArmature.armature, combineSlots);
 
-            //
-            //先合并
             this.meshBuffers = new MeshBuffer[combineSlots.Count];
             for (var i = 0; i < combineSlots.Count; i++)
             {
                 var combineSlot = combineSlots[i];
-                //
                 var proxySlot = combineSlot.proxySlot;
                 MeshBuffer meshBuffer = new MeshBuffer();
                 meshBuffer.name = proxySlot._meshBuffer.name;
@@ -165,12 +136,10 @@ namespace DragonBones
 
                 meshBuffer.CombineMeshes(combineSlot.combines.ToArray());
                 meshBuffer.vertexDirty = true;
-                //
                 proxySlot._meshFilter.sharedMesh = meshBuffer.sharedMesh;
 
                 this.meshBuffers[i] = meshBuffer;
 
-                //
                 this._verticeOffset = 0;
                 for (int j = 0; j < combineSlot.slots.Count; j++)
                 {
@@ -194,16 +163,14 @@ namespace DragonBones
                         transform.localEulerAngles = Vector3.zero;
                         transform.localScale = Vector3.one;
                     }
-                    //
                     if(slot._deformVertices != null)
                     {
                         slot._deformVertices.verticesDirty = true;
                     }
-                    
+
                     slot._transformDirty = true;
                     slot.Update(-1);
 
-                    //
                     meshBuffer.combineSlots.Add(slot);
 
                     this.slotNames.Add(slot.name);
@@ -212,7 +179,6 @@ namespace DragonBones
                     this._subSlotCount++;
                 }
 
-                //被合并的显示
                 if (proxySlot._renderDisplay != null)
                 {
                     proxySlot._renderDisplay.SetActive(true);
@@ -233,7 +199,6 @@ namespace DragonBones
             {
                 return;
             }
-            //
             var isBreakCombineMesh = false;
             var isSameMaterial = false;
             var isChildAramture = false;
@@ -265,13 +230,11 @@ namespace DragonBones
                     isSameMaterial = slotMeshProxy == null;
                 }
 
-                //先检查这个slot会不会打断网格合并
                 isBreakCombineMesh = isChildAramture ||
                                     slot._isIgnoreCombineMesh ||
                                     slot._blendMode != BlendMode.Normal ||
                                     !isSameMaterial;
 
-                //如果会打断，那么先合并一次
                 if (isBreakCombineMesh)
                 {
                     if (combineSlots.Count > 0)
@@ -284,7 +247,6 @@ namespace DragonBones
 
                     slotMeshProxy = null;
                 }
-                //
                 if (slotMeshProxy == null && !isBreakCombineMesh && slotDisplay != null && slotDisplay.activeSelf)
                 {
                     CombineMeshInfo combineSlot = new CombineMeshInfo();
@@ -296,7 +258,6 @@ namespace DragonBones
                     slotMeshProxy = slot;
                 }
 
-                //如果不会合并，检查一下是否是子骨架
                 if (isChildAramture)
                 {
                     continue;
@@ -317,7 +278,6 @@ namespace DragonBones
                 {
                     continue;
                 }
-                //
                 if (combineSlots.Count > 0)
                 {
                     if (combineSlots[combineSlots.Count - 1].combines.Count == 1)

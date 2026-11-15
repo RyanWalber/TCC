@@ -1,25 +1,3 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +6,6 @@ using DragonBones;
 
 namespace DragonBones
 {
-    //[Serializable]
     public class MeshBuffer : IDisposable
     {
         public readonly List<UnitySlot> combineSlots = new List<UnitySlot>();
@@ -111,7 +88,6 @@ namespace DragonBones
 
             this.sharedMesh.CombineMeshes(combines);
 
-            //
             this.uvBuffers = this.sharedMesh.uv;
             this.rawVertextBuffers = this.sharedMesh.vertices;
             this.vertexBuffers = this.sharedMesh.vertices;
@@ -119,7 +95,6 @@ namespace DragonBones
             this.triangleBuffers = this.sharedMesh.triangles;
 
             this.vertexCount = this.vertexBuffers.Length;
-            //
             if (this.color32Buffers == null || this.color32Buffers.Length != this.vertexCount)
             {
                 this.color32Buffers = new Color32[vertexCount];
@@ -142,7 +117,7 @@ namespace DragonBones
                 this.color32Buffers = new Color32[this.vertexCount];
             }
 
-            this.sharedMesh.vertices = this.vertexBuffers;// Must set vertices before uvs.
+            this.sharedMesh.vertices = this.vertexBuffers;
             this.sharedMesh.uv = this.uvBuffers;
             this.sharedMesh.colors32 = this.color32Buffers;
             this.sharedMesh.triangles = this.triangleBuffers;
@@ -179,17 +154,14 @@ namespace DragonBones
                 var slot = combineSlots[i] as UnitySlot;
                 oldVerticeOffset = slot._verticeOffset;
 
-                //重新赋值
                 slot._verticeOrder = i;
                 slot._verticeOffset = newVerticeIndex;
-                //
                 CombineInstance com = new CombineInstance();
                 slot._meshBuffer.InitMesh();
                 com.mesh = slot._meshBuffer.sharedMesh;
 
                 combines[i] = com;
 
-                //
                 var zspace = (slot._armature.proxy as UnityArmatureComponent).zSpace;
                 for (int j = 0; j < slot._meshBuffer.vertexCount; j++)
                 {
@@ -204,10 +176,8 @@ namespace DragonBones
                 }
             }
 
-            //
             this.sharedMesh.Clear();
             this.sharedMesh.CombineMeshes(combines);
-            //
             this.uvBuffers = newUVs;
             this.vertexBuffers = newVertices;
             this.color32Buffers = newColors;
