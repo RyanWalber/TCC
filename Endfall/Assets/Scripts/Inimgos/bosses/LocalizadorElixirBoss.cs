@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Sistema compartilhado entre os BossVida (Fome/Peste/Morte) e VidaBossGuerra.
-// Escolhe um elixir visivel, distante da Kaya e acima de plataforma real.
 public static class LocalizadorElixirBoss
 {
     public static bool Escolher(
@@ -38,8 +36,6 @@ public static class LocalizadorElixirBoss
         float afastamentoElixires = largura * Mathf.Clamp(
             distanciaEntreElixiresNormalizada, 0.05f, 0.5f);
 
-        // Encontra o chao onde Kaya esta, mas sem assumir que um Tilemap
-        // inteiro e a mesma plataforma.
         Collider2D pisoKaya = null;
         float alturaPisoKaya = kaya.position.y;
         RaycastHit2D[] sobKaya = Physics2D.RaycastAll(

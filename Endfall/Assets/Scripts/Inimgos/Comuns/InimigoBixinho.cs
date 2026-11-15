@@ -44,11 +44,9 @@ public class InimigoBixinho : MonoBehaviour
 
     private void Start()
     {
-        // O som de aparicao pertence a este inimigo, se configurado no prefab.
         audioInimigo.TocarInvocacao(this);
         vidaAtual = vidaMaxima;
 
-        // Pega o componente DragonBones automaticamente caso não esteja arrastado no Inspector
         if (armatureComponent == null)
             armatureComponent = GetComponentInChildren<UnityArmatureComponent>();
 
@@ -196,7 +194,6 @@ public class InimigoBixinho : MonoBehaviour
             c.enabled = false;
         rb.simulated = false;
 
-        // A ultima bala tambem mostra o flash antes de desaparecer.
         Destroy(gameObject, feedbackDano.DuracaoVisivel);
     }
 

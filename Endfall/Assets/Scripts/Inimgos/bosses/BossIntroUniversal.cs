@@ -48,14 +48,12 @@ public class BossIntroUniversal : MonoBehaviour
     {
         PrepararBarraBoss();
 
-        // 1. Localiza a Kaya pela Tag
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
             playerTransform = playerObj.transform;
         }
 
-        // 2. Localiza o objeto CinemachineCamera na Hierarchy
         GameObject cineObj = GameObject.Find("CinemachineCamera") ?? GameObject.Find("CM vcam1");
         if (cineObj == null)
         {
@@ -95,22 +93,16 @@ public class BossIntroUniversal : MonoBehaviour
             if (controleKaya == null)
                 controleKaya = playerTransform.GetComponentInChildren<PlayerController>(true);
 
-            // Trava comandos no exato instante do gatilho, antes da camera
-            // mudar. A gravidade e animacoes da Kaya continuam funcionando.
             introEmAndamento = true;
             if (controleKaya != null)
                 controleKaya.DefinirBloqueioIntroBoss(true);
 
-            // Inicia a trilha da batalha no gatilho da introducao, sem
-            // depender da distancia da Kaya ate o boss.
             KayaAudioManager musica = collision.GetComponentInParent<KayaAudioManager>();
             if (musica == null && playerTransform != null)
                 musica = playerTransform.GetComponentInParent<KayaAudioManager>();
             if (musica != null && bossTransform != null)
                 musica.IniciarCombateBoss(bossTransform);
 
-            // A mesma entrada tambem libera o gerador de elixires,
-            // inclusive quando o boss estiver longe da Kaya.
             BossVida vidaComum = EncontrarNoChefe<BossVida>(bossTransform);
             if (vidaComum != null)
                 vidaComum.IniciarSpawnElixiresPeloGatilho();
@@ -118,8 +110,6 @@ public class BossIntroUniversal : MonoBehaviour
             if (vidaGuerra != null)
                 vidaGuerra.IniciarSpawnElixiresPeloGatilho();
 
-            // O estado de combate fica no boss: este gatilho pode ser
-            // desativado ao fim da introducao sem cancelar os ataques.
             AtivarChefeComAtraso();
             if (fadeBarra == null) PrepararBarraBoss();
             if (fadeBarra != null) fadeBarra.Mostrar(fadeEntradaBarra);
@@ -143,8 +133,6 @@ public class BossIntroUniversal : MonoBehaviour
     private void AtivarChefeComAtraso()
     {
         if (bossTransform == null) return;
-        // Quando a camera ainda estiver focada no boss, nao permitir
-        // dano antecipado. O atraso configurado comeca no gatilho.
         float espera = Mathf.Max(Mathf.Max(0f, atrasoParaAtacar),
             Mathf.Max(0f, tempoFocoNoBoss) + 1.2f +
             Mathf.Max(0f, tempoRetornoCamera));
@@ -195,26 +183,18 @@ public class BossIntroUniversal : MonoBehaviour
             yield break;
         }
 
-        // O PlayerController ja zerou o movimento ao entrar no gatilho.
-        // Nao desligar esse componente: assim gravidade e animacoes continuam.
 
-        // 1. MUTA O ALVO DA CINEMACHINE PARA O BOSS
         AlterarAlvoCinemachine(bossTransform);
 
-        // 2. TEMPO DE ESPERA (Viagem da câmara + Foco no Boss)
         yield return new WaitForSeconds(tempoFocoNoBoss + 1.2f);
 
-        // 3. VOLTA O ALVO DA CINEMACHINE PARA A KAYA
         AlterarAlvoCinemachine(playerTransform);
 
-        // Aguarda a camera se aproximar novamente da Kaya antes de liberar
-        // movimento/pulo/dash/tiro. Ajustavel conforme o blend da cena.
         if (tempoRetornoCamera > 0f)
             yield return new WaitForSeconds(tempoRetornoCamera);
 
         FinalizarBloqueioDaIntro();
 
-        // Desativa somente o gatilho, preservando o combate em andamento.
         gameObject.SetActive(false);
     }
 
@@ -228,8 +208,6 @@ public class BossIntroUniversal : MonoBehaviour
 
     private void OnDisable()
     {
-        // Se o gatilho for desligado durante a cinematica, a Kaya nao
-        // pode ficar travada para sempre (morte, troca de cena, etc.).
         if (introEmAndamento && cinemachineCam != null &&
             playerTransform != null)
             AlterarAlvoCinemachine(playerTransform);
@@ -242,18 +220,15 @@ public class BossIntroUniversal : MonoBehaviour
 
         var tipo = cinemachineCam.GetType();
 
-        // Cinemachine v2 (m_Follow / m_LookAt)
         var fieldFollow = tipo.GetField("m_Follow");
         if (fieldFollow != null) fieldFollow.SetValue(cinemachineCam, novoAlvo);
 
         var fieldLookAt = tipo.GetField("m_LookAt");
         if (fieldLookAt != null) fieldLookAt.SetValue(cinemachineCam, novoAlvo);
 
-        // Propriedade Follow
         var propFollow = tipo.GetProperty("Follow");
         if (propFollow != null && propFollow.CanWrite) propFollow.SetValue(cinemachineCam, novoAlvo);
 
-        // Unity 6 Cinemachine 3.x (Target.TrackingTarget)
         var propTarget = tipo.GetProperty("Target");
         if (propTarget != null)
         {

@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Coloque este componente no MESMO GameObject que tem o Animator do boss.
-/// Um Animation Event no clipe de subida chama InvocarInimigoParado().
-/// </summary>
 [DisallowMultipleComponent]
 public class BossPesteInvocacao : MonoBehaviour
 {
@@ -42,7 +38,6 @@ public class BossPesteInvocacao : MonoBehaviour
         if (player != null) kaya = player.transform;
     }
 
-    // Chamar por Animation Event no momento em que a boss SUBIR.
     public void InvocarInimigoParado()
     {
         if (!isActiveAndEnabled || prefabInimigoParado == null ||
@@ -54,7 +49,6 @@ public class BossPesteInvocacao : MonoBehaviour
         PlayerHealth vida = kaya.GetComponentInParent<PlayerHealth>();
         if (vida != null && vida.VidaAtual <= 0f) return;
 
-        // Nao acumula inimigos ilimitados se a animacao repetir.
         invocados.RemoveAll(inimigo => inimigo == null);
         if (invocados.Count >= maximoInvocadosVivos) return;
 
@@ -65,8 +59,6 @@ public class BossPesteInvocacao : MonoBehaviour
             return;
         }
 
-        // Origem pouco acima dos pes: se a Kaya estiver no ar, ainda encontra
-        // a plataforma solida imediatamente abaixo dela.
         float alturaPes = kaya.position.y;
         Collider2D corpoKaya = kaya.GetComponent<Collider2D>();
         if (corpoKaya != null) alturaPes = corpoKaya.bounds.min.y;
@@ -101,8 +93,6 @@ public class BossPesteInvocacao : MonoBehaviour
             return;
         }
 
-        // O InimigoParado sobe alturaEmergir a partir de sua posicao inicial.
-        // O final de sua emergencia coincide com a superficie da plataforma.
         float alturaEmergir = Mathf.Max(0f, modelo.alturaEmergir);
         float enterramento = Mathf.Max(0f, alturaEmergir - alturaFinalAcimaDoChao);
         Vector3 posicaoSpawn = new Vector3(
@@ -112,10 +102,8 @@ public class BossPesteInvocacao : MonoBehaviour
         InimigoParado inimigo = novoInimigo.GetComponent<InimigoParado>();
         if (inimigo != null)
         {
-            // Exclusivo da instancia invocada, sem modificar o prefab original.
             inimigo.player = kaya;
 
-            // Garante o aviso e a emergencia mesmo se a Kaya estiver pulando.
             inimigo.raioDeteccao = Mathf.Max(
                 inimigo.raioDeteccao, Vector2.Distance(kaya.position, posicaoSpawn) + 10f);
 

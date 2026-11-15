@@ -83,7 +83,7 @@ public class InimigoParado : MonoBehaviour
     private int vidaAtual;
 
     [Header("Ataque ao Jogador")]
-    public int danoNoJogador = 10; 
+    public int danoNoJogador = 10;
     public float forcaEmpurrao = 12f;
 
     private Vector3 posicaoOculta;
@@ -91,7 +91,6 @@ public class InimigoParado : MonoBehaviour
     private bool jaEmergiu = false;
     private bool audioDeSurgimentoTocado;
 
-    // Pode ser chamado pelo chefe que invocou; o som e do inimigo, nao do chefe.
     public void TocarAoSerInvocado()
     {
         if (audioDeSurgimentoTocado) return;
@@ -124,8 +123,6 @@ public class InimigoParado : MonoBehaviour
     {
         if (armatureComponent == null) return;
 
-        // O SpriteMask nao recorta corretamente as malhas DragonBones.
-        // Evita duas solucoes de recorte disputando pelo mesmo renderer.
         Transform raizPrefab = transform.parent != null ? transform.parent : transform;
         foreach (SpriteMask mascara in raizPrefab.GetComponentsInChildren<SpriteMask>(true))
             if (mascara != null) mascara.enabled = false;
@@ -142,9 +139,6 @@ public class InimigoParado : MonoBehaviour
             return;
         }
 
-        // O offset da poeira e o ponto visual de onde a terra sai.
-        // Nao deve se tornar diretamente o nivel de recorte:
-        // o emissor pode estar alguns metros acima da superficie.
         float estimativa = posicaoOculta.y + Mathf.Max(0f, alturaEmergir);
         float origemPesquisaY = Mathf.Max(
             estimativa, posicaoOculta.y + offsetPoeira.y) +
@@ -152,8 +146,6 @@ public class InimigoParado : MonoBehaviour
         float comprimento = Mathf.Max(80f, alturaEmergir * 2.5f);
         float tolerancia = Mathf.Max(12f, alturaEmergir * 0.65f);
 
-        // O prefab desloca visualmente o DragonBones em X. Procura o piso
-        // sob o ponto da poeira, sob a armadura e sob o transform do inimigo.
         float[] pontosX = {
             posicaoOculta.x + offsetPoeira.x,
             armatureComponent.transform.position.x,
@@ -183,7 +175,6 @@ public class InimigoParado : MonoBehaviour
 
                 bool ehGround = (camadasDaSuperficie.value &
                     (1 << col.gameObject.layer)) != 0;
-                // Prefere o piso real, nao os colliders de decoracoes.
                 float pontuacao = diferenca + (ehGround ? 0f : 2f);
                 if (pontuacao >= melhorPontuacao) continue;
 
@@ -199,8 +190,6 @@ public class InimigoParado : MonoBehaviour
         }
         else
         {
-            // Evita repetir o erro antigo de usar offsetPoeira.y (74)
-            // como topo do piso. Um recorte MUITO alto comia o corpo.
             superficieChaoY = estimativa - Mathf.Max(2f, alturaEmergir * 0.15f);
             if (!avisoSemCollider)
             {
@@ -235,8 +224,6 @@ public class InimigoParado : MonoBehaviour
 
             if (shaderValido)
             {
-                // A textura ORIGINAL do DragonBones e preservada.
-                // O corte atua somente abaixo da superficie detectada.
                 Material[] materias = malha.sharedMaterials;
                 bool atualizar = false;
                 for (int i = 0; i < materias.Length; i++)
@@ -266,8 +253,6 @@ public class InimigoParado : MonoBehaviour
                 malha.SetPropertyBlock(parametrosRecorte);
             }
 
-            // Se faltar shader, nunca mostra o inimigo sob o piso.
-            // Quando disponivel, cada pixel abaixo do piso e descartado.
             bool podeMostrar = shaderValido
                 ? jaEmergiu
                 : jaEmergiu &&
@@ -280,7 +265,6 @@ public class InimigoParado : MonoBehaviour
 
     private void LateUpdate()
     {
-        // O DragonBones pode recompor as malhas a qualquer momento.
         AtualizarRenderizacaoDoCorpo();
     }
 
@@ -290,7 +274,6 @@ public class InimigoParado : MonoBehaviour
         if (criarPoeira)
         {
             GameObject objeto = new GameObject("AvisoPoeiraEmergencia");
-            // Emissor como filho: sera eliminado quando o inimigo morrer.
             objeto.transform.SetParent(transform, true);
             objeto.transform.position = posicaoOculta + offsetPoeira;
             efeitoPoeira = objeto.AddComponent<ParticleSystem>();
@@ -298,8 +281,6 @@ public class InimigoParado : MonoBehaviour
         }
 
         var main = efeitoPoeira.main;
-        // Emissao manual em coordenadas 2D (X/Y): sempre de baixo para cima.
-        // O componente pode ter sido criado por codigo ou informado no Inspector.
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.startColor = new ParticleSystem.MinMaxGradient(corPoeira);
         main.startSpeed = 0f;
@@ -309,9 +290,9 @@ public class InimigoParado : MonoBehaviour
             Mathf.CeilToInt(quantidadeParticulasPoeira * densidadePoeira) * 2);
 
         var emissao = efeitoPoeira.emission;
-        emissao.enabled = false; // Sem emissao automatica duplicada.
+        emissao.enabled = false;
         var formato = efeitoPoeira.shape;
-        formato.enabled = false; // Cada particula recebe posicao/velocidade proprias.
+        formato.enabled = false;
         var velocidadeExtra = efeitoPoeira.velocityOverLifetime;
         velocidadeExtra.enabled = false;
 
@@ -320,8 +301,6 @@ public class InimigoParado : MonoBehaviour
             main.playOnAwake = false;
             main.loop = false;
             main.duration = 0.7f;
-            // A configuracao de direcao e tamanho e feita por EmitParams,
-            // para nao depender da rotacao do Particle System em 2D.
         }
 
         renderizadorPoeira = efeitoPoeira.GetComponent<ParticleSystemRenderer>();
@@ -340,13 +319,11 @@ public class InimigoParado : MonoBehaviour
             return;
         }
 
-        // Um efeito externo com material valido pode manter sua aparencia.
         Material atual = renderizadorPoeira.sharedMaterial;
         if (!criarPoeira && materialPoeira == null && atual != null &&
             atual.shader != null && atual.shader.isSupported)
             return;
 
-        // Sem material, o renderizador pode ficar magenta/roxo.
         Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
         if (shader == null || !shader.isSupported)
             shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
@@ -388,7 +365,6 @@ public class InimigoParado : MonoBehaviour
     {
         if (efeitoPoeira == null || quantidade <= 0) return;
 
-        // As posicoes e velocidades estao em espaco WORLD, no plano XY.
         Vector3 origem = posicaoOculta + offsetPoeira;
         float metadeFaixa = Mathf.Max(0.05f, larguraSaidaPoeira);
         float tamanhoMinimo = Mathf.Max(0.08f, alturaEmergir * 0.025f) * tamanhoPoeira;
@@ -402,7 +378,6 @@ public class InimigoParado : MonoBehaviour
                 Random.Range(-metadeFaixa, metadeFaixa),
                 Random.Range(-0.08f, 0.08f), 0f);
 
-            // A terra sobe principalmente em Y e se abre um pouco para os lados.
             terra.velocity = new Vector3(
                 Random.Range(-impulso * 0.5f, impulso * 0.5f),
                 Random.Range(impulso * 0.85f, impulso * 1.5f),
@@ -444,8 +419,6 @@ public class InimigoParado : MonoBehaviour
             }
             else
             {
-                // Varias ondas durante o aviso criam um jato continuo de terra,
-                // em vez de poucas particulas em um unico frame.
                 int ondas = Mathf.Max(1, Mathf.CeilToInt(tempoAvisoPoeira / 0.08f));
                 int jaEmitidas = 0;
                 for (int onda = 0; onda < ondas; onda++)
@@ -486,8 +459,6 @@ public class InimigoParado : MonoBehaviour
 
         if (jaEmergiu)
         {
-            // Lerp com velocidadeSubida=70 completava tudo em um frame.
-            // MoveTowards usa unidades por segundo e revela a subida gradualmente.
             transform.position = Vector3.MoveTowards(
                 transform.position, posicaoExposta,
                 Mathf.Max(0f, velocidadeSubida) * Time.deltaTime);
@@ -585,7 +556,6 @@ public class InimigoParado : MonoBehaviour
         Vector3 centroDeteccao = transform.position + (Vector3)offsetDeteccao;
         Gizmos.DrawWireSphere(centroDeteccao, raioDeteccao);
 
-        // Linha ciano na altura em que a malha e recortada.
         float y = Application.isPlaying ? superficieChaoY + ajusteNivelSuperficie :
             pontoSuperficie != null ? pontoSuperficie.position.y + ajusteNivelSuperficie :
             transform.position.y + alturaEmergir + ajusteNivelSuperficie;

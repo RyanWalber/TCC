@@ -2,8 +2,6 @@ using System;
 using UnityEngine;
 using DragonBones;
 
-// Feedback individual por inimigo, compativel com malhas DragonBones
-// combinadas. Nao altera materials compartilhados nem as animacoes.
 [Serializable]
 public sealed class FeedbackDanoDragonBones
 {
@@ -29,8 +27,6 @@ public sealed class FeedbackDanoDragonBones
             armadura = referencia != null
                 ? referencia : dono.GetComponentInChildren<UnityArmatureComponent>(true);
 
-            // Salva as cores originais do DragonBones e os overrides
-            // individuais de shader; cada inimigo tem seus proprios blocos.
             corOriginal = null;
             if (armadura != null && armadura.armature != null)
             {
