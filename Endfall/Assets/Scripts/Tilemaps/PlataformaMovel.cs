@@ -74,8 +74,6 @@ public class PlataformaMovel : MonoBehaviour
         Vector2 proximaPosicao = Vector2.MoveTowards(atual, destino,
             Mathf.Max(0f, velocidade) * Time.fixedDeltaTime);
 
-        // So a plataforma move seu Rigidbody. A Kaya recebe a velocidade
-        // como suporte no PlayerController, sem concorrencia de MovePosition.
         VelocidadeAtual = (proximaPosicao - atual) / Time.fixedDeltaTime;
         rb.MovePosition(proximaPosicao);
 
@@ -119,8 +117,6 @@ public class PlataformaMovel : MonoBehaviour
     {
         if (!collision.gameObject.CompareTag("Player")) return;
 
-        // Normal do contato na plataforma aponta para baixo quando
-        // o jogador esta sobre ela.
         foreach (ContactPoint2D contato in collision.contacts)
         {
             if (contato.normal.y < -0.5f)
@@ -132,8 +128,6 @@ public class PlataformaMovel : MonoBehaviour
                 if (!movimentoLiberado && iniciarAoPisar)
                 {
                     movimentoLiberado = true;
-                    // O ponto 0 ja e a posicao inicial. Segue diretamente
-                    // para o primeiro destino quando a Kaya pisa.
                     if (pontosGlobais != null && pontosGlobais.Length > 1)
                         indicePontoAtual = 1;
                 }

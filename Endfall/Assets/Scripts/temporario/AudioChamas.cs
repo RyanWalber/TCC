@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Fica no objeto das particulas de fogo, com volume crescente ao acender.
 [DisallowMultipleComponent]
 public class AudioChamas : MonoBehaviour
 {

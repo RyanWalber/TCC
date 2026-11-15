@@ -3,7 +3,7 @@ using UnityEngine;
 public class Checkpoint : MonoBehaviour
 {
     [Header("Efeitos Visuais")]
-    [SerializeField] private ParticleSystem fogoParticulas; // Arraste o 'Efeitofogo' aqui
+    [SerializeField] private ParticleSystem fogoParticulas;
 
     [Header("Audio deste checkpoint")]
     [SerializeField] private AudioClip somAtivarCheckpoint;
@@ -30,7 +30,6 @@ public class Checkpoint : MonoBehaviour
 
     private void Start()
     {
-        // Garante que o fogo começa apagado ao iniciar a cena
         if (fogoParticulas != null)
         {
             fogoParticulas.Stop();
@@ -45,14 +44,12 @@ public class Checkpoint : MonoBehaviour
             AudioObjeto2D.Tocar(somAtivarCheckpoint, volumeAtivarCheckpoint,
                 transform.position, "Checkpoint");
 
-            // 1. Acende o fogo da pira
             if (fogoParticulas != null)
             {
                 fogoParticulas.Play();
                 if (audioChamas != null) audioChamas.Acender();
             }
 
-            // 2. Regista a posição no SaveManager
             Vector3 posicaoSalvar = pontoDeRenascer != null ? pontoDeRenascer.position : other.transform.position;
 
             if (LevelManager.Instance != null)
@@ -62,7 +59,6 @@ public class Checkpoint : MonoBehaviour
             }
             else if (SaveManager.Instance != null)
             {
-                // Fallback para cenas que ainda não têm LevelManager.
                 SaveManager.Instance.RegistrarCheckpoint(posicaoSalvar);
                 Debug.LogWarning("Checkpoint salvo sem sincronizar moedas: LevelManager não foi encontrado.");
             }

@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Abertura cinematografica: executada somente quando Splash e carregada.
 public class SplashManager : MonoBehaviour
 {
     [Header("Cena seguinte")]
@@ -50,16 +49,13 @@ public class SplashManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // Um so cursor persiste em todas as cenas; no jogo vira mira.
         CursorManagerGlobal.Garantir().Configurar(cursorMenu, cursorMira, pontoCliqueSeta, offsetHotspotMira);
 
-        // O AudioSource global permanece entre as cenas, em loop continuo.
         AudioManagerGlobal audioGlobal = AudioManagerGlobal.Garantir();
         audioGlobal.Configurar(musicaDeMenu, somCliqueBotoes, volumeMusicaMenu,
             volumeMusicaNarrativa, volumeCliqueBotoes, fadeEntradaMusica);
         audioGlobal.IniciarNaSplash();
 
-        // Nao ha dependencia de prefab nem de um TMP arrastado no Inspector.
         GameObject canvasObj = new GameObject("AberturaEndFall", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         Canvas canvas = canvasObj.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -71,7 +67,6 @@ public class SplashManager : MonoBehaviour
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
-        // Fundo preto e logo no mesmo Canvas, antes de mostrar o titulo EndFall.
         GameObject fundoObj = new GameObject("FundoPretoAbertura", typeof(RectTransform), typeof(Image));
         fundoObj.transform.SetParent(canvasObj.transform, false);
         RectTransform fundoRect = fundoObj.GetComponent<RectTransform>();
@@ -157,19 +152,15 @@ public class SplashManager : MonoBehaviour
         voz.volume = volumeVoz;
         voz.clip = vozEndFall;
 
-        // Espera o Fade In global da Splash para evitar titulo oculto.
         while (LevelLoader.Instance != null && LevelLoader.Instance.EstaEmTransicao)
             yield return null;
 
-        // Primeira tela obrigatoria: estúdio antes do nome do jogo.
         yield return AnimarOpacidade(grupoCarcara, 0f, 1f, fadeEntradaCarcara);
         yield return new WaitForSecondsRealtime(Mathf.Max(0f, permanenciaCarcara));
         yield return AnimarOpacidade(grupoCarcara, 1f, 0f, fadeSaidaCarcara);
         painelCarcara.SetActive(false);
 
         yield return AnimarTitulo(texto, baseCor, 0f, 1f, tempoFadeIn);
-        // A voz so comeca quando o titulo ja esta 100% visivel.
-        // Pequena pausa opcional para deixar a abertura mais cinematografica.
         if (atrasoVozAposFadeIn > 0f)
             yield return new WaitForSecondsRealtime(atrasoVozAposFadeIn);
         if (vozEndFall != null) voz.Play();
