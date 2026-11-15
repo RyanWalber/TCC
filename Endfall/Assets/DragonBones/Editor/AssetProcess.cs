@@ -1,25 +1,3 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
@@ -45,7 +23,7 @@ namespace DragonBones
             public List<SubTextureClass> SubTexture=null;
         }
 
-        public static void OnPostprocessAllAssets(string[]imported,string[] deletedAssets,string[] movedAssets,string[]movedFromAssetPaths)  
+        public static void OnPostprocessAllAssets(string[]imported,string[] deletedAssets,string[] movedAssets,string[]movedFromAssetPaths)
         {
             if (imported.Length == 0)
             {
@@ -146,14 +124,12 @@ namespace DragonBones
                     TextureDataClass tdc = JsonUtility.FromJson<TextureDataClass>(ta.text);
                     if(tdc != null && (tdc.width == 0 || tdc.height == 0))
                     {
-                        //add width and height
                         string imgPath = path.Substring(0,path.IndexOf(".json"))+".png";
                         Texture2D texture = LoadPNG(Application.dataPath+"/"+ imgPath.Substring(6));
                         if(texture)
                         {
                             tdc.width = texture.width;
                             tdc.height = texture.height;
-                            //save
                             string json = JsonUtility.ToJson(tdc);
                             File.WriteAllText(path,json);
                             EditorUtility.SetDirty(ta);

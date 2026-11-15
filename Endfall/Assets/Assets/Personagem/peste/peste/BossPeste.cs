@@ -59,7 +59,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         timerAtaque = 0f;
     }
 
-    // Referência para o sistema de vida universal
     private BossVida bossVida;
 
     private void Start()
@@ -96,8 +95,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
 
     private void PatrulharEVoar()
     {
-        // Patrulha fixa entre os limites originais, inclusive em combate.
-        // O gatilho so ativa a luta; nao faz a Peste perseguir Kaya.
         float limiteDireita = posicaoInicial.x + distanciaPatrulha;
         float limiteEsquerda = posicaoInicial.x - distanciaPatrulha;
 
@@ -147,19 +144,14 @@ public class BossPeste : MonoBehaviour, IAudioBoss
 
     private void CalcularProximoCooldown()
     {
-        // Pega o percentual de vida direto do script universal
         float percentualVida = bossVida != null ? bossVida.ObterPercentualVida() : 1f;
         float tempoBase = Mathf.Lerp(tempoAtaqueVidaBaixa, tempoAtaqueVidaCheia, percentualVida);
 
-        // Frequencia maior, com a mesma progressao de vida de antes.
-        // So altera o intervalo, preservando InstanciarGosma() e a
-        // queda vertical no ProjetilGosma original.
         proximoIntervaloAtaque = Mathf.Max(0.2f,
             tempoBase * Mathf.Clamp(multiplicadorIntervaloCuspe, 0.2f, 2f) *
             Random.Range(0.8f, 1.2f));
     }
 
-    // Chamado pelo Animation Event no clipe pesteatak
     public void InstanciarGosma()
     {
         if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
@@ -192,7 +184,6 @@ public class BossPeste : MonoBehaviour, IAudioBoss
         transform.rotation = Quaternion.Euler(0f, anguloY, 0f);
     }
 
-    // --- CONTATO COM O JOGADOR ---
     private void OnCollisionEnter2D(Collision2D collision) => ProcessarContatoPlayer(collision.gameObject);
     private void OnCollisionStay2D(Collision2D collision) => ProcessarContatoPlayer(collision.gameObject);
     private void OnTriggerEnter2D(Collider2D collision) => ProcessarContatoPlayer(collision.gameObject);

@@ -1,25 +1,3 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -58,12 +36,9 @@ namespace DragonBones
         {
             this._armatureIndex = -1;
             this._animationIndex = -1;
-            // this._sortingModeIndex = -1;
-            // this._sortingLayerIndex = -1;
 
             this._armatureNames = null;
             this._animationNames = null;
-            // this._sortingLayerNames = null;
         }
 
         void OnDisable()
@@ -78,7 +53,6 @@ namespace DragonBones
                 return;
             }
 
-            // 
             this._nowTime = System.DateTime.Now.Ticks;
 
             this._sortingModeIndex = (int)this._armatureComponent.sortingMode;
@@ -91,39 +65,30 @@ namespace DragonBones
             this._flipYPro = serializedObject.FindProperty("_flipY");
             this._closeCombineMeshsPro = serializedObject.FindProperty("_closeCombineMeshs");
 
-            // Update armature.
             if (!EditorApplication.isPlayingOrWillChangePlaymode &&
                 _armatureComponent.armature == null &&
                 _armatureComponent.unityData != null &&
                 !string.IsNullOrEmpty(_armatureComponent.armatureName))
             {
-                // Clear cache
                 UnityFactory.factory.Clear(true);
 
-                // Unload
                 EditorUtility.UnloadUnusedAssetsImmediate();
                 System.GC.Collect();
 
-                // Load data.
                 var dragonBonesData = UnityFactory.factory.LoadData(_armatureComponent.unityData);
 
-                // Refresh texture atlas.
                 UnityFactory.factory.RefreshAllTextureAtlas(_armatureComponent);
 
-                // Refresh armature.
                 UnityEditor.ChangeArmatureData(_armatureComponent, _armatureComponent.armatureName, dragonBonesData.name);
 
-                // Refresh texture.
                 _armatureComponent.armature.InvalidUpdate(null, true);
 
-                // Play animation.
                 if (!string.IsNullOrEmpty(_armatureComponent.animationName))
                 {
                     _armatureComponent.animation.Play(_armatureComponent.animationName, _playTimesPro.intValue);
                 }
             }
 
-            // Update hideFlags.
             if (!EditorApplication.isPlayingOrWillChangePlaymode &&
                 _armatureComponent.armature != null &&
                 _armatureComponent.armature.parent != null)
@@ -152,7 +117,6 @@ namespace DragonBones
                 _UpdateParameters();
             }
 
-            // DragonBones Data
             EditorGUILayout.BeginHorizontal();
 
             _armatureComponent.unityData = EditorGUILayout.ObjectField("DragonBones Data", _armatureComponent.unityData, typeof(UnityDragonBonesData), false) as UnityDragonBonesData;
@@ -180,7 +144,6 @@ namespace DragonBones
             }
             else
             {
-                //create UnityDragonBonesData by a json data
                 if (GUILayout.Button("JSON"))
                 {
                     PickJsonDataWindow.OpenWindow(_armatureComponent);
@@ -189,7 +152,6 @@ namespace DragonBones
 
             if (created)
             {
-                //clear cache
                 UnityFactory.factory.Clear(true);
                 ClearUp();
                 _armatureComponent.animationName = null;
@@ -207,7 +169,6 @@ namespace DragonBones
             {
                 var dragonBonesData = _armatureComponent.armature.armatureData.parent;
 
-                // Armature
                 if (UnityFactory.factory.GetAllDragonBonesData().ContainsValue(dragonBonesData) && _armatureNames != null)
                 {
                     var armatureIndex = EditorGUILayout.Popup("Armature", _armatureIndex, _armatureNames.ToArray());
@@ -225,7 +186,6 @@ namespace DragonBones
                     }
                 }
 
-                // Animation
                 if (_animationNames != null && _animationNames.Count > 0)
                 {
                     EditorGUILayout.BeginHorizontal();
@@ -271,7 +231,6 @@ namespace DragonBones
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    //playTimes
                     EditorGUILayout.BeginHorizontal();
                     var playTimes = _playTimesPro.intValue;
                     EditorGUILayout.PropertyField(_playTimesPro, false);
@@ -285,7 +244,6 @@ namespace DragonBones
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    // TimeScale
                     var timeScale = _timeScalePro.floatValue;
                     EditorGUILayout.PropertyField(_timeScalePro, false);
                     if (timeScale != _timeScalePro.floatValue)
@@ -294,18 +252,15 @@ namespace DragonBones
                     }
                 }
 
-                //
                 EditorGUILayout.Space();
 
                 if (!_armatureComponent.isUGUI)
                 {
-                    //Sorting Mode
                     _sortingModeIndex = EditorGUILayout.Popup("Sorting Mode", (int)_armatureComponent.sortingMode, _sortingMode);
                     if (_sortingModeIndex != (int)_armatureComponent.sortingMode)
                     {
                         Undo.RecordObject(_armatureComponent, "Sorting Mode");
                         _armatureComponent.sortingMode = (SortingMode)_sortingModeIndex;
-                        // 里面return了，没有赋值成功
                         if (_armatureComponent.sortingMode != (SortingMode)_sortingModeIndex)
                         {
                             _sortingModeIndex = (int)_armatureComponent.sortingMode;
@@ -314,7 +269,6 @@ namespace DragonBones
                         MarkSceneDirty();
                     }
 
-                    // Sorting Layer
                     _sortingLayerIndex = EditorGUILayout.Popup("Sorting Layer", _sortingLayerIndex, _sortingLayerNames.ToArray());
                     if (_sortingLayerNames[_sortingLayerIndex] != _armatureComponent.sortingLayerName)
                     {
@@ -324,7 +278,6 @@ namespace DragonBones
                         MarkSceneDirty();
                     }
 
-                    // Sorting Order
                     var sortingOrder = EditorGUILayout.IntField("Order in Layer", _armatureComponent.sortingOrder);
                     if (sortingOrder != _armatureComponent.sortingOrder)
                     {
@@ -334,7 +287,6 @@ namespace DragonBones
                         MarkSceneDirty();
                     }
 
-                    // ZSpace
                     EditorGUILayout.BeginHorizontal();
                     _armatureComponent.zSpace = EditorGUILayout.Slider("Z Space", _armatureComponent.zSpace, 0.0f, 0.5f);
                     EditorGUILayout.EndHorizontal();
@@ -342,7 +294,6 @@ namespace DragonBones
 
                 EditorGUILayout.Space();
 
-                // Flip
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Flip");
                 var flipX = _flipXPro.boolValue;
@@ -366,7 +317,6 @@ namespace DragonBones
             {
                 if (!Application.isPlaying && !this._armatureComponent.isUGUI)
                 {
-                    //
                     var oldValue = this._closeCombineMeshsPro.boolValue;
                     if (!this._closeCombineMeshsPro.boolValue)
                     {
@@ -393,7 +343,7 @@ namespace DragonBones
             if (!EditorApplication.isPlayingOrWillChangePlaymode && Selection.activeObject == _armatureComponent.gameObject)
 {
     EditorUtility.SetDirty(_armatureComponent);
-    EditorApplication.QueuePlayerLoopUpdate(); // Ini akan meminta Unity untuk memperbarui frame tanpa memaksa repaint langsung.
+    EditorApplication.QueuePlayerLoopUpdate();
 }
         }
 
@@ -414,7 +364,6 @@ namespace DragonBones
                         }
                     }
 
-                    //
                     _nowTime = System.DateTime.Now.Ticks;
                 }
             }
@@ -431,7 +380,6 @@ namespace DragonBones
                     _armatureNames = _armatureComponent.armature.armatureData.parent.armatureNames;
                     _animationNames = _armatureComponent.animation.animationNames;
                     _armatureIndex = _armatureNames.IndexOf(_armatureComponent.armature.name);
-                    //
                     if (!string.IsNullOrEmpty(_armatureComponent.animationName))
                     {
                         _animationIndex = _animationNames.IndexOf(_armatureComponent.animationName);
@@ -471,7 +419,6 @@ namespace DragonBones
         private void MarkSceneDirty()
         {
             EditorUtility.SetDirty(_armatureComponent);
-            //
             if (!Application.isPlaying && !_IsPrefab())
             {
                 EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());

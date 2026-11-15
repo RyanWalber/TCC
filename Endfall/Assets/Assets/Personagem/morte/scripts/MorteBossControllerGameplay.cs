@@ -2,11 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Cavaleira da Morte: State Pattern (vida alta, media e baixa).
-/// Cada estado decide seus proprios comportamentos de forma ciclica,
-/// independente da maquina visual do Animator.
-/// </summary>
 [DisallowMultipleComponent]
 public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 {
@@ -169,8 +164,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         InvestidaLongaComGolpe
     }
 
-    // Padrao State propriamente dito: cada classe encapsula a politica
-    // de selecao dos comportamentos para uma faixa de HP.
     private abstract class EstadoVida
     {
         public abstract string Nome { get; }
@@ -186,9 +179,9 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         {
             switch (indice % 3)
             {
-                case 0: return Acao.CorvosDiretos;    // 4 corvos focados
-                case 1: return Acao.InvocarLamentus;  // mortesubindo
-                default: return Acao.CorvosLeque;     // 4 corvos espalhados
+                case 0: return Acao.CorvosDiretos;
+                case 1: return Acao.InvocarLamentus;
+                default: return Acao.CorvosLeque;
             }
         }
     }
@@ -201,9 +194,9 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         {
             switch (indice % 3)
             {
-                case 0: return Acao.CorvosDiretos;              // 6 corvos
-                case 1: return Acao.LancarFoice;                // arremessa parada
-                default: return Acao.LancarFoiceAposAproximar; // aproxima e arremessa
+                case 0: return Acao.CorvosDiretos;
+                case 1: return Acao.LancarFoice;
+                default: return Acao.LancarFoiceAposAproximar;
             }
         }
     }
@@ -216,9 +209,9 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         {
             switch (indice % 3)
             {
-                case 0: return Acao.CorvosDiretos;           // 10 corvos
-                case 1: return Acao.InvestidaComGolpe;       // aproxima e golpeia
-                default: return Acao.InvestidaLongaComGolpe; // aproxima mais perto e golpeia
+                case 0: return Acao.CorvosDiretos;
+                case 1: return Acao.InvestidaComGolpe;
+                default: return Acao.InvestidaLongaComGolpe;
             }
         }
     }
@@ -283,8 +276,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
     private void AoAlterarVida(float percentual)
     {
-        // O evento vem do BossVida no mesmo frame do dano, impedindo
-        // que um segundo projétil acerte antes da invulnerabilidade.
         if (isActiveAndEnabled && vidaBoss != null && !vidaBoss.EstaMorto)
             AtualizarEstadoVida();
     }
@@ -328,7 +319,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         AtualizarOrientacao();
         if (!combatePeloGatilho || Time.time < ataqueLiberadoEm) return;
         if (atacando || Time.time < proximoAtaque) return;
-        // O State Pattern ja aproxima a Morte; distancia nao desativa a luta.
 
         PlayerHealth vidaKaya = jogador.GetComponentInParent<PlayerHealth>();
         if (vidaKaya == null)
@@ -340,8 +330,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         Acao acao = estadoAtual.Selecionar(indiceAtaque);
         indiceAtaque = (indiceAtaque + 1) % estadoAtual.QuantidadeComportamentos;
         atacando = true;
-        // Congela a escolha de fase durante a habilidade, mesmo que
-        // o jogador reduza a vida enquanto a horda esta sendo lancada.
         EstadoVida faseDoAtaque = estadoAtual;
         acaoEmExecucao = acao;
         velocidadeAnimacaoAtual = VelocidadeDaFase(faseDoAtaque);
@@ -364,7 +352,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             animator.SetInteger("FaseVida",
                 estadoAtual == alta ? 1 : estadoAtual == media ? 2 : 3);
 
-        // Inicialização não deve provocar transição visual.
         if (anterior != null && !emTransicaoDeEstagio)
         {
             IniciarTransicaoDeEstagio();
@@ -376,8 +363,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     {
         emTransicaoDeEstagio = true;
 
-        // Interrompe qualquer habilidade anterior (até a horda em
-        // andamento). Corvos já lançados podem continuar voando.
         if (rotinaAtaque != null)
         {
             StopCoroutine(rotinaAtaque);
@@ -391,8 +376,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         if (corpoFisico != null) corpoFisico.linearVelocity = Vector2.zero;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
 
-        // Invulnerabilidade aplicada IMEDIATAMENTE, antes de aguardar
-        // um frame; BossVida também colore a personagem de preto.
         if (vidaBoss != null)
             vidaBoss.DefinirInvulnerabilidadeDeFase(true);
 
@@ -404,7 +387,7 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
                 "LancarFoice", "Aproximar", "Investida", "CancelarAtaque" };
             foreach (string gatilho in limpar) animator.ResetTrigger(gatilho);
             animator.SetTrigger("CancelarAtaque");
-            animator.speed = 0f; // Congela a pose; nao altera timeScale global
+            animator.speed = 0f;
         }
 
         rotinaTransicao = StartCoroutine(TransicaoDeEstagio());
@@ -430,14 +413,11 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         vidaBoss.DefinirInvulnerabilidadeDeFase(false);
         emTransicaoDeEstagio = false;
         rotinaTransicao = null;
-        // Dá tempo ao Animator para retornar suavemente à pose ociosa.
         proximoAtaque = Time.time + 0.3f;
     }
 
     private IEnumerator ExecutarAcao(Acao acao, EstadoVida faseDoAtaque)
     {
-        // A aproximação comum é usada apenas antes da invocação
-        // no estágio 1; as outras fases têm variações próprias.
         if (acao == Acao.InvocarLamentus)
             yield return AproximarDaKaya();
 
@@ -475,7 +455,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         multiplicadorVelocidadeMovimento = 1f;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
         if (animator != null) animator.speed = 1f;
-        // O retorno para morteociosa acontece pelas setas do Animator.
         atacando = false;
         rotinaAtaque = null;
         proximoAtaque = Time.time + IntervaloDaFase(estadoAtual);
@@ -539,10 +518,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
         int quantidade = faseDoAtaque == alta ? 4 :
             faseDoAtaque == media ? 6 : 10;
-        // A segunda horda da fase alta espalha os mesmos 4 corvos
-        // em angulos distintos: terceira habilidade sem nova animacao.
-        // Garante que ate a horda de 10 saia durante o clipe
-        // mortelancando (1.95s), sem tiros depois do fim da animacao.
         float intervaloReal = Mathf.Min(Mathf.Max(0.05f, intervaloCorvos),
             (DuracaoCorvos - 0.75f) / Mathf.Max(1, quantidade - 1));
         for (int i = 0; i < quantidade; i++)
@@ -611,7 +586,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         float lado = jogador.position.x >= transform.position.x ? 1f : -1f;
         bool achou = false;
         Vector2 superficie = Vector2.zero;
-        // Se nao houver plataforma de um lado, tenta o outro antes de desistir.
         for (int tentativa = 0; tentativa < 2 && !achou; tentativa++)
         {
             float sinal = tentativa == 0 ? lado : -lado;
@@ -669,18 +643,12 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         }
 
         lamentusInvocados.Add(invocado);
-        // O audio de invocacao e configurado no proprio prefab Lamentus.
-        // InimigoParado toca o seu som ao surgir; outros inimigos comuns
-        // tocam o som de aparicao no proprio Start.
         InimigoParado audioDoInvocado = invocado.GetComponent<InimigoParado>();
         if (audioDoInvocado != null) audioDoInvocado.TocarAoSerInvocado();
     }
 
     private IEnumerator AtaqueFoiceArremessada()
     {
-        // Mira somente uma vez: Kaya pode fugir para qualquer lado apos
-        // o lancamento. A foice cruza o X inicial da Kaya e so entao retorna.
-        // Mantem o tempo e a animacao original de 2.1667 segundos.
         EncontrarJogador();
         if (jogador != null)
         {
@@ -704,8 +672,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         {
             decorrido += Time.deltaTime;
             tempoAnimacaoFoice = decorrido * velocidadeAnimacaoAtual;
-            // O reposicionamento VISUAL e o acerto sao feitos no LateUpdate,
-            // depois que o Animator escreve os keyframes da foice.
             yield return null;
         }
 
@@ -717,7 +683,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     {
         if (!arremessoFoiceEmAndamento || foiceAnimada == null) return;
 
-        // Nao modifica animacoes de aproximação, ataque ou morte.
         if (animator != null &&
             !animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.mortelancandofoice"))
         {
@@ -725,25 +690,17 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             return;
         }
 
-        // O inicio da ida acontece em 1.0167s no clip; antes disso
-        // os bracos e a foice continuam com a preparacao original.
         if (limitarFoiceAteKaya && tempoAnimacaoFoice >= 1.0167f &&
             foiceAnimada.parent != null && jogador != null)
         {
             Transform pai = foiceAnimada.parent;
             Vector3 local = foiceAnimada.localPosition;
 
-            // A animacao vai para X local NEGATIVO (-67.4 ate -673.1).
-            // A orientacao visual da Morte ja inverte o X para a direita
-            // quando Kaya esta daquele lado: nao precisamos duplicar clips.
             Vector3 alvoMundo = new Vector3(alvoXFoice,
                 foiceAnimada.position.y, foiceAnimada.position.z);
             float destinoLocalX = pai.InverseTransformPoint(alvoMundo).x;
             float distanciaDisponivel = Mathf.Max(0f,
                 inicioOriginalFoiceLocalX - destinoLocalX);
-            // Nao usar Clamp01: quando Kaya esta mais distante, a foice
-            // precisa poder percorrer ALEM do deslocamento original do clip
-            // para atingir o ponto extra, sem parar antes da posicao dela.
             float proporcao = Mathf.Max(0f,
                 distanciaDisponivel / Mathf.Max(1f, distanciaAnimadaFoice));
 
@@ -752,8 +709,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             foiceAnimada.localPosition = local;
         }
 
-        // Verifica o dano pela MESMA posicao visivel, inclusive ao ultrapassar
-        // Kaya. Nao cria hit invisivel nem rastreia Kaya depois do lancamento.
         Vector2 atual = foiceAnimada.position;
         if (foiceTemPosicaoAnterior && !arremessoFoiceAcertou &&
             tempoAnimacaoFoice >= inicioColisaoFoice &&
@@ -799,8 +754,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
 
     private IEnumerator AtaqueInvestidaFinal()
     {
-        // O movimento "indo" ou "indolonge" so aproxima. Somente aqui
-        // a animacao indoataque habilita a hitbox com dano.
         audioInimigo.TocarEspecial(this, somInvestida, volumeInvestida);
         DispararTrigger("Investida");
         float tempo = 0f;
@@ -822,9 +775,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
     {
         if (animator == null) return;
 
-        // Impede triggers antigos de ficarem pendentes e ativarem outro
-        // estado apos a fase mudar. A animacao e decidida nas SETAS
-        // do Morte 1.controller, nunca pelo Animator.Play aqui.
         string[] gatilhos = {
             "AtaqueCorvos", "InvocarLamentus", "LancarFoice",
             "Aproximar", "Investida", "CancelarAtaque"
@@ -942,8 +892,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             fonteMusicaTransicao.Stop();
     }
 
-    // Musica especial da animacao mortemorre, independente deste componente:
-    // BossVida desativa a IA no golpe fatal e o som deve continuar na cinematica.
     public void IniciarMusicaMorteFinal(MonoBehaviour controladorCinematica)
     {
         AudioClip faixa = musicaMorteFinal != null ? musicaMorteFinal : musicaTransicaoEstagio;
@@ -983,9 +931,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         if (fonte != null) fonte.volume = volumeAlvo;
     }
 
-    // Chamado pelo FinalizadorMorte quando a animacao 'mortemorre' comeca.
-    // O som roda no controlador da CINEMATICA, pois BossVida desativa este
-    // script no golpe final e cancelaria coroutines executadas aqui.
     public void IniciarGritoFinal(MonoBehaviour controladorCinematica)
     {
         if (gritoFinal == null || controladorCinematica == null) return;
@@ -1033,8 +978,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
             yield return null;
         }
 
-        // Durante a cinematica final a faixa especial ainda esta tocando.
-        // Restaurar a musica de combate aqui criaria um salto indesejado.
         if (trilha != null && !manterTrilhasAbafadas)
             trilha.RestaurarMusicas(tempoFadeMusica);
         if (fonte != null) Destroy(fonte.gameObject);
@@ -1065,7 +1008,6 @@ public class MorteBossControllerGameplay : MonoBehaviour, IAudioBoss
         if (animator != null) animator.speed = 1f;
         if (hitboxFoice != null) hitboxFoice.DefinirAtiva(false);
 
-        // Nao deixa Lamentus vivos atacando Kaya na cinematica de morte.
         if (vidaBoss != null && vidaBoss.EstaMorto)
         {
             foreach (GameObject invocado in lamentusInvocados)
