@@ -60,7 +60,6 @@ public class SistemaFuria : MonoBehaviour
     private void Update()
     {
         AtualizarFadeVinheta();
-        // Nao alterna Furia com o menu de pausa aberto.
         if (Time.timeScale <= 0f) return;
 
         if ((controleKaya == null || !controleKaya.ControlesBloqueadosPorDialogo) &&
