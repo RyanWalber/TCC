@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e18dc918a003441bc2148cc04ca3e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  velocidade: 150
+  velocidade: 155
   forcaDoPulo: 200
   tempoCoyote: 0.15
   groundCheck: {fileID: 9105069308953572735}
@@ -275,7 +275,7 @@ MonoBehaviour:
   somAmbiente: {fileID: 8300000, guid: a573e279bfb724248a7aea9838e35966, type: 3}
   volumeAmbiente: 1
   musicaCombate: {fileID: 8300000, guid: 25251cccdfeee2e47ab51a1a6eea174c, type: 3}
-  volumeMusicaCombate: 0.1
+  volumeMusicaCombate: 0.4
   raioDeteccaoCombate: 220
   intervaloVerificacaoCombate: 0.35
   duracaoTransicaoMusicas: 2
@@ -291,7 +291,7 @@ MonoBehaviour:
   fasePrimeiraPisada: 0.15
   faseSegundaPisada: 0.65
   pulo: {fileID: 8300000, guid: 6f71b6e20715a5a4295e024329ac679b, type: 3}
-  volumePulo: 0.4
+  volumePulo: 0.8
   aterrissagem: {fileID: 8300000, guid: 10c2b5b71f16e5c4996c9e68083cf4a3, type: 3}
   volumeAterrissagem: 0.4
   dash: {fileID: 8300000, guid: ea3e18728f0979349ad475280ac99540, type: 3}

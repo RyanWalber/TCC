@@ -159,17 +159,15 @@ MonoBehaviour:
   cartaFinal: "Kaya,\n\nEnt\xE3o voc\xEA conseguiu. Derrubou a pr\xF3pria Morte.
     Confesso que n\xE3o esperava tanto de uma humana t\xE3o teimosa.\n\nSeus pais
     n\xE3o voltar\xE3o, e nenhuma vit\xF3ria apagar\xE1 essa aus\xEAncia. Mas o caminho
-    que come\xE7ou com vingan\xE7a termina com algo maior: a liberdade de escolher
-    o pr\xF3prio destino.\n\nAgora v\xE1 viver. Afinal, seria um desperd\xEDcio sobreviver
-    a tudo isso s\xF3 para continuar me ouvindo falar.\n\nCom certo orgulho \u2014
-    n\xE3o se acostume,\nAtt. Cael."
+    que comecou com vinganca termina com algo maior.\n\nAgora v\xE1 viver. Afinal,
+    seria um desperd\xEDcio sobreviver a tudo isso s\xF3 para continuar me ouvindo
+    falar.\n\nCom certo orgulho \u2014 n\xE3o se acostume,\nAtt. Cael."
   textoCreditos: "E N D F A L L\n\nCARCAR\xC1 PRODU\xC7\xD5ES\n\n\nUM JOGO DE\nRYAN
-    WALBER SOUZA SILVA\n\n\nDESENVOLVIMENTO E PROGRAMA\xC7\xC3O\nRyan Walber Souza
-    Silva\n\nCRIA\xC7\xC3O E NARRATIVA\nRyan Walber Souza Silva\n\n\nPROJETO DE CONCLUS\xC3O
-    DE CURSO\nJOGOS DIGITAIS \u2014 IFRN\n\n\nAGRADECIMENTOS\n\nAos professores,
-    pelos ensinamentos.\nAos amigos e colegas, pela companhia.\n\xC0 minha fam\xEDlia,
-    pelo apoio.\nE a voc\xEA, por chegar at\xE9 o fim desta jornada.\n\n\nOBRIGADO
-    POR JOGAR."
+    WALBER SOUZA SILVA\nMARIA GABRYELLE CAMPELO MATIAS\n \n\nDESENVOLVIMENTO E PROGRAMA\xC7\xC3O\nRyan
+    Walber Souza Silva\n\nCRIA\xC7\xC3O E NARRATIVA\nRyan Walber Souza Silva\nMaria
+    Gabryelle Campelo Matias\n\nPROJETO DE CONCLUS\xC3O DE CURSO\nJOGOS DIGITAIS
+    \u2014 IFRN\n\n\nAGRADECIMENTOS\n\nAos professores, pelos ensinamentos.\nE a
+    voc\xEA, por chegar at\xE9 o fim desta jornada.\n\n\nOBRIGADO POR JOGAR."
   segundosPorLetra: 0.022
   duracaoFade: 1
   tempoTitulo: 3
