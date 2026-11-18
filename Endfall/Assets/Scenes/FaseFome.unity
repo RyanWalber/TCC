@@ -49092,14 +49092,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8530811496345764708}
     m_Modifications:
-    - target: {fileID: 1678727707407738261, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 123.0645
-      objectReference: {fileID: 0}
-    - target: {fileID: 1678727707407738261, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -38.365124
-      objectReference: {fileID: 0}
     - target: {fileID: 3683070864047690188, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
       propertyPath: m_Name
       value: Barradehud
@@ -49183,10 +49175,6 @@ PrefabInstance:
     - target: {fileID: 5875716463848696206, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7485746658475221313, guid: 4e5312b98e613ea45b57e21264aaa6d9, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 16.988
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -51557,6 +51545,10 @@ PrefabInstance:
     - target: {fileID: 3506548918364907698, guid: 34e41e35725c8374d981eb86402e74b3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3730900162483469964, guid: 34e41e35725c8374d981eb86402e74b3, type: 3}
+      propertyPath: falasPadrao.Array.data[10].texto
+      value: "Parab\xE9ns, entrou para a fila! At\xE9 mais, querida."
       objectReference: {fileID: 0}
     - target: {fileID: 8897663045103876425, guid: 34e41e35725c8374d981eb86402e74b3, type: 3}
       propertyPath: m_Name
