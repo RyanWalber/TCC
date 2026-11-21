@@ -48,7 +48,6 @@ public class TiroPlayer : MonoBehaviour
 
     private void Update()
     {
-        // Nao cria tiros enquanto o jogo esta pausado.
         if (Time.timeScale <= 0f) return;
         if (controleKaya != null && controleKaya.ControlesBloqueadosPorDialogo)
         {
@@ -60,13 +59,9 @@ public class TiroPlayer : MonoBehaviour
         float cadenciaEfetiva = Mathf.Max(0.01f, cadenciaTiro);
         if (furiaAtiva)
         {
-            // MultCadencia e um MULTIPLICADOR DO INTERVALO, nao tiros/segundo.
-            // Valores menores que 1 significam disparos mais rapidos.
             cadenciaEfetiva *= Mathf.Clamp(sistemaFuria.multCadencia, 0.1f, 1f);
         }
 
-        // Na Furia pode manter o botao pressionado e disparar rapidamente.
-        // Fora dela permanece o comportamento original: um tiro por clique.
         bool pediuTiro = furiaAtiva
             ? (Input.GetKey(teclaTiro) || Input.GetMouseButton(0))
             : (Input.GetKeyDown(teclaTiro) || Input.GetMouseButtonDown(0));
@@ -92,7 +87,6 @@ public class TiroPlayer : MonoBehaviour
         if (prefabEfeitoFogo != null)
             Instantiate(prefabEfeitoFogo, pontoDeDisparo.position, pontoDeDisparo.rotation, pontoDeDisparo);
 
-        // PlayOneShot permite disparos seguidos sem cortar o som anterior.
         if (audioKaya != null) audioKaya.TocarTiro();
         else if (audioTiro != null && audioTiro.clip != null)
             audioTiro.PlayOneShot(audioTiro.clip, volumeTiro);

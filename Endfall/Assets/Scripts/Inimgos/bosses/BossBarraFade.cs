@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// Controla a transparencia da barra por gatilho, sem desativar a UI
-// durante o fade ou destruir imediatamente a barra na derrota do boss.
 [DisallowMultipleComponent]
 public sealed class BossBarraFade : MonoBehaviour
 {
@@ -83,7 +81,6 @@ public sealed class BossBarraFade : MonoBehaviour
     {
         if (!preparado || grupo == null) return;
 
-        // A UI segue viva enquanto o boss e destruido ou faz a animacao final.
         if (apareceu && !encerrando)
         {
             bool derrotado = (vida != null && vida.EstaMorto) ||
@@ -99,7 +96,6 @@ public sealed class BossBarraFade : MonoBehaviour
             Destroy(gameObject);
     }
 
-    // Mantem o Canvas vivo quando a UI e filha do proprio boss.
     public void LiberarDaHierarquiaDoBoss(Transform raizBoss)
     {
         if (raizBoss == null || !transform.IsChildOf(raizBoss)) return;

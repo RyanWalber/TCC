@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Hitbox da foice. O controller ativa o Collider2D apenas durante os frames de acerto.
-/// É anexado automaticamente ao objeto que contém o collider com 'foice' no nome.
-/// </summary>
 [DisallowMultipleComponent]
 public class MorteFoiceHitbox : MonoBehaviour
 {
@@ -41,7 +37,6 @@ public class MorteFoiceHitbox : MonoBehaviour
         ativa = valor;
         hitbox.enabled = valor;
 
-        // Cada ativação do ataque representa uma janela nova de acerto.
         jogadoresAtingidos.Clear();
     }
 

@@ -89,13 +89,11 @@ public class VidaBossGuerra : MonoBehaviour
         }
     }
 
-    // Aceita dano em INT (do seu Projetil.cs e inimigos padrão)
     public void TomarDano(int quantidadeDano)
     {
         TomarDano((float)quantidadeDano);
     }
 
-    // Aceita dano em FLOAT (caso algum ataque use valores decimais)
     public void TomarDano(float quantidadeDano)
     {
         if (estaMorto || quantidadeDano <= 0f) return;
@@ -165,8 +163,6 @@ public class VidaBossGuerra : MonoBehaviour
                             ? Mathf.Max(0.5f, intervaloSpawnElixires)
                             : 1f;
                     }
-                    // No limite de vidas presentes, nao reinicia o
-                    // cronometro: a vaga expirada pode ser reutilizada.
                 }
             }
             yield return null;
@@ -198,8 +194,6 @@ public class VidaBossGuerra : MonoBehaviour
             }
         }
 
-        // Se nao houver pontos, tenta criar sobre o chao real, e nunca
-        // no ar ou atravessando uma parede.
         for (int tentativa = 0; tentativa < 12; tentativa++)
         {
             float x = transform.position.x +

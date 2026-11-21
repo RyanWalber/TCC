@@ -1,25 +1,3 @@
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2017 DragonBones team and other contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -28,74 +6,24 @@ using UnityEditor;
 
 namespace DragonBones
 {
-    /// <summary>
-    /// The slots sorting mode
-    /// </summary>
-    /// <version>DragonBones 4.5</version>
-    /// <language>en_US</language>
-    /// 
-    /// <summary>
-    /// 插槽排序模式
-    /// </summary>
-    /// <version>DragonBones 4.5</version>
-    /// <language>zh_CN</language>
     public enum SortingMode
     {
-        /// <summary>
-        /// Sort by Z values
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// 按照插槽显示对象的z值排序
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         SortByZ,
-        /// <summary>
-        /// Renderer's order within a sorting layer.
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// 在同一层sorting layer中插槽按照sortingOrder排序
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         SortByOrder
     }
 
-    ///<inheritDoc/>
     [ExecuteInEditMode, DisallowMultipleComponent]
     public class UnityArmatureComponent : DragonBoneEventDispatcher, IArmatureProxy
     {
         public const int ORDER_SPACE = 10;
-        /// <private/>
         public UnityDragonBonesData unityData = null;
-        /// <private/>
         public string armatureName = null;
-        /// <summary>
-        /// Is it the UGUI model?
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// 是否是UGUI模式
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public bool isUGUI = false;
         public bool debugDraw = false;
         internal readonly ColorTransform _colorTransform = new ColorTransform();
 
-        /// <private/>
         public string animationName = null;
-        /// <private/>
         private bool _disposeProxy = true;
-        /// <private/>
         internal Armature _armature = null;
         [Tooltip("0 : Loop")]
         [Range(0, 100)]
@@ -118,17 +46,14 @@ namespace DragonBones
         protected bool _flipX = false;
         [SerializeField]
         protected bool _flipY = false;
-        //default open combineMeshs
         [SerializeField]
         protected bool _closeCombineMeshs;
 
         private bool _hasSortingGroup = false;
         private Material _debugDrawer;
 
-        //
         internal int _armatureZ;
 
-        /// <private/>
         public void DBClear()
         {
             if (this._armature != null)
@@ -165,7 +90,6 @@ namespace DragonBones
             this._armatureZ = 0;
             this._closeCombineMeshs = false;
         }
-        ///
         public void DBInit(Armature armature)
         {
             this._armature = armature;
@@ -180,17 +104,12 @@ namespace DragonBones
         {
             if (!_debugDrawer)
             {
-                // Unity has a built-in shader that is useful for drawing
-                // simple colored things.
                 Shader shader = Shader.Find("Hidden/Internal-Colored");
                 _debugDrawer = new Material(shader);
                 _debugDrawer.hideFlags = HideFlags.HideAndDontSave;
-                // Turn on alpha blending
                 _debugDrawer.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 _debugDrawer.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                // Turn backface culling off
                 _debugDrawer.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-                // Turn off depth writes
                 _debugDrawer.SetInt("_ZWrite", 0);
             }
         }
@@ -203,17 +122,12 @@ namespace DragonBones
                 Color boneLineColor = new Color(0.0f, 1.0f, 1.0f, 0.7f);
                 Color boundingBoxLineColor = new Color(1.0f, 0.0f, 1.0f, 1.0f);
                 CreateLineMaterial();
-                // Apply the line material
                 _debugDrawer.SetPass(0);
 
                 GL.PushMatrix();
-                // Set transformation matrix for drawing to
-                // match our transform
                 GL.MultMatrix(transform.localToWorldMatrix);
-                //
                 var bones = this._armature.GetBones();
                 var offset = 0.02f;
-                // draw bone line
                 for (int i = 0; i < bones.Count; i++)
                 {
                     var bone = bones[i];
@@ -226,7 +140,6 @@ namespace DragonBones
                     var leftStartPos = Quaternion.AngleAxis(90, Vector3.forward) * torwardDir * offset + startPos;
                     var rightStartPos = Quaternion.AngleAxis(-90, Vector3.forward) * torwardDir * offset + startPos;
                     var newStartPos = startPos + torwardDir * offset;
-                    //
                     GL.Begin(GL.LINES);
                     GL.Color(boneLineColor);
                     GL.Vertex(leftStartPos);
@@ -239,7 +152,6 @@ namespace DragonBones
                     GL.End();
                 }
 
-                // draw boundingBox
                 Point result = new Point();
                 var slots = this._armature.GetSlots();
                 for (int i = 0; i < slots.Count; i++)
@@ -261,12 +173,10 @@ namespace DragonBones
                     var ty = slot.globalTransformMatrix.ty;
                     var boundingBoxWidth = boundingBoxData.width;
                     var boundingBoxHeight = boundingBoxData.height;
-                    //
                     switch (boundingBoxData.type)
                     {
                         case BoundingBoxType.Rectangle:
                             {
-                                //
                                 #if UNITY_5_6_OR_NEWER
                                 GL.Begin(GL.LINE_STRIP);
                                 #else
@@ -323,7 +233,6 @@ namespace DragonBones
 
         }
 
-        /// <inheritDoc/>
         public void Dispose(bool disposeProxy = true)
         {
             _disposeProxy = disposeProxy;
@@ -333,53 +242,18 @@ namespace DragonBones
                 _armature.Dispose();
             }
         }
-        /// <summary>
-        /// Get the Armature.
-        /// </summary>
-        /// <readOnly/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// 获取骨架。
-        /// </summary>
-        /// <readOnly/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public Armature armature
         {
             get { return _armature; }
         }
 
-        /// <summary>
-        /// Get the animation player
-        /// </summary>
-        /// <readOnly/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
 
-        /// <summary>
-        /// 获取动画播放器。
-        /// </summary>
-        /// <readOnly/>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public new Animation animation
         {
             get { return _armature != null ? _armature.animation : null; }
         }
 
-        /// <summary>
-        /// The slots sorting mode
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// 插槽排序模式
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public SortingMode sortingMode
         {
             get { return _sortingMode; }
@@ -404,7 +278,6 @@ namespace DragonBones
 
                 _sortingMode = value;
 
-                //
 #if UNITY_5_6_OR_NEWER
                 if (_sortingMode == SortingMode.SortByOrder)
                 {
@@ -429,17 +302,6 @@ namespace DragonBones
             }
         }
 
-        /// <summary>
-        /// Name of the Renderer's sorting layer.
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// sorting layer名称。
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public string sortingLayerName
         {
             get { return _sortingLayerName; }
@@ -447,7 +309,6 @@ namespace DragonBones
             {
                 if (_sortingLayerName == value)
                 {
-                    //return;
                 }
 
                 _sortingLayerName = value;
@@ -456,17 +317,6 @@ namespace DragonBones
             }
         }
 
-        /// <summary>
-        /// Renderer's order within a sorting layer.
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// 插槽按照sortingOrder在同一层sorting layer中排序
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public int sortingOrder
         {
             get { return _sortingOrder; }
@@ -474,7 +324,6 @@ namespace DragonBones
             {
                 if (_sortingOrder == value)
                 {
-                    //return;
                 }
 
                 _sortingOrder = value;
@@ -482,17 +331,6 @@ namespace DragonBones
                 _UpdateSlotsSorting();
             }
         }
-        /// <summary>
-        /// The Z axis spacing of slot display objects
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
-        /// 
-        /// <summary>
-        /// 插槽显示对象的z轴间隔
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public float zSpace
         {
             get { return _zSpace; }
@@ -513,17 +351,6 @@ namespace DragonBones
                 _UpdateSlotsSorting();
             }
         }
-        /// <summary>
-        /// - The armature color.
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>en_US</language>
-        /// 
-        /// <summary>
-        /// - 骨架的颜色。
-        /// </summary>
-        /// <version>DragonBones 4.5</version>
-        /// <language>zh_CN</language>
         public ColorTransform color
         {
             get { return this._colorTransform; }
@@ -548,7 +375,6 @@ namespace DragonBones
 
         private void _UpdateSortingGroup()
         {
-            //发现骨架有SortingGroup，那么子骨架也都加上，反之删除
             _sortingGroup = GetComponent<UnityEngine.Rendering.SortingGroup>();
             if (_sortingGroup != null)
             {
@@ -621,7 +447,6 @@ namespace DragonBones
 #endif
             }
 
-            //
             foreach (UnitySlot slot in _armature.GetSlots())
             {
                 var display = slot._renderDisplay;
@@ -654,7 +479,6 @@ return PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == null
         }
 #endif
 
-        /// <private/>
         void Awake()
         {
 #if UNITY_EDITOR
@@ -692,14 +516,12 @@ return PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == null
                     _armature.animation.Play(animationName, _playTimes);
                 }
             }
-            
-            
+
+
         }
 
         void Start()
         {
-            // this._closeCombineMeshs = true;
-            //默认开启合并
             if (this._closeCombineMeshs)
             {
                 this.CloseCombineMeshs();
@@ -731,7 +553,6 @@ return PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == null
 #endif
         }
 
-        /// <private/>
         void OnDestroy()
         {
             if (_armature != null)
@@ -758,14 +579,12 @@ return PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == null
                 return;
             }
 
-            //
             var cm = gameObject.GetComponent<UnityCombineMeshs>();
             if (cm == null)
             {
                 cm = gameObject.AddComponent<UnityCombineMeshs>();
             }
-            //
-            
+
             if (this._armature == null)
             {
                 return;
@@ -783,18 +602,16 @@ return PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == null
         public void CloseCombineMeshs()
         {
             this._closeCombineMeshs = true;
-            //
             var cm = gameObject.GetComponent<UnityCombineMeshs>();
             if (cm != null)
             {
                 DestroyImmediate(cm);
             }
-            
+
             if (this._armature == null)
             {
                 return;
             }
-            //
             var slots = this._armature.GetSlots();
             foreach (var slot in slots)
             {

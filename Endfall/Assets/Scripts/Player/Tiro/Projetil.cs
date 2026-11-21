@@ -52,7 +52,6 @@ public class Projetil : MonoBehaviour
             return;
         }
 
-        // Pequena tolerancia quando o tiro nasce na borda da camera.
         if (esteveDentroDaCamera || Time.time - instanteCriacao >= 0.2f)
         {
             jaColidiu = true;
@@ -83,7 +82,6 @@ public class Projetil : MonoBehaviour
         bool acertouInimigo = collision.CompareTag("Inimigo") ||
                               collision.transform.root.CompareTag("Inimigo");
 
-        // Itens, checkpoints e outras zonas trigger nao bloqueiam o tiro.
         if (collision.isTrigger && !acertouInimigo)
             return;
 
@@ -91,7 +89,6 @@ public class Projetil : MonoBehaviour
         if (acertouInimigo)
             AplicarDanoAoInimigo(collision);
 
-        // O primeiro inimigo (inclusive trigger) ou parede encerra o tiro.
         Destroy(gameObject);
     }
 

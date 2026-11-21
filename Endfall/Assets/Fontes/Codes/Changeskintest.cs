@@ -4,12 +4,12 @@ using DragonBones;
 
 public class ReplaceAndReplaySlotDisplay : MonoBehaviour
 {
-    public UnityArmatureComponent armatureUtama; // Armature 'Utama'
-    public UnityArmatureComponent armatureSkin;  // Armature 'SKIN'
+    public UnityArmatureComponent armatureUtama;
+    public UnityArmatureComponent armatureSkin;
 
-    public string slotName = "SWORD";  // Nama slot yang akan diganti
-    public string displayName = "Sword_Skin_01";  // Nama display baru yang diambil dari armature 'SKIN'
-    public string animationName = "SWORD_Idle";  // Nama animasi yang akan diputar ulang
+    public string slotName = "SWORD";
+    public string displayName = "Sword_Skin_01";
+    public string animationName = "SWORD_Idle";
 
     public Button changeSkinButton;
 
@@ -30,25 +30,19 @@ public class ReplaceAndReplaySlotDisplay : MonoBehaviour
 
             if (targetSlot != null && sourceSlot != null)
             {
-                // Simpan referensi ke display lama dan pastikan itu adalah GameObject
                 var oldDisplay = targetSlot.display as GameObject;
-                
-                // Ganti display slot di armature 'Utama' dengan display dari armature 'SKIN'
+
                 targetSlot.display = sourceSlot.display;
 
-                // Cek apakah display baru adalah GameObject dan display lama tidak null
                 if (targetSlot.display is GameObject newDisplay && oldDisplay != null)
                 {
-                    // Salin transformasi dari display lama ke display baru
                     newDisplay.transform.localPosition = oldDisplay.transform.localPosition;
                     newDisplay.transform.localRotation = oldDisplay.transform.localRotation;
                     newDisplay.transform.localScale = oldDisplay.transform.localScale;
                 }
 
-                // Memaksa pembaruan armature untuk memastikan perubahan tampilan diterapkan
                 armatureUtama.armature.AdvanceTime(0);
 
-                // Putar ulang animasi pada armature utama
                 var animationState = armatureUtama.animation.FadeIn(animationName, 0.2f);
                 if (animationState != null)
                 {

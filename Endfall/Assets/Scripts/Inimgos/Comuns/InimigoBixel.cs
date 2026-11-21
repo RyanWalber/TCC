@@ -64,15 +64,12 @@ public class InimigoBixel : MonoBehaviour
 
     private void Start()
     {
-        // O som de aparicao pertence a este inimigo, se configurado no prefab.
         audioInimigo.TocarInvocacao(this);
         posicaoInicial = transform.position;
         rb = GetComponent<Rigidbody2D>();
         colisorBixel = GetComponent<Collider2D>();
         rb.freezeRotation = true;
 
-        // Ajuda a evitar atravessamentos com velocidades altas.
-        // O Cast mais abaixo garante que a investida PARE ao ver uma parede lateral.
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         filtroInvestida = new ContactFilter2D();
         filtroInvestida.useTriggers = false;
@@ -96,8 +93,6 @@ public class InimigoBixel : MonoBehaviour
         if (tempoRecargaRestante > 0f)
             tempoRecargaRestante -= Time.fixedDeltaTime;
 
-        // O Bixel para um instante apos bater de lado e depois patrulha
-        // em sentido contrario ao do obstaculo.
         if (tempoPausaImpactoRestante > 0f)
         {
             tempoPausaImpactoRestante -= Time.fixedDeltaTime;
@@ -107,8 +102,6 @@ public class InimigoBixel : MonoBehaviour
 
         if (tempoInvestidaRestante > 0f)
         {
-            // Testa a distancia que seria percorrida NESTE passo de fisica.
-            // Isso evita atravessar paredes finas com velocidadeInvestida alta.
             if (VerificarImpactoLateralPrevisto())
                 return;
 
@@ -133,7 +126,6 @@ public class InimigoBixel : MonoBehaviour
     {
         GameObject objeto = GameObject.FindGameObjectWithTag("Player");
 
-        // Se a Tag estiver em um filho, usa o verdadeiro objeto da Kaya.
         if (objeto != null)
         {
             PlayerHealth vida = objeto.GetComponentInParent<PlayerHealth>();
@@ -141,7 +133,6 @@ public class InimigoBixel : MonoBehaviour
         }
         else
         {
-            // Fallback para cenas que ainda nao configuraram a Tag.
             PlayerHealth vida = FindFirstObjectByType<PlayerHealth>();
             if (vida != null) objeto = vida.gameObject;
         }
@@ -158,14 +149,9 @@ public class InimigoBixel : MonoBehaviour
     {
         if (jogador == null || alcanceDeteccao <= 0f) return false;
 
-        // O movimento e horizontal: a distancia de ataque tambem deve ser
-        // medida no eixo X. Nao usa a distancia entre os pivots dos rigs.
         if (Mathf.Abs(jogador.position.x - transform.position.x) > alcanceDeteccao)
             return false;
 
-        // Antes, a diferenca Y tinha que ser <= 2 unidades, mesmo com
-        // personagens/colliders de dezenas de unidades de altura.
-        // Agora verifica a separacao real entre os colliders no eixo Y.
         if (colisorBixel != null && colisorJogador != null &&
             colisorBixel.enabled && colisorJogador.enabled)
         {
@@ -178,7 +164,6 @@ public class InimigoBixel : MonoBehaviour
             return espacoVertical <= margemAlturaDeteccao;
         }
 
-        // Compatibilidade com um player sem Collider2D configurado.
         return Mathf.Abs(jogador.position.y - transform.position.y)
             <= Mathf.Max(margemAlturaDeteccao, alcanceDeteccao * 0.25f);
     }
@@ -191,7 +176,6 @@ public class InimigoBixel : MonoBehaviour
         tempoRecargaRestante = recargaInvestida;
         audioInimigo.TocarAtaque(this);
 
-        // Detecta uma parede mesmo no PRIMEIRO passo da investida.
         if (VerificarImpactoLateralPrevisto())
             return;
 
@@ -207,8 +191,6 @@ public class InimigoBixel : MonoBehaviour
         float distanciaPasso = velocidadeInvestida * Time.fixedDeltaTime + margemColisaoLateral;
         impactosDaInvestida.Clear();
 
-        // Faz uma varredura com o formato real do CapsuleCollider2D.
-        // Colisores Trigger sao ignorados (moedas, checkpoints, zonas etc.).
         colisorBixel.Cast(direcao, filtroInvestida, impactosDaInvestida, distanciaPasso);
 
         foreach (RaycastHit2D impacto in impactosDaInvestida)
@@ -216,13 +198,9 @@ public class InimigoBixel : MonoBehaviour
             if (impacto.collider == null || impacto.collider.isTrigger)
                 continue;
 
-            // Somente superficies VERTICAIS que se opoem ao movimento.
-            // Chao e teto possuem normal predominantemente em Y.
             if (impacto.normal.x * direcaoInvestida > -0.65f)
                 continue;
 
-            // Quando um collider do piso sobrepoe ligeiramente os pes do
-            // inimigo, nao o interpreta como uma parede lateral.
             if (impacto.distance <= 0.001f &&
                 impacto.collider.bounds.max.y <= colisorBixel.bounds.min.y + 0.5f)
                 continue;
@@ -246,7 +224,6 @@ public class InimigoBixel : MonoBehaviour
         tempoPausaImpactoRestante = pausaAposImpacto;
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
-        // Retoma a patrulha para o lado OPOSTO ao da colisao.
         Virar(direcaoInvestida < 0f);
     }
 
@@ -418,7 +395,6 @@ public class InimigoBixel : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(new Vector3(centro.x - distanciaPatrulha, centro.y, centro.z), new Vector3(centro.x + distanciaPatrulha, centro.y, centro.z));
 
-        // Amarelo: faixa real de deteccao da investida no mesmo nivel.
         Collider2D colisor = Application.isPlaying ? colisorBixel : GetComponent<Collider2D>();
         Gizmos.color = Color.yellow;
         if (colisor != null)

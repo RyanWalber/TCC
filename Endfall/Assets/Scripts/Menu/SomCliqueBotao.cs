@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Adicionado automaticamente aos botoes de menu, slots e pausa.
 [RequireComponent(typeof(Button))]
 public class SomCliqueBotao : MonoBehaviour
 {

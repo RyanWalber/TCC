@@ -3,13 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-// Cortina unica e persistente para entrada, saida, respawn e troca de cenas.
-// Funciona tambem quando uma fase e iniciada diretamente no Editor.
 public class LevelLoader : MonoBehaviour
 {
     public static LevelLoader Instance { get; private set; }
 
-    // A narrativa pode aguardar o fim do Fade In antes de digitar.
     public bool EstaEmTransicao => emTransicao || fadeInicial != null;
 
     [Header("UI de Transicao")]
@@ -20,8 +17,6 @@ public class LevelLoader : MonoBehaviour
     private Coroutine fadeInicial;
     private bool emTransicao;
 
-    // Se a cena de abertura ja possui LevelLoader, reutiliza essa instancia.
-    // Caso o usuario execute uma fase diretamente no Editor, cria uma unica.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InicializarAoAbrirCena()
     {
@@ -51,9 +46,6 @@ public class LevelLoader : MonoBehaviour
 
     private void Awake()
     {
-        // A Splash possui um LevelLoader no proprio Canvas. Persistir esse
-        // objeto preservaria a interface inteira da Splash na proxima cena.
-        // Mantemos apenas um controlador independente da UI de cada cena.
         if (cortinaTransicao != null)
         {
             cortinaTransicao.enabled = false;
@@ -62,7 +54,6 @@ public class LevelLoader : MonoBehaviour
 
         if (Instance != null && Instance != this)
         {
-            // Destroi so o componente, nunca o Canvas da cena atual.
             Destroy(this);
             return;
         }
@@ -92,7 +83,6 @@ public class LevelLoader : MonoBehaviour
 
     private IEnumerator AbrirCena()
     {
-        // Garante pelo menos um frame inteiramente preto na primeira cena.
         DefinirAlpha(1f);
         yield return null;
         if (emTransicao)
@@ -109,7 +99,6 @@ public class LevelLoader : MonoBehaviour
 
     private void CriarCortinaGlobal()
     {
-        // Uma Canvas propria acima dos HUDs e menus de todas as cenas.
         GameObject canvasObj = new GameObject("CanvasTransicaoGlobal",
             typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler),
             typeof(GraphicRaycaster));
@@ -133,10 +122,6 @@ public class LevelLoader : MonoBehaviour
         cortinaGlobal.raycastTarget = true;
     }
 
-    // Usado somente pela morte cinematografica da Kaya. A cortina
-    // global ja fica acima do HUD, assim nenhum canvas novo e necessario.
-    // Este metodo nao inicia uma troca de cena: o respawn continua sendo
-    // responsabilidade do SaveManager e do fluxo de checkpoint.
     public void DefinirEscurecimentoDeMorte(float alpha)
     {
         if (emTransicao) return;
@@ -154,7 +139,6 @@ public class LevelLoader : MonoBehaviour
         DefinirAlpha(alpha);
     }
 
-    // Seguranca caso a Kaya seja desativada antes da conclusao do fade.
     public void CancelarEscurecimentoDeMorte()
     {
         if (emTransicao || cortinaGlobal == null) return;
@@ -173,8 +157,6 @@ public class LevelLoader : MonoBehaviour
             return;
         }
 
-        // O audio acompanha o Fade Out global, sem interromper o loop
-        // quando o destino for a tela de narrativa.
         if (AudioManagerGlobal.Instance != null)
             AudioManagerGlobal.Instance.AoIniciarTransicao(nomeCena, tempoTransicao);
 
@@ -195,7 +177,6 @@ public class LevelLoader : MonoBehaviour
         cortinaGlobal.raycastTarget = true;
         yield return AnimarFade(cortinaGlobal.color.a, 1f);
 
-        // Desfaz pausa antes de carregar, mas o fade ja ocorreu em tempo real.
         Time.timeScale = 1f;
         AudioListener.pause = false;
 
@@ -217,8 +198,6 @@ public class LevelLoader : MonoBehaviour
         while (!operacao.isDone)
             yield return null;
 
-        // Mantem a tela preta ate o Start/LevelSetup posicionar a Kaya.
-        // Um frame adicional permite a primeira renderizacao da nova cena.
         DefinirAlpha(1f);
         yield return null;
         yield return null;
@@ -233,8 +212,6 @@ public class LevelLoader : MonoBehaviour
         float duracao = Mathf.Max(0.05f, tempoTransicao);
         while (tempo < duracao)
         {
-            // Carregar uma fase pode gerar um frame muito longo. Sem limitar
-            // esse delta, o Fade In saltaria diretamente de preto para claro.
             tempo += Mathf.Min(Time.unscaledDeltaTime, 0.05f);
             DefinirAlpha(Mathf.Lerp(inicio, fim, Mathf.Clamp01(tempo / duracao)));
             yield return null;

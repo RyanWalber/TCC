@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Adicione a uma area com Collider2D marcado como Is Trigger.
-/// Quando a Kaya entrar, abre o PainelDialogo escolhido.
-/// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class GatilhoDialogo : MonoBehaviour
 {
@@ -30,7 +26,6 @@ public class GatilhoDialogo : MonoBehaviour
         if (jaAtivado && apenasUmaVez)
             return;
 
-        // A Tag Player pode estar num filho; o PlayerHealth fica na Kaya.
         bool ehKaya = outro.CompareTag("Player") ||
                       outro.GetComponentInParent<PlayerHealth>() != null;
         if (!ehKaya)
@@ -50,7 +45,6 @@ public class GatilhoDialogo : MonoBehaviour
             jaAtivado = true;
     }
 
-    // Opcional: pode ser chamado por outro evento/script.
     public void ReativarGatilho()
     {
         jaAtivado = false;

@@ -12,13 +12,12 @@ public class VictoryZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // O gatilho de vitoria nao pode interromper a animacao final.
         if (FinalizadorMorte.EmAndamento) return;
 
         if (collision.CompareTag("Player") && !aguardandoEntrada)
         {
             aguardandoEntrada = true;
-            Time.timeScale = 0f; 
+            Time.timeScale = 0f;
 
             if (painelVitoria != null)
             {
@@ -45,7 +44,6 @@ public class VictoryZone : MonoBehaviour
 
     private void Update()
     {
-        // O fim da Morte tem sua propria sequencia e controla o fade.
         if (FinalizadorMorte.EmAndamento) return;
 
         if (aguardandoEntrada)
@@ -54,9 +52,7 @@ public class VictoryZone : MonoBehaviour
 
             if (timerSeguranca >= 0.4f && Input.anyKeyDown)
             {
-                Time.timeScale = 1f; 
-                // FaseMorte termina na tela cinematografica, nao no
-                // AvancarFase que enviaria o jogador diretamente ao menu.
+                Time.timeScale = 1f;
                 if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "FaseMorte")
                     LevelLoader.CarregarComFade("VitoriaFinal");
                 else if (SaveManager.Instance != null)

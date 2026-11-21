@@ -8,7 +8,6 @@ public class BossAnimation : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
-        // Pega a referência do controller que está no pai (GuerraBoss)
         controller = GetComponentInParent<BossGuerraController>();
     }
 
@@ -28,7 +27,6 @@ public class BossAnimation : MonoBehaviour
         }
     }
 
-    // Método que vai aparecer no Animation Event
     public void InstanciarBarril()
     {
         if (controller != null)

@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Uma unica instancia atravessa Splash -> Menu -> Explicacao sem reiniciar a trilha.
-// Tambem gerencia o som de clique de todos os botoes UI.
 [DisallowMultipleComponent]
 public class AudioManagerGlobal : MonoBehaviour
 {
@@ -80,8 +78,6 @@ public class AudioManagerGlobal : MonoBehaviour
         AtualizarVolumeMusica();
     }
 
-    // Quando a cena Menu e executada diretamente no Editor, aceita clips
-    // alternativos sem substituir a faixa que veio da Splash.
     public void PreencherClipsAusentes(AudioClip faixa, AudioClip clique)
     {
         if (musicaMenu == null && faixa != null)
@@ -98,7 +94,6 @@ public class AudioManagerGlobal : MonoBehaviour
         FadePara(1f, tempoEntrada);
     }
 
-    // Entrada direta no Menu pelo Editor, sem passar pela Splash.
     public void IniciarNoMenu()
     {
         IniciarTrilhaSeNecessario();
@@ -123,15 +118,12 @@ public class AudioManagerGlobal : MonoBehaviour
             if (som == null) som = botao.gameObject.AddComponent<SomCliqueBotao>();
             som.Registrar();
 
-            // Realce amarelo em botoes-texto e botoes-imagem, inclusive
-            // nos paineis de slots e configuracoes criados pelo usuario.
             EfeitoHoverBotao hover = botao.GetComponent<EfeitoHoverBotao>();
             if (hover == null) hover = botao.gameObject.AddComponent<EfeitoHoverBotao>();
             hover.Registrar();
         }
     }
 
-    // Chamado pelo LevelLoader no comeco do fade de saida.
     public void AoIniciarTransicao(string nomeCena, float duracaoFade)
     {
         if (nomeCena == "Explicação")
@@ -156,15 +148,11 @@ public class AudioManagerGlobal : MonoBehaviour
         }
         else if (cena.name == "Explicação")
         {
-            // Sem inicio automatico: fragmentos posteriores nao repetem
-            // a musica da abertura depois que o jogador iniciou a campanha.
             if (fonteMusica != null && fonteMusica.isPlaying)
                 FadePara(VolumeRelativoNarrativa(), 0.5f);
         }
         else if (cena.name != "Splash")
         {
-            // Ao entrar numa fase, a cortina global ja terminou o fade
-            // de saida e a faixa do menu nao vaza para a jogabilidade.
             if (animacaoVolume != null)
             {
                 StopCoroutine(animacaoVolume);
@@ -218,7 +206,6 @@ public class AudioManagerGlobal : MonoBehaviour
 
     private void Update()
     {
-        // O toggle silencia somente a musica, sem parar o loop ou a narracao.
         AtualizarVolumeMusica();
     }
 

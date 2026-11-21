@@ -34,7 +34,6 @@ public class BarrilGuerra : MonoBehaviour
         tempoDesdeSpawn += Time.deltaTime;
     }
 
-    // CÁLCULO BALÍSTICO DE TRAJETÓRIA
     public void Lançar(Vector3 posOrigem, Vector3 posDestino, float velocidadeHorizontal)
     {
         if (rb == null) rb = GetComponent<Rigidbody2D>();
@@ -44,7 +43,6 @@ public class BarrilGuerra : MonoBehaviour
         float deltaX = posDestino.x - posOrigem.x;
         float deltaY = posDestino.y - posOrigem.y;
 
-        // Garante uma distância mínima em X para não dividir por zero
         if (Mathf.Abs(deltaX) < 1f)
         {
             deltaX = deltaX >= 0 ? 1f : -1f;
@@ -53,14 +51,11 @@ public class BarrilGuerra : MonoBehaviour
         float sentidoX = Mathf.Sign(deltaX);
         float vx = sentidoX * velocidadeHorizontal;
 
-        // Tempo necessário para percorrer a distância X até o player
         float tempoDeVoo = Mathf.Abs(deltaX) / velocidadeHorizontal;
 
-        // Pega a gravidade real da sua cena no Unity
         float g = Mathf.Abs(Physics2D.gravity.y) * rb.gravityScale;
         if (g <= 0f) g = 9.81f;
 
-        // Calcula a velocidade Y exata necessária para atingir a posição Y do player no tempo do voo
         float vy = (deltaY + (0.5f * g * tempoDeVoo * tempoDeVoo)) / tempoDeVoo;
 
         rb.linearVelocity = new Vector2(vx, vy);

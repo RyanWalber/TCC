@@ -42,7 +42,6 @@ public class MiraMouse : MonoBehaviour
     private Quaternion ultimaRotacaoAplicada;
     private bool rotacaoAplicadaNoFrameAnterior;
 
-    // Hierarquias de bracos independentes do Ponto De Disparo.
     private EstadoBraco bracoFrente;
     private EstadoBraco bracoTras;
 
@@ -74,7 +73,6 @@ public class MiraMouse : MonoBehaviour
         rotacaoNeutraBraco = transform.localRotation;
         ultimaRotacaoAplicada = rotacaoNeutraBraco;
 
-        // Caminhos confirmados no prefab usado pela Kaya.
         Transform frente = transform.Find("kayaseparada_4");
         Transform tras = transform.Find("kayaseparada_3");
         if (frente != null && tras != null)
@@ -84,7 +82,6 @@ public class MiraMouse : MonoBehaviour
         }
         else
         {
-            // Prefabs alternativos nao recebem nenhuma modificacao.
             corrigirPoseExtrema = false;
         }
 
@@ -103,13 +100,10 @@ public class MiraMouse : MonoBehaviour
 
     void LateUpdate()
     {
-        // Nao sobrescreve a rotacao do objeto Ani Kaya quando a animacao
-        // de morte o coloca na horizontal. A mira continua normal em vida.
         if (vidaKaya != null && vidaKaya.VidaAtual <= 0f)
         {
             if (!orientacaoCongeladaNaMorte)
             {
-                // Recoloca a pose da arma sob controle exclusivo da animacao.
                 timerTiro = 0f;
                 pesoMira = 0f;
                 estavaMirando = false;
@@ -122,11 +116,6 @@ public class MiraMouse : MonoBehaviour
 
         if (controleKaya != null && controleKaya.ControlesBloqueadosPorDialogo)
         {
-            // O Animator pode alterar a POSICAO do objeto Ani Kaya durante
-            // a conversa. Antes, o retorno antecipado pulava a correcao
-            // visual feita normalmente abaixo; por isso o desenho subia
-            // ou se deslocava e voltava ao lugar no final do dialogo.
-            // Corrige so o visual, sem mover o Rigidbody2D nem o player.
             if (aniKaya != null)
             {
                 aniKaya.localRotation = Quaternion.Euler(
@@ -137,8 +126,6 @@ public class MiraMouse : MonoBehaviour
                     : posicaoOriginalKaya;
             }
 
-            // Continua bloqueando mira/tiro e evita manter uma pose
-            // aplicada pela mira quando a conversa comeca.
             timerTiro = 0f;
             pesoMira = 0f;
             estavaMirando = false;
@@ -156,9 +143,6 @@ public class MiraMouse : MonoBehaviour
 
         if (estabilizarPoseBraco)
         {
-            // No frame anterior a mira pode ter escrito no mesmo Transform.
-            // Se o Animator nao o modificou, nao reutiliza esse angulo
-            // artificial como a pose base do proximo frame.
             bool aindaEhRotacaoDaMira = rotacaoAplicadaNoFrameAnterior &&
                 Quaternion.Angle(rotacaoAnimacao, ultimaRotacaoAplicada) < 0.1f;
 
@@ -178,8 +162,6 @@ public class MiraMouse : MonoBehaviour
         bool olhandoEsquerda = posicaoMouseMundo.x < centroDoPersonagem.position.x;
         if (estabilizarPoseBraco)
         {
-            // Pequena histerese apenas na VIRADA do corpo. A direcao
-            // de mira e de disparo continua livre nos 360 graus.
             float distanciaHorizontal = posicaoMouseMundo.x - centroDoPersonagem.position.x;
             if (Mathf.Abs(distanciaHorizontal) <= margemTrocaDirecao)
                 olhandoEsquerda = olhandoEsquerdaAntesDoDialogo;
@@ -228,8 +210,6 @@ public class MiraMouse : MonoBehaviour
         float anguloMundo = Mathf.Atan2(direcaoMundo.y, direcaoMundo.x) * Mathf.Rad2Deg;
         float anguloMira = olhandoEsquerda ? (180f - anguloMundo) : anguloMundo;
 
-        // A sensibilidade regula a velocidade de resposta angular da mira 2D.
-        // A posicao do cursor e o virar da Kaya continuam normais.
         if (!estavaMirando)
             anguloMiraSuavizado = anguloMira;
         else
@@ -255,12 +235,10 @@ public class MiraMouse : MonoBehaviour
         {
             float inclinacao = Mathf.Abs(Mathf.DeltaAngle(0f, angulo));
             float t = Mathf.InverseLerp(anguloInicioCorrecao, 90f, inclinacao);
-            t = t * t * (3f - 2f * t); // Smoothstep sem animacoes novas.
+            t = t * t * (3f - 2f * t);
             intensidade = t * Mathf.Clamp01(peso) * intensidadePoseExtrema;
         }
 
-        // Counter-rotation moderada do braco nos angulos acentuados.
-        // O Ponto De Disparo e irmao dos bracos; sua rotacao nao muda.
         float sinal = Mathf.Sign(Mathf.DeltaAngle(0f, angulo));
         AplicarPose(bracoFrente, -sinal * correcaoBracoFrente * intensidade,
             new Vector3(1.2f * intensidade, 0.2f * intensidade, 0f));
@@ -272,8 +250,6 @@ public class MiraMouse : MonoBehaviour
     {
         if (braco == null || braco.alvo == null) return;
 
-        // Se o Animator nao escreveu uma nova pose no frame, removemos
-        // implicitamente nossa contribuicao anterior para nao acumular giro.
         bool aindaEhNossoValor = braco.alterado &&
             (braco.alvo.localPosition - braco.ultimaPosicao).sqrMagnitude < 0.0001f &&
             Quaternion.Angle(braco.alvo.localRotation, braco.ultimaRotacao) < 0.1f;
@@ -302,7 +278,6 @@ public class MiraMouse : MonoBehaviour
         if (braco == null || braco.alvo == null || !braco.alterado)
             return;
 
-        // Se a animacao de morte mudou o braco, nao sobrescreve a nova pose.
         bool aindaEhNossoValor =
             (braco.alvo.localPosition - braco.ultimaPosicao).sqrMagnitude < 0.0001f &&
             Quaternion.Angle(braco.alvo.localRotation, braco.ultimaRotacao) < 0.1f;

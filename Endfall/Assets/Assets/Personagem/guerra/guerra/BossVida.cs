@@ -96,11 +96,8 @@ public class BossVida : MonoBehaviour
 
     public bool EstaMorto => estaMorto;
     public bool InvulneravelNaTransicao => invulneravelNaTransicao;
-    // Usado pela Morte final para iniciar a reação no mesmo frame do dano.
     public event System.Action<float> VidaAlterada;
 
-    // Usado pela Morte final sem alterar a vida de outros chefes.
-    // Chamado em Start pelo controlador e refletido na barra de HP.
     public void ConfigurarVidaMaxima(float valor)
     {
         if (estaMorto) return;
@@ -123,11 +120,9 @@ public class BossVida : MonoBehaviour
 
     private void Start()
     {
-        // Se o controlador ja definiu HP em Start, nao sobrescreve.
         if (!vidaConfigurada)
             vidaAtual = vidaMaxima;
 
-        // Pega todos os SpriteRenderers do Boss e dos filhos
         todosSprites = GetComponentsInChildren<SpriteRenderer>();
 
         if (todosSprites != null && todosSprites.Length > 0)
@@ -141,13 +136,9 @@ public class BossVida : MonoBehaviour
 
         AtualizarBarraUI();
 
-        // Barra invisivel ate o Gatilho Intro Boss; continua ativa para
-        // manter o Slider e a configuracao original.
         GameObject painel = ObterPainelBarra();
         if (painel != null) BossBarraFade.Garantir(painel);
 
-        // Cada boss possui seu proprio gerador (Fome, Peste, Guerra, Morte).
-        // Nao inicia nada se o prefab opcional estiver vazio.
         if (prefabElixirArena != null)
             rotinaElixiresArena = StartCoroutine(GerarElixiresDuranteBatalha());
     }
@@ -202,16 +193,11 @@ public class BossVida : MonoBehaviour
                             quantidadeGeradaArena++;
                         }
 
-                        // Contagem de intervalo so reinicia ao gerar uma
-                        // vida (ou ao tentar e nao achar piso visivel).
                         cronometro = 0f;
                         proximo = encontrouLocal
                             ? Mathf.Max(0.5f, intervaloSpawnElixires)
                             : 1f;
                     }
-                    // Se ja ha maximo de vidas na tela, mantem o tempo
-                    // acumulado. Assim a expiracao libera a vaga logo
-                    // que o intervalo configurado ja tiver passado.
                 }
             }
             yield return null;
@@ -222,7 +208,6 @@ public class BossVida : MonoBehaviour
     {
         posicao = transform.position;
 
-        // Mesmo estilo de spawn para Fome, Peste e Morte.
         if (usarSpawnNaCamera)
             return LocalizadorElixirBoss.Escolher(
                 kayaNaArena, transform.position.z, chaoParaElixires,
@@ -244,8 +229,6 @@ public class BossVida : MonoBehaviour
             }
         }
 
-        // Se nao houver pontos, tenta criar sobre o chao real, e nunca
-        // no ar ou atravessando uma parede.
         for (int tentativa = 0; tentativa < 12; tentativa++)
         {
             float x = transform.position.x +
@@ -291,7 +274,6 @@ public class BossVida : MonoBehaviour
         vidaAtual = Mathf.Clamp(vidaAtual - dano, 0f, vidaMaxima);
         AtualizarBarraUI();
 
-        // Morte definitiva tem prioridade sobre qualquer troca de estágio.
         if (vidaAtual <= 0f)
         {
             AudioInimigo.NotificarVidaBoss(this, false);
@@ -301,7 +283,6 @@ public class BossVida : MonoBehaviour
 
         AudioInimigo.NotificarVidaBoss(this, false);
 
-        // O evento pode ativar a proteção de fase IMEDIATAMENTE.
         VidaAlterada?.Invoke(ObterPercentualVida());
 
         if (!invulneravelNaTransicao && todosSprites != null &&
@@ -312,14 +293,11 @@ public class BossVida : MonoBehaviour
         }
     }
 
-    // Deixa a boss totalmente preta durante o ritual de troca de fase.
-    // Os outros chefes nunca usam esse modo; seu comportamento permanece igual.
     public void DefinirInvulnerabilidadeDeFase(bool ativar)
     {
         if (estaMorto || invulneravelNaTransicao == ativar) return;
         invulneravelNaTransicao = ativar;
 
-        // Evita o vermelho da reação ao dano competir com a cor preta.
         if (corrotinaPiscar != null)
         {
             StopCoroutine(corrotinaPiscar);
@@ -337,7 +315,6 @@ public class BossVida : MonoBehaviour
             if (sprite == null) continue;
             if (invulneravelNaTransicao)
             {
-                // Preserva o alfa da arte original, mas zera RGB.
                 float alfa = coresOriginais != null && i < coresOriginais.Length ?
                     coresOriginais[i].a : sprite.color.a;
                 sprite.color = new Color(0f, 0f, 0f, alfa);
@@ -349,13 +326,10 @@ public class BossVida : MonoBehaviour
 
     private void LateUpdate()
     {
-        // Animator pode escrever cores nos sprites a cada frame.
-        // Aplicar depois dele garante preto total ate o tremor terminar.
         if (invulneravelNaTransicao)
             AtualizarCorTransicao();
     }
 
-    // Faz somente a barra da boss oscilar, sem deslocar Camera nem jogador.
     public IEnumerator TremerBarraVida(float duracao, float amplitude, float frequencia)
     {
         RectTransform alvo = conteinerBarraDeVida != null ?
@@ -405,7 +379,6 @@ public class BossVida : MonoBehaviour
         }
     }
 
-    // Retorna um valor entre 0.0 (0%) e 1.0 (100%)
     public float ObterPercentualVida()
     {
         if (vidaMaxima <= 0f) return 0f;
@@ -452,19 +425,15 @@ public class BossVida : MonoBehaviour
         AudioInimigo.NotificarVidaBoss(this, true);
         EncerrarElixiresDaArena();
 
-        // Desativa física e colisões
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
         if (TryGetComponent<Rigidbody2D>(out var rb)) rb.simulated = false;
 
-        // Desativa os scripts de comportamento/IA do Boss automaticamente
         MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
         foreach (var script in scripts)
         {
             if (script != this) script.enabled = false;
         }
 
-        // Fade de saida em vez de apagar a barra instantaneamente.
-        // O componente de UI sobrevive ate o alpha chegar a zero.
         GameObject painel = ObterPainelBarra();
         if (painel != null)
         {
@@ -476,13 +445,10 @@ public class BossVida : MonoBehaviour
             }
         }
 
-        // Somente a Morte final permanece viva ate o ultimo frame
-        // de mortemorre.anim. Os demais BossVida continuam iguais.
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "FaseMorte" &&
             (GetComponentInChildren<MorteBossControllerGameplay>(true) != null ||
              GetComponentInParent<MorteBossControllerGameplay>() != null))
         {
-            // Colisores da foice e dos filhos tambem devem parar de causar dano.
             foreach (Collider2D colliderFinal in GetComponentsInChildren<Collider2D>(true))
                 colliderFinal.enabled = false;
             foreach (Rigidbody2D corpoFinal in GetComponentsInChildren<Rigidbody2D>(true))

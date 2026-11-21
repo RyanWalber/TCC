@@ -5,17 +5,17 @@ using DragonBones;
 
 public class DragonBonesClickToMove : MonoBehaviour
 {
-    public float moveSpeed = 5f; // Kecepatan gerakan karakter
-    private Vector3 targetPosition; // Posisi target tujuan
-    private bool isMoving = false; // Apakah karakter sedang bergerak
-    private UnityArmatureComponent armatureComponent; // Komponen DragonBones
-    private string currentAnimation; // Menyimpan nama animasi yang sedang diputar
+    public float moveSpeed = 5f;
+    private Vector3 targetPosition;
+    private bool isMoving = false;
+    private UnityArmatureComponent armatureComponent;
+    private string currentAnimation;
 
     void Start()
     {
         armatureComponent = GetComponent<UnityArmatureComponent>();
         targetPosition = transform.position;
-        currentAnimation = "SWORD_Idle"; // Set animasi awal ke idle
+        currentAnimation = "SWORD_Idle";
         armatureComponent.animation.Play(currentAnimation);
     }
 
@@ -31,7 +31,6 @@ public class DragonBonesClickToMove : MonoBehaviour
                 targetPosition = hit.point;
                 isMoving = true;
 
-                // Cek apakah animasi "walk" sudah diputar atau belum
                 if (currentAnimation != "SWORD_Run_Weapon")
                 {
                     currentAnimation = "SWORD_Run_Weapon";
@@ -61,7 +60,6 @@ public class DragonBonesClickToMove : MonoBehaviour
             else
             {
                 isMoving = false;
-                // Hanya set animasi ke idle jika animasi sebelumnya bukan idle
                 if (currentAnimation != "SWORD_Idle")
                 {
                     currentAnimation = "SWORD_Idle";

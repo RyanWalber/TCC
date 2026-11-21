@@ -59,22 +59,18 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (animator == null) return;
 
-        // Atualiza os parâmetros normais
         animator.SetBool("isWalking", estaAndando);
         animator.SetBool("isGrounded", estaNoChao);
         animator.SetBool("isDashing", estaDandoDash);
 
-        // FORÇA O CORTE DA ANIMAÇÃO DE PULO NO MOMENTO EXATO DA ATERRISSAGEM
         if (estaNoChao && !estavaNoChaoAnteriormente)
         {
             if (estaAndando)
             {
-                // Força o início imediato do ciclo de corrida
                 animator.Play("kayandando", 0, 0f);
             }
             else
             {
-                // Força o início imediato do estado ocioso
                 animator.Play("kayaociosa", 0, 0f);
             }
         }

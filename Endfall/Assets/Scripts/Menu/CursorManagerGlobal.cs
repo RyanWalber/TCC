@@ -2,9 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Controla o cursor nativo do Windows/Unity, sem Canvas nem Sprite seguindo o mouse.
-// Seta nas interfaces e mira nas fases; a pausa sempre usa seta.
-// Persistente entre cenas, com restauracao do cursor do sistema ao perder o foco.
 [DisallowMultipleComponent]
 public class CursorManagerGlobal : MonoBehaviour
 {
@@ -17,8 +14,6 @@ public class CursorManagerGlobal : MonoBehaviour
     private bool estaPausado;
     private bool temFoco = true;
 
-    // Ao testar qualquer fase diretamente, tambem cria o controlador.
-    // Se as imagens estiverem em Assets/Resources/Cursores/, ele as encontra.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void IniciarNasCenas()
     {
@@ -66,15 +61,11 @@ public class CursorManagerGlobal : MonoBehaviour
         SceneManager.sceneLoaded -= AoCarregarCena;
     }
 
-    // Chamado pela Splash. Se nao houver textura configurada no Inspector,
-    // tenta os nomes opcionais em Assets/Resources/Cursores.
     public void Configurar(Texture2D setaDoMenu, Texture2D miraDoJogo, Vector2 pontaDaSeta)
     {
         Configurar(setaDoMenu, miraDoJogo, pontaDaSeta, Vector2.zero);
     }
 
-    // O offset regula a posicao clicavel da textura sem alterar a posicao
-    // real do mouse usada pelo tiro e pela mira da Kaya.
     public void Configurar(Texture2D setaDoMenu, Texture2D miraDoJogo, Vector2 pontaDaSeta, Vector2 offsetMira)
     {
         if (setaDoMenu != null) cursorMenu = setaDoMenu;
@@ -102,13 +93,10 @@ public class CursorManagerGlobal : MonoBehaviour
 
     private void AoCarregarCena(Scene cena, LoadSceneMode modo)
     {
-        // O novo nivel comeca despausado; o PauseMenuManager assumira
-        // quando o jogador apertar ESC/P.
         estaPausado = false;
         AplicarCursor();
     }
 
-    // As rotinas de pausa/retomada chamam isto explicitamente.
     public void DefinirModoPausa(bool pausado)
     {
         estaPausado = pausado;
@@ -117,8 +105,6 @@ public class CursorManagerGlobal : MonoBehaviour
 
     private void AplicarCursor()
     {
-        // Nunca prenda o mouse na janela, pois o jogador pode usar
-        // outras janelas quando estiver em modo janela.
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
@@ -138,7 +124,6 @@ public class CursorManagerGlobal : MonoBehaviour
                 ? new Vector2(textura.width * 0.5f, textura.height * 0.5f) + offsetHotspotMira
                 : hotspotMenu;
 
-            // A coordenada do clique deve estar dentro da textura.
             hotspot.x = Mathf.Clamp(hotspot.x, 0f, Mathf.Max(0f, textura.width - 1));
             hotspot.y = Mathf.Clamp(hotspot.y, 0f, Mathf.Max(0f, textura.height - 1));
         }

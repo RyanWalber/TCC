@@ -88,13 +88,10 @@ public class KayaAudioManager : MonoBehaviour
     private float proximaBuscaDeInimigos;
     private float ultimoInstanteInimigoPerto = float.NegativeInfinity;
 
-    // Controle externo usado pela Cavaleira da Morte no ritual e no grito.
-    // Afeta SOMENTE as duas trilhas, preservando tiros, passos e outros SFX.
     private float fatorMusicaExterno = 1f;
     private float fatorMusicaExternoAlvo = 1f;
     private float duracaoFadeMusicaExterno = 0.35f;
 
-    // BossIntroUniversal inicia e mantem a trilha ate a derrota do chefe.
     private bool combateBossAtivo;
     private Transform bossDoGatilho;
     private BossVida vidaBossDoGatilho;
@@ -108,7 +105,6 @@ public class KayaAudioManager : MonoBehaviour
         animatorPassos = GetComponentInChildren<Animator>(true);
         hashEstadoAndar = Animator.StringToHash(estadoAnimacaoAndar);
 
-        // Aproveita os dois AudioSources que ja estavam configurados no TiroPlayer.
         TiroPlayer tiroAnterior = GetComponentInChildren<TiroPlayer>(true);
         if (tiroAnterior != null)
         {
@@ -130,14 +126,11 @@ public class KayaAudioManager : MonoBehaviour
             fonteRespiracaoCansada == fonteRespiracaoNormal)
             fonteRespiracaoCansada = CriarFonte("Audio - Respiracao Cansada");
 
-        // O ambiente precisa de uma fonte propria para nao interromper os efeitos da Kaya.
         if (fonteAmbiente == null || fonteAmbiente == fonteEfeitos ||
             fonteAmbiente == fontePassos || fonteAmbiente == fonteRespiracaoNormal ||
             fonteAmbiente == fonteRespiracaoCansada)
             fonteAmbiente = CriarFonte("Audio - Ambiente da Fase");
 
-        // Fontes independentes para as duas musicas. Nenhuma reutiliza tiro,
-        // passos, respiracao ou efeitos.
         if (fonteMusicaCombate == null ||
             fonteMusicaCombate == fonteEfeitos ||
             fonteMusicaCombate == fontePassos ||
@@ -146,7 +139,6 @@ public class KayaAudioManager : MonoBehaviour
             fonteMusicaCombate == fonteAmbiente)
             fonteMusicaCombate = CriarFonte("Audio - Musica de Combate");
 
-        // Compatibilidade com os clips que ja foram arrastados para os AudioSources.
         if (tiro == null && fonteEfeitos.clip != null) tiro = fonteEfeitos.clip;
         if (respiracaoNormal == null && fonteRespiracaoNormal.clip != null)
             respiracaoNormal = fonteRespiracaoNormal.clip;
@@ -158,14 +150,10 @@ public class KayaAudioManager : MonoBehaviour
         ConfigurarFonte(fonteAmbiente, true);
         ConfigurarFonte(fonteMusicaCombate, true);
 
-        // So as fontes de respiracao tocam continuamente.
         fonteEfeitos.Stop();
         fontePassos.Stop();
         IniciarRespiracao(fonteRespiracaoNormal, respiracaoNormal, volumeRespiracaoNormal);
         IniciarRespiracao(fonteRespiracaoCansada, respiracaoCansada, 0f);
-        // Ambos os loops iniciam juntos no relogio DSP, para manter o mesmo
-        // ponto musical mesmo enquanto um deles estiver com volume zero.
-        // Essa sincronia e especialmente util se 1.wav e 2.wav tem a mesma duracao.
         fonteAmbiente.Stop();
         fonteMusicaCombate.Stop();
         fonteAmbiente.clip = somAmbiente;
@@ -217,8 +205,6 @@ public class KayaAudioManager : MonoBehaviour
         AtualizarTransicaoMusicas();
     }
 
-    // O Animator atualiza sua pose antes do LateUpdate.
-    // Assim, as pisadas seguem o ciclo REAL da animacao, mesmo se sua velocidade mudar.
     private void LateUpdate()
     {
         if (!morreu)
@@ -250,8 +236,6 @@ public class KayaAudioManager : MonoBehaviour
             return;
         }
 
-        // normalizedTime avanca por ciclos: 0..1, 1..2, 2..3...
-        // Detectar a passagem por cada marca impede que o som derive do movimento.
         if (Mathf.FloorToInt(tempoAtual - fasePrimeiraPisada) >
             Mathf.FloorToInt(ultimoTempoDaAnimacao - fasePrimeiraPisada))
             TocarUmaPisada();
@@ -270,7 +254,6 @@ public class KayaAudioManager : MonoBehaviour
         AudioClip clip = passos;
         if (variacoesPassos != null && variacoesPassos.Length > 0)
         {
-            // Busca a proxima variacao valida, sem exigir todos os campos preenchidos.
             for (int i = 0; i < variacoesPassos.Length; i++)
             {
                 int posicao = (indiceVariacaoPasso + i) % variacoesPassos.Length;
@@ -343,8 +326,6 @@ public class KayaAudioManager : MonoBehaviour
 
     private bool ExisteAmeacaProxima()
     {
-        // Collider do proprio inimigo; nao confunde paredes e plataformas
-        // com inimigos. A musica nao dispara por tiros sem inimigos.
         Collider2D[] proximos = Physics2D.OverlapCircleAll(
             transform.position, Mathf.Max(1f, raioDeteccaoCombate));
         foreach (Collider2D colisao in proximos)
@@ -369,8 +350,6 @@ public class KayaAudioManager : MonoBehaviour
             InimigoParado parado = colisao.GetComponentInParent<InimigoParado>();
             if (parado != null && parado.isActiveAndEnabled) return true;
 
-            // Bosses somente com gatilho; corvos fazem parte da batalha
-            // do boss e nao devem manter a trilha apos a morte do chefe.
         }
         return false;
     }
@@ -381,7 +360,6 @@ public class KayaAudioManager : MonoBehaviour
 
         ConferirFimDoCombateBoss();
 
-        // A proximidade so importa fora da luta iniciada pelo gatilho.
         if (!combateBossAtivo && Time.time >= proximaBuscaDeInimigos)
         {
             proximaBuscaDeInimigos = Time.time +
@@ -398,8 +376,6 @@ public class KayaAudioManager : MonoBehaviour
             Time.deltaTime / Mathf.Max(0.1f, duracaoTransicaoMusicas));
         float crossfade = Mathf.SmoothStep(0f, 1f, misturaCombate);
 
-        // Abaixa as duas musicas suavemente durante eventos especiais.
-        // O crossfade entre ambiente e combate continua no ponto correto.
         fatorMusicaExterno = Mathf.MoveTowards(
             fatorMusicaExterno, fatorMusicaExternoAlvo,
             Time.unscaledDeltaTime / Mathf.Max(0.05f, duracaoFadeMusicaExterno));
@@ -434,7 +410,6 @@ public class KayaAudioManager : MonoBehaviour
         }
         else
         {
-            // Se nao houver clip de respiracao cansada, intensifica a gravacao normal.
             fonteRespiracaoNormal.volume = Mathf.Lerp(
                 volumeRespiracaoNormal, volumeRespiracaoCansada, misturaCansaco);
         }
@@ -471,10 +446,8 @@ public class KayaAudioManager : MonoBehaviour
     public void TocarAtivarFuria() => TocarEfeito(ativarFuria, volumeAtivarFuria);
     public void TocarDesativarFuria() => TocarEfeito(desativarFuria, volumeDesativarFuria);
 
-    // Assinatura original preservada para eventuais UnityEvents/animacoes.
     public void TocarMorte() => TocarMorte(false);
 
-    // Durante a morte cinematografica, nao corta a musica de combate.
     public void TocarMorte(bool manterMusicasTocando)
     {
         if (morreu) return;
@@ -483,13 +456,9 @@ public class KayaAudioManager : MonoBehaviour
         fonteRespiracaoNormal.Stop();
         fonteRespiracaoCansada.Stop();
         fontePassos.Stop();
-        // Durante a morte cinematografica a musica continua SEM reiniciar;
-        // o PlayerHealth desacelera o pitch dela e de todos os efeitos.
         if (!manterMusicasTocando && fonteMusicaCombate != null)
             fonteMusicaCombate.Stop();
 
-        // A cena pode recarregar imediatamente depois da morte.
-        // Um objeto temporario conserva o som durante o renascimento.
         if (morte == null) return;
 
         GameObject objeto = new GameObject("Audio - Morte Kaya");
